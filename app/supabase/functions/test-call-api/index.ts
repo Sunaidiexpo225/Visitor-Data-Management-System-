@@ -7,10 +7,14 @@
 // admin-only, so only admins can read the record through the forwarded token.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { corsHeaders } from '../_shared/cors.ts';
 
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
   if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
+    return new Response('Method not allowed', { status: 405, headers: corsHeaders });
   }
 
   const authHeader = req.headers.get('Authorization') ?? '';
@@ -47,6 +51,6 @@ Deno.serve(async (req) => {
 function json(obj: unknown, status = 200) {
   return new Response(JSON.stringify(obj), {
     status,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 }

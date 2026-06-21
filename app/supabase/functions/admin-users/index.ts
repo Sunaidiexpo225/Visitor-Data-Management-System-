@@ -10,9 +10,13 @@
 // Both return a generated temporary password.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { corsHeaders } from '../_shared/cors.ts';
 
 Deno.serve(async (req) => {
-  if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+  if (req.method !== 'POST') return new Response('Method not allowed', { status: 405, headers: corsHeaders });
 
   const url = Deno.env.get('SUPABASE_URL')!;
   const anon = Deno.env.get('SUPABASE_ANON_KEY')!;
@@ -65,7 +69,7 @@ Deno.serve(async (req) => {
 });
 
 function json(obj: unknown, status = 200) {
-  return new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json' } });
+  return new Response(JSON.stringify(obj), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 }
 
 function genPassword(): string {
