@@ -21,6 +21,14 @@ import RenameEventModal from './components/modals/RenameEventModal';
 function App() {
   const state = useAppState();
 
+  if (!state.authReady) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7a7873', fontSize: 14 }}>
+        Loading…
+      </div>
+    );
+  }
+
   if (!state.loggedIn) {
     return (
       <>

@@ -28,14 +28,14 @@ export default function InviteHistoryModal(state: AppState) {
               <div style={{ fontSize: 11, color: '#7a7873' }}>{inv.date}</div>
             </div>
             <div className="vdm-select-wrap">
-              <select className="vdm-select" value={inv.status} onChange={(e) => setInviteStatus(visitor.id, inv.id, e.target.value as InviteStatus)}>
+              <select className="vdm-select" value={inv.status} onChange={(e) => setInviteStatus(inv.id, e.target.value as InviteStatus)}>
                 {statuses.map((s) => (
                   <option key={s} value={s}>{s}</option>
                 ))}
               </select>
               <span className="vdm-caret">▾</span>
             </div>
-            <button type="button" className="vdm-btn-ghost" onClick={() => removeInvite(visitor.id, inv.id)}>Remove</button>
+            <button type="button" className="vdm-btn-ghost" onClick={() => removeInvite(inv.id)}>Remove</button>
           </div>
         ))}
       </div>

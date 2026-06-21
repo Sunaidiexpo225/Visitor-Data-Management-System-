@@ -70,6 +70,7 @@ export interface AppUser {
 }
 
 export interface WatiConnection {
+  id?: string;
   event: string;
   sender: string;
   api: string;
