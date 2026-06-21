@@ -14,6 +14,7 @@ import InviteHistoryModal from './components/modals/InviteHistoryModal';
 import NewCampaignModal from './components/modals/NewCampaignModal';
 import ActiveCallModal from './components/modals/ActiveCallModal';
 import AddUserModal from './components/modals/AddUserModal';
+import CredentialModal from './components/modals/CredentialModal';
 import AddWatiModal from './components/modals/AddWatiModal';
 import AddCallApiModal from './components/modals/AddCallApiModal';
 import RenameEventModal from './components/modals/RenameEventModal';
@@ -63,6 +64,7 @@ function App() {
       <NewCampaignModal {...state} />
       <ActiveCallModal {...state} />
       <AddUserModal {...state} />
+      <CredentialModal {...state} />
       <AddWatiModal {...state} />
       <AddCallApiModal {...state} />
       <RenameEventModal {...state} />

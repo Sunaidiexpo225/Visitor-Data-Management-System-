@@ -109,6 +109,7 @@ export function useAppState() {
 
   const [addUserOpen, setAddUserOpen] = useState(false);
   const [newUser, setNewUser] = useState({ name: '', email: '', role: 'Marketing' });
+  const [credModal, setCredModal] = useState<{ title: string; email: string; password: string } | null>(null);
 
   const [addWatiOpen, setAddWatiOpen] = useState(false);
   const [newWati, setNewWati] = useState({ event: '', sender: '', api: '' });
@@ -557,8 +558,8 @@ export function useAppState() {
       });
       audit('User created', newUser.email, 'User Management');
       await reloadUsers();
-      flash(`User added. Temporary password: ${tempPassword}`);
       setAddUserOpen(false);
+      setCredModal({ title: 'User created', email: newUser.email, password: tempPassword });
     } catch (e) {
       flash(errMsg(e, 'Could not create user.'));
     }
@@ -569,7 +570,7 @@ export function useAppState() {
     try {
       const tempPassword = await api.adminResetPassword(u.email);
       audit('Password reset issued', u.email, 'User Management');
-      flash(`Temporary password: ${tempPassword}`);
+      setCredModal({ title: 'Password reset', email: u.email, password: tempPassword });
     } catch (e) {
       flash(errMsg(e, 'Could not reset password.'));
     }
@@ -976,6 +977,7 @@ export function useAppState() {
     // admin: users
     addUserOpen, newUser, setNewUser, openAddUser, closeAddUser, addUser, resetPassword, toggleUser, togglePerm,
     toggleUserPage, toggleUserCampaign,
+    credModal, closeCredModal: () => setCredModal(null),
     // admin: fields (status options)
     createStatusOption, renameStatusOption, deleteStatusOption,
     // admin: templates
