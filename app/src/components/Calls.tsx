@@ -15,8 +15,8 @@ function latestStatus(invites: { status: string }[]): string {
 
 export default function Calls(state: AppState) {
   const {
-    visitors, events,
-    callFilter, setCallFilter, callEventFilter, setCallEventFilter,
+    visitors, events, subEventsFor,
+    callFilter, setCallFilter, callEventFilter, setCallEventFilter, callSubEvent, setCallSubEvent,
     targetEvent, setTargetEvent,
     startCall, openCall,
   } = state;
@@ -26,6 +26,7 @@ export default function Calls(state: AppState) {
   const filtered = useMemo(() => {
     return visitors.filter((v) => {
       if (callEventFilter && v.event !== callEventFilter) return false;
+      if (callSubEvent && v.subEvent !== callSubEvent) return false;
       const latest = latestStatus(v.invites);
       if (callFilter === 'none' && latest !== 'Not contacted') return false;
       if (callFilter === 'pending' && !v.invites.some((i) => i.status === 'Pending')) return false;
@@ -33,7 +34,7 @@ export default function Calls(state: AppState) {
       if (callFilter === 'notinterested' && !v.invites.some((i) => i.status === 'Not interested')) return false;
       return true;
     });
-  }, [visitors, callEventFilter, callFilter]);
+  }, [visitors, callEventFilter, callSubEvent, callFilter]);
 
   return (
     <div>
@@ -66,7 +67,7 @@ export default function Calls(state: AppState) {
 
       <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
         <div className="vdm-select-wrap">
-          <select className="vdm-select" value={callEventFilter} onChange={(e) => setCallEventFilter(e.target.value)}>
+          <select className="vdm-select" value={callEventFilter} onChange={(e) => { setCallEventFilter(e.target.value); setCallSubEvent(''); }}>
             <option value="">All events</option>
             {events.map((ev) => (
               <option key={ev} value={ev}>{ev}</option>
@@ -74,6 +75,17 @@ export default function Calls(state: AppState) {
           </select>
           <span className="vdm-caret">▾</span>
         </div>
+        {callEventFilter && (
+          <div className="vdm-select-wrap">
+            <select className="vdm-select" value={callSubEvent} onChange={(e) => setCallSubEvent(e.target.value)}>
+              <option value="">All sub-events</option>
+              {subEventsFor(callEventFilter).map((s) => (
+                <option key={s.id} value={s.name}>{s.name}</option>
+              ))}
+            </select>
+            <span className="vdm-caret">▾</span>
+          </div>
+        )}
         <div className="vdm-select-wrap">
           <select className="vdm-select" value={callFilter} onChange={(e) => setCallFilter(e.target.value)}>
             <option value="">All</option>

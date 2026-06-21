@@ -81,9 +81,11 @@ export function useAppState() {
 
   const [cleanupFilter, setCleanupFilter] = useState('');
   const [cleanupEventFilter, setCleanupEventFilter] = useState('');
+  const [cleanupSubEvent, setCleanupSubEvent] = useState('');
 
   const [callFilter, setCallFilter] = useState('');
   const [callEventFilter, setCallEventFilter] = useState('');
+  const [callSubEvent, setCallSubEvent] = useState('');
   const [targetEvent, setTargetEvent] = useState('');
 
   const [callingId, setCallingId] = useState<string | null>(null);
@@ -96,11 +98,13 @@ export function useAppState() {
 
   const [ncOpen, setNcOpen] = useState(false);
   const [ncEvents, setNcEvents] = useState<string[]>([]);
+  const [ncSubEvent, setNcSubEvent] = useState('');
   const [ncTemplate, setNcTemplate] = useState('');
   const [ncMessage, setNcMessage] = useState('');
   const [ncSelectedIds, setNcSelectedIds] = useState<string[]>([]);
 
   const [reportEvent, setReportEvent] = useState('');
+  const [reportSubEvent, setReportSubEvent] = useState('');
   const [repCat, setRepCat] = useState<'Cleanup' | 'Calls' | 'Campaigns'>('Cleanup');
   const [repStatus, setRepStatus] = useState('');
 
@@ -480,6 +484,7 @@ export function useAppState() {
   // ---------- New campaign modal ----------
   function openNewCampaign() {
     setNcEvents(filterEvent ? [filterEvent] : []);
+    setNcSubEvent('');
     setNcSelectedIds(optedInIds(filterEvent ? [filterEvent] : []));
     if (templatesList[0]) {
       setNcTemplate(templatesList[0].value);
@@ -493,6 +498,7 @@ export function useAppState() {
   }
 
   function toggleNcEvent(ev: string) {
+    setNcSubEvent('');
     setNcEvents((prev) => {
       const next = prev.includes(ev) ? prev.filter((e) => e !== ev) : [...prev, ev];
       setNcSelectedIds(optedInIds(next));
@@ -517,13 +523,16 @@ export function useAppState() {
   }
 
   async function sendNewCampaign() {
-    if (ncSelectedIds.length === 0) {
+    const scopedIds = visitors
+      .filter((v) => ncSelectedIds.includes(v.id) && ncEvents.includes(v.event) && (!ncSubEvent || v.subEvent === ncSubEvent))
+      .map((v) => v.id);
+    if (scopedIds.length === 0) {
       flash('Select at least one recipient.');
       return;
     }
     const tplLabel = templatesList.find((t) => t.value === ncTemplate)?.label ?? ncTemplate;
     try {
-      const { total, events: evCount } = await api.sendCampaign(ncSelectedIds, tplLabel, ncMessage);
+      const { total, events: evCount } = await api.sendCampaign(scopedIds, tplLabel, ncMessage);
       await Promise.all([reloadCampaigns(), reloadActivity(), reloadAudit()]);
       flash(`Campaign sent to ${total} contacts across ${evCount} event(s).`);
       setNcOpen(false);
@@ -963,17 +972,18 @@ export function useAppState() {
     // edit modal
     editingId, editDraft, setEditDraft, openEdit, closeEdit, saveEdit,
     // cleanup
-    cleanupFilter, setCleanupFilter, cleanupEventFilter, setCleanupEventFilter,
+    cleanupFilter, setCleanupFilter, cleanupEventFilter, setCleanupEventFilter, cleanupSubEvent, setCleanupSubEvent,
     // calls
-    callFilter, setCallFilter, callEventFilter, setCallEventFilter, targetEvent, setTargetEvent,
+    callFilter, setCallFilter, callEventFilter, setCallEventFilter, callSubEvent, setCallSubEvent,
+    targetEvent, setTargetEvent,
     startCall, endCall, cancelCall, activeCall, callSeconds,
     callingId, openCall, closeCall, addInviteEvent, setAddInviteEvent, addInviteStatus, setAddInviteStatus,
     addInvite, setInviteStatus, removeInvite,
     // campaigns
-    ncOpen, ncEvents, ncTemplate, ncMessage, ncSelectedIds, optedInIds, watiFor,
+    ncOpen, ncEvents, ncSubEvent, setNcSubEvent, ncTemplate, ncMessage, ncSelectedIds, optedInIds, watiFor,
     openNewCampaign, closeNewCampaign, toggleNcEvent, toggleNcSelect, toggleNcAll, onNcTemplate, setNcMessage, sendNewCampaign,
     // reports
-    reportEvent, setReportEvent, repCat, setRepCat, repStatus, setRepStatus, downloadPdf,
+    reportEvent, setReportEvent, reportSubEvent, setReportSubEvent, repCat, setRepCat, repStatus, setRepStatus, downloadPdf,
     // admin: users
     addUserOpen, newUser, setNewUser, openAddUser, closeAddUser, addUser, resetPassword, toggleUser, togglePerm,
     toggleUserPage, toggleUserCampaign,

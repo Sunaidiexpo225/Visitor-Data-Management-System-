@@ -4,11 +4,20 @@ import ModalOverlay from './ModalOverlay';
 
 export default function NewCampaignModal(state: AppState) {
   const {
-    ncOpen, closeNewCampaign, events, watiFor, visitors, templatesList,
-    ncEvents, toggleNcEvent, ncSelectedIds, toggleNcSelect, toggleNcAll,
+    ncOpen, closeNewCampaign, events, subEventsFor, watiFor, visitors, templatesList,
+    ncEvents, ncSubEvent, setNcSubEvent, toggleNcEvent, ncSelectedIds, toggleNcSelect, toggleNcAll,
     ncTemplate, onNcTemplate, ncMessage, setNcMessage, sendNewCampaign,
   } = state;
-  const pool = useMemo(() => visitors.filter((v) => ncEvents.includes(v.event) && v.consent === 'Opted-in'), [visitors, ncEvents]);
+  const pool = useMemo(
+    () => visitors.filter((v) => ncEvents.includes(v.event) && v.consent === 'Opted-in' && (!ncSubEvent || v.subEvent === ncSubEvent)),
+    [visitors, ncEvents, ncSubEvent],
+  );
+  // Sub-events available across the chosen events (de-duplicated by name).
+  const subOptions = useMemo(() => {
+    const names = new Set<string>();
+    ncEvents.forEach((ev) => subEventsFor(ev).forEach((s) => names.add(s.name)));
+    return Array.from(names);
+  }, [ncEvents, subEventsFor]);
   if (!ncOpen) return null;
 
   const poolIds = pool.map((v) => v.id);
@@ -45,6 +54,21 @@ export default function NewCampaignModal(state: AppState) {
         </div>
       </div>
 
+      {subOptions.length > 0 && (
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: '#5a5853', marginBottom: 8 }}>Sub-event</div>
+          <div className="vdm-select-wrap">
+            <select className="vdm-select" value={ncSubEvent} onChange={(e) => setNcSubEvent(e.target.value)}>
+              <option value="">All sub-events</option>
+              {subOptions.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+            <span className="vdm-caret">▾</span>
+          </div>
+        </div>
+      )}
+
       {ncEvents.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
           {ncEvents.map((ev) => {
@@ -64,7 +88,7 @@ export default function NewCampaignModal(state: AppState) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
           <div style={{ fontSize: 12, fontWeight: 600, color: '#5a5853' }}>Recipients</div>
           <label style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <input type="checkbox" checked={allSelected} onChange={() => toggleNcAll(poolIds)} /> {ncSelectedIds.length} of {pool.length} selected
+            <input type="checkbox" checked={allSelected} onChange={() => toggleNcAll(poolIds)} /> {poolIds.filter((id) => ncSelectedIds.includes(id)).length} of {pool.length} selected
           </label>
         </div>
         <div style={{ maxHeight: 200, overflow: 'auto', border: '1px solid #f0efe9', borderRadius: 8 }}>

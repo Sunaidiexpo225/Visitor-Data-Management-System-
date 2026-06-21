@@ -6,14 +6,17 @@ const cats: ('Cleanup' | 'Calls' | 'Campaigns')[] = ['Cleanup', 'Calls', 'Campai
 
 export default function Reports(state: AppState) {
   const {
-    visitors, events, callLog, campaigns,
-    reportEvent, setReportEvent, repCat, setRepCat, repStatus, setRepStatus,
+    visitors, events, subEventsFor, callLog, campaigns,
+    reportEvent, setReportEvent, reportSubEvent, setReportSubEvent, repCat, setRepCat, repStatus, setRepStatus,
     downloadPdf, exportEvent,
   } = state;
 
   const isRepCalls = repCat === 'Calls';
 
-  const scopedVisitors = useMemo(() => (reportEvent ? visitors.filter((v) => v.event === reportEvent) : visitors), [visitors, reportEvent]);
+  const scopedVisitors = useMemo(
+    () => visitors.filter((v) => (reportEvent ? v.event === reportEvent : true) && (reportSubEvent ? v.subEvent === reportSubEvent : true)),
+    [visitors, reportEvent, reportSubEvent],
+  );
   const scopedCallLog = useMemo(() => (reportEvent ? callLog.filter((c) => c.event === reportEvent) : callLog), [callLog, reportEvent]);
   const scopedCampaigns = useMemo(() => (reportEvent ? campaigns.filter((c) => c.event === reportEvent) : campaigns), [campaigns, reportEvent]);
 
@@ -56,7 +59,7 @@ export default function Reports(state: AppState) {
 
       <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
         <div className="vdm-select-wrap">
-          <select className="vdm-select" value={reportEvent} onChange={(e) => setReportEvent(e.target.value)}>
+          <select className="vdm-select" value={reportEvent} onChange={(e) => { setReportEvent(e.target.value); setReportSubEvent(''); }}>
             <option value="">All events</option>
             {events.map((ev) => (
               <option key={ev} value={ev}>{ev}</option>
@@ -64,6 +67,17 @@ export default function Reports(state: AppState) {
           </select>
           <span className="vdm-caret">▾</span>
         </div>
+        {reportEvent && (
+          <div className="vdm-select-wrap">
+            <select className="vdm-select" value={reportSubEvent} onChange={(e) => setReportSubEvent(e.target.value)}>
+              <option value="">All sub-events</option>
+              {subEventsFor(reportEvent).map((s) => (
+                <option key={s.id} value={s.name}>{s.name}</option>
+              ))}
+            </select>
+            <span className="vdm-caret">▾</span>
+          </div>
+        )}
         {isRepCalls && (
           <div className="vdm-select-wrap">
             <select className="vdm-select" value={repStatus} onChange={(e) => setRepStatus(e.target.value)}>
