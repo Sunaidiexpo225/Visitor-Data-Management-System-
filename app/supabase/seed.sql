@@ -6,7 +6,7 @@
 -- ============================================================================
 
 truncate invites, visitors, campaigns, call_log, activity, audit_log,
-         wati_connections, call_apis, events restart identity cascade;
+         wati_connections, call_apis, sub_events, events restart identity cascade;
 
 -- ---- events ---------------------------------------------------------------
 insert into events (name) values
@@ -15,6 +15,10 @@ insert into events (name) values
   ('Trade Days'),
   ('Design Week'),
   ('Startup Meet');
+
+-- ---- sub-events (one default 'General' per event) -------------------------
+insert into sub_events (event_id, name)
+select id, 'General' from events;
 
 -- ---- visitors -------------------------------------------------------------
 -- Derive phone/email exactly like the prototype's seedVisitors():
@@ -43,7 +47,7 @@ with rows (idx, name, company, digits, event_name, status, consent) as (
     (16, 'Bilal Noor',   'Onyx Partners',     '288', 'Startup Meet',     'Category',       'Opted-in'),
     (17, 'Jana Aziz',    'Meridian',          '741', 'Tech Forum',       'Pre-registered', 'Opted-in')
 )
-insert into visitors (id, name, company, phone, email, event_id, status, consent, cleaned)
+insert into visitors (id, name, company, phone, email, sub_event_id, status, consent, cleaned)
 select
   -- deterministic ids v00000000-...-<idx> so invites can reference them
   ('00000000-0000-0000-0000-' || lpad(r.idx::text, 12, '0'))::uuid,
@@ -52,12 +56,13 @@ select
   '+9665' || r.digits || '00' || r.digits,
   regexp_replace(lower(r.name), '[^a-z]', '.', 'g') || '@'
     || regexp_replace(lower(r.company), '[^a-z]', '', 'g') || '.com',
-  e.id,
-  r.status::visitor_status,
+  se.id,
+  r.status,
   r.consent::consent_status,
   (r.idx % 3 <> 0)
 from rows r
-join events e on e.name = r.event_name;
+join events e on e.name = r.event_name
+join sub_events se on se.event_id = e.id and se.name = 'General';
 
 -- ---- invites (seeded for visitors 0, 2, 5 like the prototype) -------------
 insert into invites (visitor_id, event, status, invited_on) values

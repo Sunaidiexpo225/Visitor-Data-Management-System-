@@ -1,11 +1,10 @@
 import { useMemo } from 'react';
 import type { AppState } from '../../hooks/useAppState';
-import { templates } from '../../data/seed';
 import ModalOverlay from './ModalOverlay';
 
 export default function NewCampaignModal(state: AppState) {
   const {
-    ncOpen, closeNewCampaign, events, watiFor, visitors,
+    ncOpen, closeNewCampaign, events, watiFor, visitors, templatesList,
     ncEvents, toggleNcEvent, ncSelectedIds, toggleNcSelect, toggleNcAll,
     ncTemplate, onNcTemplate, ncMessage, setNcMessage, sendNewCampaign,
   } = state;
@@ -84,8 +83,8 @@ export default function NewCampaignModal(state: AppState) {
         Template
         <div className="vdm-select-wrap">
           <select className="vdm-select" style={{ width: '100%' }} value={ncTemplate} onChange={(e) => onNcTemplate(e.target.value)}>
-            {templates.map((t) => (
-              <option key={t.value} value={t.value}>{t.label}</option>
+            {templatesList.map((t) => (
+              <option key={t.id} value={t.value}>{t.label}</option>
             ))}
           </select>
           <span className="vdm-caret">▾</span>

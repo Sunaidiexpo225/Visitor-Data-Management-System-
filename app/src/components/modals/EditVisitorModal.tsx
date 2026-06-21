@@ -3,10 +3,11 @@ import type { ConsentStatus } from '../../types';
 import ModalOverlay from './ModalOverlay';
 
 export default function EditVisitorModal(state: AppState) {
-  const { editingId, editDraft, setEditDraft, closeEdit, saveEdit } = state;
+  const { editingId, editDraft, setEditDraft, closeEdit, saveEdit, events, subEventsFor, statusOptions } = state;
   if (!editingId || !editDraft) return null;
 
   const consents: ConsentStatus[] = ['Opted-in', 'Pending', 'Opted-out'];
+  const subs = subEventsFor(editDraft.event);
 
   return (
     <ModalOverlay onClose={closeEdit} maxWidth={460}>
@@ -28,6 +29,54 @@ export default function EditVisitorModal(state: AppState) {
           Email
           <input className="vdm-input" value={editDraft.email} onChange={(e) => setEditDraft({ ...editDraft, email: e.target.value })} />
         </label>
+        <label style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12, color: '#5a5853', fontWeight: 500 }}>
+          Status
+          <div className="vdm-select-wrap">
+            <select className="vdm-select" style={{ width: '100%' }} value={editDraft.status} onChange={(e) => setEditDraft({ ...editDraft, status: e.target.value })}>
+              {statusOptions.map((s) => (
+                <option key={s.id} value={s.name}>{s.name}</option>
+              ))}
+              {!statusOptions.some((s) => s.name === editDraft.status) && editDraft.status && (
+                <option value={editDraft.status}>{editDraft.status}</option>
+              )}
+            </select>
+            <span className="vdm-caret">▾</span>
+          </div>
+        </label>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <label style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12, color: '#5a5853', fontWeight: 500 }}>
+            Event
+            <div className="vdm-select-wrap">
+              <select
+                className="vdm-select"
+                style={{ width: '100%' }}
+                value={editDraft.event}
+                onChange={(e) => {
+                  const ev = e.target.value;
+                  const firstSub = subEventsFor(ev)[0]?.name ?? '';
+                  setEditDraft({ ...editDraft, event: ev, subEvent: firstSub });
+                }}
+              >
+                {events.map((ev) => (
+                  <option key={ev} value={ev}>{ev}</option>
+                ))}
+              </select>
+              <span className="vdm-caret">▾</span>
+            </div>
+          </label>
+          <label style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12, color: '#5a5853', fontWeight: 500 }}>
+            Sub-event
+            <div className="vdm-select-wrap">
+              <select className="vdm-select" style={{ width: '100%' }} value={editDraft.subEvent} onChange={(e) => setEditDraft({ ...editDraft, subEvent: e.target.value })}>
+                {subs.map((s) => (
+                  <option key={s.id} value={s.name}>{s.name}</option>
+                ))}
+                {subs.length === 0 && <option value="">— none —</option>}
+              </select>
+              <span className="vdm-caret">▾</span>
+            </div>
+          </label>
+        </div>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12, color: '#5a5853', fontWeight: 500 }}>
           Consent
           <div className="vdm-select-wrap">

@@ -1,12 +1,24 @@
 import { useMemo, useRef } from 'react';
 import type { AppState } from '../hooks/useAppState';
+import type { PageKey } from '../types';
 import { initials } from '../lib/format';
+import AdminFields from './admin/AdminFields';
+import AdminTemplates from './admin/AdminTemplates';
+import AdminEventsTree from './admin/AdminEventsTree';
+
+const PAGE_KEYS: { key: PageKey; label: string }[] = [
+  { key: 'dashboard', label: 'Dash' },
+  { key: 'visitors', label: 'Visit' },
+  { key: 'cleanup', label: 'Clean' },
+  { key: 'calls', label: 'Calls' },
+  { key: 'campaigns', label: 'Camp' },
+  { key: 'reports', label: 'Rep' },
+];
 
 export default function Admin(state: AppState) {
   const {
-    users, openAddUser, resetPassword, toggleUser, togglePerm,
-    importFile,
-    events, visitors, watiConns, newEventName, setNewEventName, createEvent, importIntoEvent, openEditEvent, deleteEvent,
+    users, openAddUser, resetPassword, toggleUser, togglePerm, toggleUserPage, toggleUserCampaign,
+    importFile, watiConns,
     callApis, openAddCallApi, toggleCallApi, testCallApi, removeCallApi,
     openAddWati, toggleWati,
     autoBackup, toggleAutoBackup, exportAll,
@@ -14,7 +26,6 @@ export default function Admin(state: AppState) {
   } = state;
 
   const importInputRef = useRef<HTMLInputElement>(null);
-  const eventImportRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const auditCategories = useMemo(() => Array.from(new Set(auditLog.map((a) => a.category))), [auditLog]);
 
@@ -48,6 +59,7 @@ export default function Admin(state: AppState) {
                 <th className="vdm-th">User</th>
                 <th className="vdm-th">Role</th>
                 <th className="vdm-th">Permissions</th>
+                <th className="vdm-th">Page access &amp; campaigns</th>
                 <th className="vdm-th">Status</th>
                 <th className="vdm-th"></th>
               </tr>
@@ -91,6 +103,38 @@ export default function Admin(state: AppState) {
                     </div>
                   </td>
                   <td style={{ padding: '10px 8px' }}>
+                    <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', maxWidth: 240 }}>
+                      {PAGE_KEYS.map(({ key, label }) => {
+                        const on = u.pages.includes(key);
+                        return (
+                          <button
+                            key={key}
+                            type="button"
+                            title={key}
+                            onClick={() => toggleUserPage(u.id, key)}
+                            style={{
+                              fontSize: 10, fontWeight: 600, padding: '3px 7px', borderRadius: 6, border: 'none',
+                              color: on ? '#1f3c88' : '#9a978f', background: on ? '#eef1fa' : '#efeeea',
+                            }}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                      <button
+                        type="button"
+                        title="Send WATI campaigns"
+                        onClick={() => toggleUserCampaign(u.id)}
+                        style={{
+                          fontSize: 10, fontWeight: 600, padding: '3px 7px', borderRadius: 6, border: 'none',
+                          color: u.canCampaign ? '#1f8a4c' : '#9a978f', background: u.canCampaign ? '#e6f4ec' : '#efeeea',
+                        }}
+                      >
+                        WATI
+                      </button>
+                    </div>
+                  </td>
+                  <td style={{ padding: '10px 8px' }}>
                     <span
                       style={{
                         fontSize: 11,
@@ -119,7 +163,7 @@ export default function Admin(state: AppState) {
         <section>
           <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>Import visitor data</h2>
           <div className="vdm-card" style={{ padding: 20 }}>
-            <p style={{ fontSize: 13, color: '#7a7873', marginBottom: 12 }}>Upload a CSV with columns: Name, Company, Phone, Email, Event.</p>
+            <p style={{ fontSize: 13, color: '#7a7873', marginBottom: 12 }}>Upload a CSV with columns: Name, Company, Phone, Email, Event, Sub-event.</p>
             <input
               ref={importInputRef}
               type="file"
@@ -146,48 +190,11 @@ export default function Admin(state: AppState) {
         </section>
       </div>
 
-      <section style={{ marginBottom: 28 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>Events</h2>
-        <div className="vdm-card" style={{ overflow: 'auto', marginBottom: 12 }}>
-          <table style={{ width: '100%' }}>
-            <thead>
-              <tr>
-                <th className="vdm-th">Event</th>
-                <th className="vdm-th">Visitors</th>
-                <th className="vdm-th"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {events.map((ev) => (
-                <tr key={ev} style={{ borderTop: '1px solid #f0efe9' }}>
-                  <td style={{ padding: '10px 8px', fontSize: 13, fontWeight: 500 }}>{ev}</td>
-                  <td style={{ padding: '10px 8px', fontSize: 13 }}>{visitors.filter((v) => v.event === ev).length}</td>
-                  <td style={{ padding: '10px 8px', display: 'flex', gap: 6 }}>
-                    <input
-                      ref={(el) => { eventImportRefs.current[ev] = el; }}
-                      type="file"
-                      accept=".csv"
-                      style={{ display: 'none' }}
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) importIntoEvent(ev)(f);
-                        e.target.value = '';
-                      }}
-                    />
-                    <button type="button" className="vdm-btn-ghost" onClick={() => eventImportRefs.current[ev]?.click()}>Import</button>
-                    <button type="button" className="vdm-btn-ghost" onClick={() => openEditEvent(ev)}>Edit</button>
-                    <button type="button" className="vdm-btn-ghost" onClick={() => deleteEvent(ev)}>Delete</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <input className="vdm-input" placeholder="New event name" value={newEventName} onChange={(e) => setNewEventName(e.target.value)} style={{ flex: 1, maxWidth: 280 }} />
-          <button type="button" className="vdm-btn-secondary" onClick={createEvent}>Create event</button>
-        </div>
-      </section>
+      <AdminFields {...state} />
+
+      <AdminTemplates {...state} />
+
+      <AdminEventsTree {...state} />
 
       <section style={{ marginBottom: 28 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>

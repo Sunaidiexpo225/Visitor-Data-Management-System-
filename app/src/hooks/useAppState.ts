@@ -9,11 +9,14 @@ import type {
   CallLogEntry,
   ConsentStatus,
   InviteStatus,
+  MessageTemplate,
+  PageKey,
+  StatusOption,
+  SubEvent,
   TabKey,
   Visitor,
   WatiConnection,
 } from '../types';
-import { templates, tplMessage } from '../data/seed';
 import { fakeIp, nowStamp, today } from '../lib/format';
 import { exportVisitorsCsv, downloadCsv } from '../lib/csv';
 import { supabase } from '../lib/supabase';
@@ -26,7 +29,12 @@ export interface EditDraft {
   email: string;
   consent: ConsentStatus;
   cleaned: boolean;
+  status: string;
+  event: string;
+  subEvent: string;
 }
+
+const ALL_PAGES: PageKey[] = ['dashboard', 'visitors', 'cleanup', 'calls', 'campaigns', 'reports'];
 
 function initialsOf(name: string): string {
   return name.split(' ').map((p) => p[0] ?? '').join('').toUpperCase();
@@ -37,6 +45,8 @@ export function useAppState() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [authReady, setAuthReady] = useState(false);
   const [role, setRole] = useState<string>('Staff');
+  const [myPages, setMyPages] = useState<PageKey[]>(ALL_PAGES);
+  const [canCampaign, setCanCampaign] = useState(true);
   const [loginAs, setLoginAs] = useState<'Staff' | 'Admin'>('Staff');
   const [sessionIp, setSessionIp] = useState('');
   const [email, setEmail] = useState('marketing@sunaidiexpo.com');
@@ -48,6 +58,9 @@ export function useAppState() {
   // ---- server-backed collections ----
   const [visitors, setVisitors] = useState<Visitor[]>([]);
   const [events, setEvents] = useState<string[]>([]);
+  const [subEvents, setSubEvents] = useState<SubEvent[]>([]);
+  const [statusOptions, setStatusOptions] = useState<StatusOption[]>([]);
+  const [templatesList, setTemplatesList] = useState<MessageTemplate[]>([]);
   const [watiConns, setWatiConns] = useState<WatiConnection[]>([]);
   const [users, setUsers] = useState<AppUser[]>([]);
   const [callApis, setCallApis] = useState<CallApi[]>([]);
@@ -58,12 +71,13 @@ export function useAppState() {
 
   // ---- UI / filter state ----
   const [filterEvent, setFilterEvent] = useState('');
+  const [filterSubEvent, setFilterSubEvent] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [filterConsent, setFilterConsent] = useState('');
   const [search, setSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [template, setTemplate] = useState(templates[0].value);
-  const [message, setMessage] = useState(tplMessage(templates[0].value));
+  const [template, setTemplate] = useState('');
+  const [message, setMessage] = useState('');
 
   const [cleanupFilter, setCleanupFilter] = useState('');
   const [cleanupEventFilter, setCleanupEventFilter] = useState('');
@@ -82,8 +96,8 @@ export function useAppState() {
 
   const [ncOpen, setNcOpen] = useState(false);
   const [ncEvents, setNcEvents] = useState<string[]>([]);
-  const [ncTemplate, setNcTemplate] = useState(templates[0].value);
-  const [ncMessage, setNcMessage] = useState(tplMessage(templates[0].value));
+  const [ncTemplate, setNcTemplate] = useState('');
+  const [ncMessage, setNcMessage] = useState('');
   const [ncSelectedIds, setNcSelectedIds] = useState<string[]>([]);
 
   const [reportEvent, setReportEvent] = useState('');
@@ -123,6 +137,9 @@ export function useAppState() {
   // ---- reloaders ----
   const reloadVisitors = useCallback(async () => setVisitors(await api.fetchVisitors()), []);
   const reloadEvents = useCallback(async () => setEvents(await api.fetchEvents()), []);
+  const reloadSubEvents = useCallback(async () => setSubEvents(await api.fetchSubEvents()), []);
+  const reloadStatusOptions = useCallback(async () => setStatusOptions(await api.fetchStatusOptions()), []);
+  const reloadTemplates = useCallback(async () => setTemplatesList(await api.fetchTemplates()), []);
   const reloadCampaigns = useCallback(async () => setCampaigns(await api.fetchCampaigns()), []);
   const reloadCallLog = useCallback(async () => setCallLog(await api.fetchCallLog()), []);
   const reloadActivity = useCallback(async () => setActivity(await api.fetchActivity()), []);
@@ -133,17 +150,30 @@ export function useAppState() {
   const reloadCallApis = useCallback(async () => {
     try { setCallApis(await api.fetchCallApis()); } catch { /* admin-only */ }
   }, []);
-  const reloadUsers = useCallback(async () => setUsers(await api.fetchUsers()), []);
+  const reloadUsers = useCallback(async () => {
+    try { setUsers(await api.fetchUsers()); } catch { /* admin-only view */ }
+  }, []);
 
   const loadAll = useCallback(async () => {
     setLoading(true);
     try {
-      const [ev, vis] = await Promise.all([api.fetchEvents(), api.fetchVisitors()]);
+      const [ev, subs, vis, tpls, statuses] = await Promise.all([
+        api.fetchEvents(), api.fetchSubEvents(), api.fetchVisitors(), api.fetchTemplates(), api.fetchStatusOptions(),
+      ]);
       setEvents(ev);
+      setSubEvents(subs);
       setVisitors(vis);
+      setTemplatesList(tpls);
+      setStatusOptions(statuses);
       setTargetEvent((t) => t || ev[0] || '');
       setAddInviteEvent((t) => t || ev[0] || '');
       setNewWati((w) => (w.event ? w : { ...w, event: ev[0] ?? '' }));
+      if (tpls[0]) {
+        setTemplate((t) => t || tpls[0].value);
+        setMessage((m) => m || tpls[0].body);
+        setNcTemplate((t) => t || tpls[0].value);
+        setNcMessage((m) => m || tpls[0].body);
+      }
       await Promise.all([
         reloadCampaigns(), reloadCallLog(), reloadActivity(), reloadWati(),
         reloadUsers(), reloadAudit(), reloadCallApis(),
@@ -173,8 +203,10 @@ export function useAppState() {
         return;
       }
       setEmail(sessionEmail);
-      const { data: profile } = await supabase.from('profiles').select('role').eq('id', userId).single();
+      const profile = await api.fetchMyProfile();
       setRole(profile?.role ?? 'Staff');
+      setMyPages(profile?.pages?.length ? profile.pages : ALL_PAGES);
+      setCanCampaign(profile?.canCampaign ?? true);
       setSessionIp((ip) => ip || fakeIp());
       setLoggedIn(true);
       await loadAll();
@@ -202,7 +234,6 @@ export function useAppState() {
       active = false;
       sub.subscription.unsubscribe();
     };
-    // applySession is stable for our purposes (loadAll deps are stable callbacks)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -221,6 +252,14 @@ export function useAppState() {
     return visitors.filter((v) => evs.includes(v.event) && v.consent === 'Opted-in').map((v) => v.id);
   }
 
+  function tplBody(value: string): string {
+    return templatesList.find((t) => t.value === value)?.body ?? '';
+  }
+
+  function subEventsFor(eventName: string): SubEvent[] {
+    return subEvents.filter((s) => s.eventName === eventName);
+  }
+
   // ---------- Auth ----------
   function pickLoginAs(which: 'Staff' | 'Admin') {
     setLoginAs(which);
@@ -236,8 +275,9 @@ export function useAppState() {
       return;
     }
     setTab('dashboard');
-    // applySession runs from the auth listener; log the sign-in once loaded.
-    setTimeout(() => audit('User signed in', 'Session', 'Authentication'), 300);
+    // Capture the real client IP for this session's audit entries.
+    api.whoami().then((ip) => { if (ip) setSessionIp(ip); });
+    setTimeout(() => audit('User signed in', 'Session', 'Authentication'), 400);
   }
 
   async function signOut() {
@@ -269,7 +309,7 @@ export function useAppState() {
 
   function onTemplate(v: string) {
     setTemplate(v);
-    setMessage(tplMessage(v));
+    setMessage(tplBody(v));
   }
 
   async function sendCampaign() {
@@ -278,7 +318,7 @@ export function useAppState() {
       flash('Select at least one opted-in recipient.');
       return;
     }
-    const tplLabel = templates.find((t) => t.value === template)?.label ?? template;
+    const tplLabel = templatesList.find((t) => t.value === template)?.label ?? template;
     try {
       const { total } = await api.sendCampaign(recipients.map((v) => v.id), tplLabel, message);
       await Promise.all([reloadCampaigns(), reloadActivity(), reloadAudit()]);
@@ -312,7 +352,10 @@ export function useAppState() {
     const v = visitors.find((x) => x.id === id);
     if (!v) return;
     setEditingId(id);
-    setEditDraft({ name: v.name, company: v.company, phone: v.phone, email: v.email, consent: v.consent, cleaned: v.cleaned });
+    setEditDraft({
+      name: v.name, company: v.company, phone: v.phone, email: v.email,
+      consent: v.consent, cleaned: v.cleaned, status: v.status, event: v.event, subEvent: v.subEvent,
+    });
   }
 
   function closeEdit() {
@@ -325,9 +368,10 @@ export function useAppState() {
     const before = visitors.find((v) => v.id === editingId);
     const cleanedChanged = before && before.cleaned !== editDraft.cleaned;
     try {
+      const subId = await api.subEventId(editDraft.event, editDraft.subEvent);
       await api.updateVisitor(editingId, {
-        name: editDraft.name, company: editDraft.company, phone: editDraft.phone,
-        email: editDraft.email, consent: editDraft.consent, cleaned: editDraft.cleaned,
+        name: editDraft.name, company: editDraft.company, phone: editDraft.phone, email: editDraft.email,
+        consent: editDraft.consent, cleaned: editDraft.cleaned, status: editDraft.status, subEventId: subId,
       });
       await api.addActivity({
         initials: initialsOf(editDraft.name),
@@ -436,8 +480,10 @@ export function useAppState() {
   function openNewCampaign() {
     setNcEvents(filterEvent ? [filterEvent] : []);
     setNcSelectedIds(optedInIds(filterEvent ? [filterEvent] : []));
-    setNcTemplate(templates[0].value);
-    setNcMessage(tplMessage(templates[0].value));
+    if (templatesList[0]) {
+      setNcTemplate(templatesList[0].value);
+      setNcMessage(templatesList[0].body);
+    }
     setNcOpen(true);
   }
 
@@ -466,7 +512,7 @@ export function useAppState() {
 
   function onNcTemplate(v: string) {
     setNcTemplate(v);
-    setNcMessage(tplMessage(v));
+    setNcMessage(tplBody(v));
   }
 
   async function sendNewCampaign() {
@@ -474,7 +520,7 @@ export function useAppState() {
       flash('Select at least one recipient.');
       return;
     }
-    const tplLabel = templates.find((t) => t.value === ncTemplate)?.label ?? ncTemplate;
+    const tplLabel = templatesList.find((t) => t.value === ncTemplate)?.label ?? ncTemplate;
     try {
       const { total, events: evCount } = await api.sendCampaign(ncSelectedIds, tplLabel, ncMessage);
       await Promise.all([reloadCampaigns(), reloadActivity(), reloadAudit()]);
@@ -550,21 +596,119 @@ export function useAppState() {
       flash(errMsg(e, 'Could not update permissions.'));
     }
   }
+  async function toggleUserPage(id: string, page: PageKey) {
+    const u = users.find((x) => x.id === id);
+    if (!u) return;
+    const next = u.pages.includes(page) ? u.pages.filter((p) => p !== page) : [...u.pages, page];
+    try {
+      await api.setUserPages(id, next);
+      await reloadUsers();
+    } catch (e) {
+      flash(errMsg(e, 'Could not update page access.'));
+    }
+  }
+  async function toggleUserCampaign(id: string) {
+    const u = users.find((x) => x.id === id);
+    if (!u) return;
+    try {
+      await api.setUserCampaign(id, !u.canCampaign);
+      await reloadUsers();
+    } catch (e) {
+      flash(errMsg(e, 'Could not update campaign access.'));
+    }
+  }
+
+  // ---------- Admin: status options (fields) ----------
+  async function createStatusOption(name: string) {
+    const n = name.trim();
+    if (!n) return;
+    if (statusOptions.some((s) => s.name.toLowerCase() === n.toLowerCase())) {
+      flash('That status already exists.');
+      return;
+    }
+    try {
+      await api.addStatusOption(n, statusOptions.length);
+      audit('Status option added', n, 'Data');
+      await reloadStatusOptions();
+      flash('Status added.');
+    } catch (e) {
+      flash(errMsg(e, 'Could not add status.'));
+    }
+  }
+  async function renameStatusOption(id: string, to: string) {
+    const n = to.trim();
+    if (!n) return;
+    try {
+      await api.renameStatusOption(id, n);
+      audit('Status option renamed', n, 'Data');
+      await Promise.all([reloadStatusOptions(), reloadVisitors()]);
+      flash('Status renamed.');
+    } catch (e) {
+      flash(errMsg(e, 'Could not rename status.'));
+    }
+  }
+  async function deleteStatusOption(id: string) {
+    try {
+      await api.removeStatusOption(id);
+      audit('Status option removed', '', 'Data');
+      await reloadStatusOptions();
+      flash('Status removed.');
+    } catch (e) {
+      flash(errMsg(e, 'Cannot remove a status that is still in use.'));
+    }
+  }
+
+  // ---------- Admin: templates ----------
+  async function createTemplate(name: string, body: string) {
+    if (!name.trim()) {
+      flash('Template name is required.');
+      return;
+    }
+    try {
+      await api.addTemplate(name.trim(), body, templatesList.length);
+      audit('Template created', name.trim(), 'Campaign');
+      await reloadTemplates();
+      flash('Template created.');
+    } catch (e) {
+      flash(errMsg(e, 'Could not create template.'));
+    }
+  }
+  async function updateTemplate(id: string, name: string, body: string) {
+    try {
+      await api.updateTemplate(id, name.trim(), body);
+      audit('Template updated', name.trim(), 'Campaign');
+      await reloadTemplates();
+      flash('Template saved.');
+    } catch (e) {
+      flash(errMsg(e, 'Could not save template.'));
+    }
+  }
+  async function deleteTemplate(id: string) {
+    try {
+      await api.removeTemplate(id);
+      audit('Template removed', '', 'Campaign');
+      await reloadTemplates();
+      flash('Template removed.');
+    } catch (e) {
+      flash(errMsg(e, 'Could not remove template.'));
+    }
+  }
 
   // ---------- Admin: import ----------
   function parseCsv(text: string, forcedEvent?: string) {
     const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
     if (lines.length === 0) return [];
     const startIdx = /name/i.test(lines[0]) ? 1 : 0;
-    const rows: { name: string; company: string; phone: string; email: string; eventName: string }[] = [];
+    const rows: { name: string; company: string; phone: string; email: string; eventName: string; subEventName?: string }[] = [];
     for (let i = startIdx; i < lines.length; i++) {
       const cols = lines[i].split(',').map((c) => c.trim());
-      const [name = '', company = '', phone = '', emailCol = '', eventCol = ''] = cols;
+      const [name = '', company = '', phone = '', emailCol = '', eventCol = '', subCol = ''] = cols;
       if (!name) continue;
       rows.push({
         name, company, phone,
         email: emailCol || name.toLowerCase().replace(/[^a-z]/g, '.') + '@example.com',
         eventName: forcedEvent || eventCol || events[0] || '',
+        subEventName: subCol || undefined,
       });
     }
     return rows;
@@ -579,7 +723,7 @@ export function useAppState() {
         return;
       }
       try {
-        const n = await api.importVisitors(rows);
+        const n = await api.importVisitors(rows, statusOptions[0]?.name ?? 'Pre-registered');
         audit('Visitor data imported', `${n} record(s)`, 'Data');
         await reloadVisitors();
         flash(`Imported ${n} record(s).`);
@@ -590,7 +734,7 @@ export function useAppState() {
     reader.readAsText(file);
   }
 
-  // ---------- Admin: events ----------
+  // ---------- Admin: events + sub-events ----------
   async function createEvent() {
     const name = newEventName.trim();
     if (!name) return;
@@ -606,6 +750,41 @@ export function useAppState() {
       setNewEventName('');
     } catch (e) {
       flash(errMsg(e, 'Could not create event.'));
+    }
+  }
+
+  async function createSubEvent(eventName: string, name: string) {
+    const n = name.trim();
+    if (!n) return;
+    try {
+      await api.addSubEvent(eventName, n);
+      audit('Sub-event created', `${eventName} / ${n}`, 'Data');
+      await reloadSubEvents();
+      flash('Sub-event created.');
+    } catch (e) {
+      flash(errMsg(e, 'Could not create sub-event.'));
+    }
+  }
+  async function renameSubEvent(id: string, to: string) {
+    const n = to.trim();
+    if (!n) return;
+    try {
+      await api.renameSubEvent(id, n);
+      audit('Sub-event renamed', n, 'Data');
+      await Promise.all([reloadSubEvents(), reloadVisitors()]);
+      flash('Sub-event renamed.');
+    } catch (e) {
+      flash(errMsg(e, 'Could not rename sub-event.'));
+    }
+  }
+  async function deleteSubEvent(id: string) {
+    try {
+      await api.removeSubEvent(id);
+      audit('Sub-event removed', '', 'Data');
+      await Promise.all([reloadSubEvents(), reloadVisitors()]);
+      flash('Sub-event removed.');
+    } catch (e) {
+      flash(errMsg(e, 'Could not remove sub-event.'));
     }
   }
 
@@ -637,7 +816,7 @@ export function useAppState() {
       if (reportEvent === editEventOrig) setReportEvent(next);
       setNcEvents((prev) => prev.map((e) => (e === editEventOrig ? next : e)));
       audit('Event renamed', `${editEventOrig} → ${next}`, 'Data');
-      await Promise.all([reloadEvents(), reloadVisitors(), reloadWati()]);
+      await Promise.all([reloadEvents(), reloadSubEvents(), reloadVisitors(), reloadWati()]);
       flash('Event renamed.');
       setEditEventOpen(false);
     } catch (e) {
@@ -651,7 +830,7 @@ export function useAppState() {
       if (filterEvent === name) setFilterEvent('');
       if (reportEvent === name) setReportEvent('');
       audit('Event deleted', `${name} (${removedCount} record(s) removed)`, 'Data');
-      await Promise.all([reloadEvents(), reloadVisitors(), reloadWati()]);
+      await Promise.all([reloadEvents(), reloadSubEvents(), reloadVisitors(), reloadWati()]);
       flash('Event deleted.');
     } catch (e) {
       flash(errMsg(e, 'Could not delete event.'));
@@ -753,7 +932,7 @@ export function useAppState() {
     try {
       await api.setAutoBackup(next);
     } catch {
-      setAutoBackup(!next); // revert on failure
+      setAutoBackup(!next);
     }
   }
   function exportAuditCsv(rows: AuditEntry[]) {
@@ -768,14 +947,16 @@ export function useAppState() {
 
   return {
     // auth
-    loggedIn, authReady, loading, role, loginAs, sessionIp, email, password,
+    loggedIn, authReady, loading, role, myPages, canCampaign, loginAs, sessionIp, email, password,
     setEmail, setPassword, pickLoginAs, signIn, signOut,
     // shell
     tab, setTab, goCampaigns,
     // data
-    visitors, setVisitors, events, watiConns, users, callApis, callLog, campaigns, activity, auditLog,
+    visitors, setVisitors, events, subEvents, subEventsFor, statusOptions, templatesList,
+    watiConns, users, callApis, callLog, campaigns, activity, auditLog,
     // visitors tab
-    filterEvent, setFilterEvent, filterStatus, setFilterStatus, filterConsent, setFilterConsent, search, setSearch,
+    filterEvent, setFilterEvent, filterSubEvent, setFilterSubEvent, filterStatus, setFilterStatus,
+    filterConsent, setFilterConsent, search, setSearch,
     selectedIds, toggleSelect, toggleAllVisitors, template, message, onTemplate, setMessage, sendCampaign,
     exportAll, exportFiltered, exportEvent,
     // edit modal
@@ -794,10 +975,16 @@ export function useAppState() {
     reportEvent, setReportEvent, repCat, setRepCat, repStatus, setRepStatus, downloadPdf,
     // admin: users
     addUserOpen, newUser, setNewUser, openAddUser, closeAddUser, addUser, resetPassword, toggleUser, togglePerm,
+    toggleUserPage, toggleUserCampaign,
+    // admin: fields (status options)
+    createStatusOption, renameStatusOption, deleteStatusOption,
+    // admin: templates
+    createTemplate, updateTemplate, deleteTemplate,
     // admin: import
     importFile,
-    // admin: events
+    // admin: events + sub-events
     newEventName, setNewEventName, createEvent, importIntoEvent,
+    createSubEvent, renameSubEvent, deleteSubEvent,
     editEventOpen, editEventName, setEditEventName, openEditEvent, closeEditEvent, saveEditEvent, deleteEvent,
     // admin: wati
     addWatiOpen, newWati, setNewWati, openAddWati, closeAddWati, addWati, toggleWati,

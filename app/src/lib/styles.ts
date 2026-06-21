@@ -1,14 +1,31 @@
 import type { ActivityKind, ConsentStatus, VisitorStatus } from '../types';
 import type { CSSProperties } from 'react';
 
+const KNOWN_STATUS: Record<string, [string, string]> = {
+  Category: ['#1f6a47', '#e6f1ea'],
+  Engaged: ['#b07a1e', '#f6efe0'],
+  'Pre-registered': ['#1f3c88', '#eef1fa'],
+  Pending: ['#6c6a66', '#efeeea'],
+};
+
+// A small palette so admin-created statuses still get a stable, distinct colour.
+const STATUS_PALETTE: [string, string][] = [
+  ['#1f6a47', '#e6f1ea'],
+  ['#b07a1e', '#f6efe0'],
+  ['#1f3c88', '#eef1fa'],
+  ['#6c6a66', '#efeeea'],
+  ['#9a4a3a', '#f5e8e4'],
+  ['#5a3ea8', '#efeafa'],
+];
+
+function hashIndex(s: string, mod: number): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return h % mod;
+}
+
 export function statusStyle(s: VisitorStatus): CSSProperties {
-  const map: Record<VisitorStatus, [string, string]> = {
-    Category: ['#1f6a47', '#e6f1ea'],
-    Engaged: ['#b07a1e', '#f6efe0'],
-    'Pre-registered': ['#1f3c88', '#eef1fa'],
-    Pending: ['#6c6a66', '#efeeea'],
-  };
-  const [color, background] = map[s] ?? map.Pending;
+  const [color, background] = KNOWN_STATUS[s] ?? STATUS_PALETTE[hashIndex(s || '', STATUS_PALETTE.length)];
   return { color, background };
 }
 

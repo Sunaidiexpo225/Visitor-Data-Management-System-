@@ -14,8 +14,12 @@ const navItems: { key: TabKey; label: string; adminOnly?: boolean }[] = [
 ];
 
 export default function Shell({ state, children }: { state: AppState; children: ReactNode }) {
-  const { tab, setTab, role, email, signOut } = state;
-  const visibleItems = navItems.filter((n) => !n.adminOnly || role === 'Admin');
+  const { tab, setTab, role, email, signOut, myPages } = state;
+  const visibleItems = navItems.filter((n) => {
+    if (n.adminOnly) return role === 'Admin';
+    if (role === 'Admin') return true; // admins see every page
+    return (myPages as string[]).includes(n.key);
+  });
 
   return (
     <div style={{ minHeight: '100vh' }}>

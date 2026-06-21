@@ -38,3 +38,9 @@ verify_jwt = true
 
 [functions.test-call-api]
 verify_jwt = true
+
+[functions.admin-users]
+verify_jwt = true
+
+[functions.whoami]
+verify_jwt = true

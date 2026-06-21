@@ -38,16 +38,24 @@ function App() {
     );
   }
 
+  const isAdmin = state.role === 'Admin';
+  const canSee = (p: string) => isAdmin || (state.myPages as string[]).includes(p);
+  // Fall back to an allowed page if the active tab isn't permitted.
+  const activeTab =
+    state.tab === 'admin'
+      ? isAdmin ? 'admin' : (state.myPages[0] ?? 'dashboard')
+      : canSee(state.tab) ? state.tab : (state.myPages[0] ?? 'dashboard');
+
   return (
     <div style={{ '--accent': '#1f3c88' } as React.CSSProperties}>
       <Shell state={state}>
-        {state.tab === 'dashboard' && <Dashboard {...state} />}
-        {state.tab === 'visitors' && <Visitors {...state} />}
-        {state.tab === 'cleanup' && <Cleanup {...state} />}
-        {state.tab === 'calls' && <Calls {...state} />}
-        {state.tab === 'campaigns' && <Campaigns {...state} />}
-        {state.tab === 'reports' && <Reports {...state} />}
-        {state.tab === 'admin' && state.role === 'Admin' && <Admin {...state} />}
+        {activeTab === 'dashboard' && <Dashboard {...state} />}
+        {activeTab === 'visitors' && <Visitors {...state} />}
+        {activeTab === 'cleanup' && <Cleanup {...state} />}
+        {activeTab === 'calls' && <Calls {...state} />}
+        {activeTab === 'campaigns' && <Campaigns {...state} />}
+        {activeTab === 'reports' && <Reports {...state} />}
+        {activeTab === 'admin' && isAdmin && <Admin {...state} />}
       </Shell>
 
       <EditVisitorModal {...state} />

@@ -6,17 +6,25 @@ import type {
   Campaign,
   CallApi,
   CallLogEntry,
+  EventNode,
+  MessageTemplate,
+  PageKey,
+  StatusOption,
+  SubEvent,
   Visitor,
   WatiConnection,
 } from '../types';
 
 // ---------------------------------------------------------------------------
-// Row → app-type mappers (DB is snake_case; app types are camelCase, and a
-// visitor's event is denormalised to its name to match the prototype shape).
+// Row → app-type mappers (DB is snake_case; app types are camelCase). A
+// visitor's event/sub-event are denormalised to their names.
 // ---------------------------------------------------------------------------
 
 const VISITOR_SELECT =
-  'id,name,company,phone,email,status,consent,cleaned,event:events(name),invites(id,event,status,invited_on)';
+  'id,name,company,phone,email,status,consent,cleaned,sub_event:sub_events(name,event:events(name)),invites(id,event,status,invited_on)';
+
+type NameRef = { name: string } | { name: string }[] | null;
+type SubEventRef = { name: string; event: NameRef } | { name: string; event: NameRef }[] | null;
 
 type VisitorRow = {
   id: string;
@@ -27,23 +35,26 @@ type VisitorRow = {
   status: Visitor['status'];
   consent: Visitor['consent'];
   cleaned: boolean;
-  event: { name: string } | { name: string }[] | null;
+  sub_event: SubEventRef;
   invites: { id: string; event: string; status: Visitor['invites'][number]['status']; invited_on: string }[] | null;
 };
 
-function eventName(ev: VisitorRow['event']): string {
-  if (!ev) return '';
-  return Array.isArray(ev) ? ev[0]?.name ?? '' : ev.name;
+function unwrap<T>(v: T | T[] | null): T | null {
+  if (!v) return null;
+  return Array.isArray(v) ? v[0] ?? null : v;
 }
 
 function mapVisitor(r: VisitorRow): Visitor {
+  const se = unwrap(r.sub_event);
+  const ev = se ? unwrap(se.event) : null;
   return {
     id: r.id,
     name: r.name,
     company: r.company,
     phone: r.phone,
     email: r.email,
-    event: eventName(r.event),
+    event: ev?.name ?? '',
+    subEvent: se?.name ?? '',
     status: r.status,
     consent: r.consent,
     cleaned: r.cleaned,
@@ -59,6 +70,50 @@ export async function fetchEvents(): Promise<string[]> {
   const { data, error } = await supabase.from('events').select('name').order('created_at');
   if (error) throw error;
   return (data ?? []).map((e) => e.name);
+}
+
+export async function fetchSubEvents(): Promise<SubEvent[]> {
+  const { data, error } = await supabase
+    .from('sub_events')
+    .select('id,name,event:events(name)')
+    .order('created_at');
+  if (error) throw error;
+  return (data ?? []).map((s) => {
+    const ev = unwrap((s as { event: NameRef }).event);
+    return { id: s.id, name: s.name, eventName: ev?.name ?? '' };
+  });
+}
+
+export async function fetchEventTree(): Promise<EventNode[]> {
+  const [events, subs] = await Promise.all([fetchEvents(), fetchSubEvents()]);
+  return events.map((name) => ({
+    name,
+    subEvents: subs.filter((s) => s.eventName === name).map((s) => ({ id: s.id, name: s.name })),
+  }));
+}
+
+export async function fetchStatusOptions(): Promise<StatusOption[]> {
+  const { data, error } = await supabase.from('status_options').select('*').order('sort');
+  if (error) throw error;
+  return (data ?? []).map((s) => ({ id: s.id, name: s.name, sort: s.sort }));
+}
+
+export async function fetchTemplates(): Promise<MessageTemplate[]> {
+  const { data, error } = await supabase.from('templates').select('*').order('sort');
+  if (error) throw error;
+  return (data ?? []).map((t) => ({ id: t.id, value: t.name, label: t.name, body: t.body }));
+}
+
+export async function fetchMyProfile(): Promise<{ role: string; pages: PageKey[]; canCampaign: boolean } | null> {
+  const { data: u } = await supabase.auth.getUser();
+  if (!u?.user) return null;
+  const { data } = await supabase
+    .from('profiles')
+    .select('role,pages,can_campaign')
+    .eq('id', u.user.id)
+    .single();
+  if (!data) return null;
+  return { role: data.role, pages: (data.pages ?? []) as PageKey[], canCampaign: data.can_campaign };
 }
 
 export async function fetchVisitors(): Promise<Visitor[]> {
@@ -118,6 +173,8 @@ export async function fetchUsers(): Promise<AppUser[]> {
   return (data ?? []).map((p) => ({
     id: p.id, name: p.name, email: p.email, role: p.role, status: p.status,
     perms: { edit: p.can_edit, delete: p.can_delete, call: p.can_call },
+    pages: (p.pages ?? []) as PageKey[],
+    canCampaign: p.can_campaign ?? true,
   }));
 }
 
@@ -157,26 +214,48 @@ export async function addActivity(a: Omit<ActivityEntry, 'id'>): Promise<void> {
 
 export async function updateVisitor(
   id: string,
-  patch: { name: string; company: string; phone: string; email: string; consent: Visitor['consent']; cleaned: boolean },
+  patch: {
+    name: string; company: string; phone: string; email: string;
+    consent: Visitor['consent']; cleaned: boolean; status: string; subEventId: string | null;
+  },
 ): Promise<void> {
-  const { error } = await supabase.from('visitors').update(patch).eq('id', id);
+  const { subEventId, ...rest } = patch;
+  const { error } = await supabase
+    .from('visitors')
+    .update({ ...rest, sub_event_id: subEventId })
+    .eq('id', id);
   if (error) throw error;
 }
 
-export async function eventIdByName(name: string): Promise<string | null> {
-  const { data } = await supabase.from('events').select('id').eq('name', name).single();
-  return data?.id ?? null;
+// Resolve "Event / Sub-event" to a sub_events.id, defaulting to the event's
+// first/General sub-event when no sub-event name is given.
+export async function subEventId(eventName: string, subName?: string): Promise<string | null> {
+  const { data: ev } = await supabase.from('events').select('id').eq('name', eventName).single();
+  if (!ev) return null;
+  let q = supabase.from('sub_events').select('id,name').eq('event_id', ev.id);
+  if (subName) q = q.eq('name', subName);
+  const { data } = await q.order('created_at').limit(1);
+  return data?.[0]?.id ?? null;
 }
 
 export async function importVisitors(
-  rows: { name: string; company: string; phone: string; email: string; eventName: string }[],
+  rows: { name: string; company: string; phone: string; email: string; eventName: string; subEventName?: string }[],
+  defaultStatus: string,
 ): Promise<number> {
   const names = Array.from(new Set(rows.map((r) => r.eventName).filter(Boolean)));
   const { data: evs } = await supabase.from('events').select('id,name').in('name', names.length ? names : ['']);
-  const idFor = (n: string) => evs?.find((e) => e.name === n)?.id ?? null;
+  const evId = (n: string) => evs?.find((e) => e.name === n)?.id ?? null;
+  const { data: subs } = await supabase.from('sub_events').select('id,name,event_id');
+  const subFor = (eventName: string, subName?: string) => {
+    const eid = evId(eventName);
+    if (!eid) return null;
+    const matches = (subs ?? []).filter((s) => s.event_id === eid);
+    const chosen = subName ? matches.find((s) => s.name === subName) : matches[0];
+    return chosen?.id ?? matches[0]?.id ?? null;
+  };
   const payload = rows.map((r) => ({
     name: r.name, company: r.company, phone: r.phone, email: r.email,
-    event_id: idFor(r.eventName), status: 'Pre-registered', consent: 'Pending', cleaned: false,
+    sub_event_id: subFor(r.eventName, r.subEventName), status: defaultStatus, consent: 'Pending', cleaned: false,
   }));
   const { error } = await supabase.from('visitors').insert(payload);
   if (error) throw error;
@@ -326,4 +405,83 @@ export async function adminResetPassword(email: string): Promise<string> {
   });
   if (error) throw error;
   return data.tempPassword as string;
+}
+
+export async function setUserPages(id: string, pages: PageKey[]): Promise<void> {
+  const { error } = await supabase.from('profiles').update({ pages }).eq('id', id);
+  if (error) throw error;
+}
+
+export async function setUserCampaign(id: string, value: boolean): Promise<void> {
+  const { error } = await supabase.from('profiles').update({ can_campaign: value }).eq('id', id);
+  if (error) throw error;
+}
+
+// ---------------------------------------------------------------------------
+// Real client IP (for audit entries) via the whoami edge function
+// ---------------------------------------------------------------------------
+export async function whoami(): Promise<string> {
+  try {
+    const { data } = await supabase.functions.invoke('whoami', { body: {} });
+    return (data?.ip as string) || '';
+  } catch {
+    return '';
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Sub-events
+// ---------------------------------------------------------------------------
+export async function addSubEvent(eventName: string, name: string): Promise<void> {
+  const { data: ev } = await supabase.from('events').select('id').eq('name', eventName).single();
+  if (!ev) throw new Error('Event not found');
+  const { error } = await supabase.from('sub_events').insert({ event_id: ev.id, name });
+  if (error) throw error;
+}
+
+export async function renameSubEvent(id: string, to: string): Promise<void> {
+  const { error } = await supabase.from('sub_events').update({ name: to }).eq('id', id);
+  if (error) throw error;
+}
+
+export async function removeSubEvent(id: string): Promise<void> {
+  const { error } = await supabase.from('sub_events').delete().eq('id', id);
+  if (error) throw error;
+}
+
+// ---------------------------------------------------------------------------
+// Status options (visitors.status references status_options.name with ON UPDATE
+// CASCADE, so renames propagate; deletes are blocked while a status is in use)
+// ---------------------------------------------------------------------------
+export async function addStatusOption(name: string, sort: number): Promise<void> {
+  const { error } = await supabase.from('status_options').insert({ name, sort });
+  if (error) throw error;
+}
+
+export async function renameStatusOption(id: string, to: string): Promise<void> {
+  const { error } = await supabase.from('status_options').update({ name: to }).eq('id', id);
+  if (error) throw error;
+}
+
+export async function removeStatusOption(id: string): Promise<void> {
+  const { error } = await supabase.from('status_options').delete().eq('id', id);
+  if (error) throw error;
+}
+
+// ---------------------------------------------------------------------------
+// Campaign templates
+// ---------------------------------------------------------------------------
+export async function addTemplate(name: string, body: string, sort: number): Promise<void> {
+  const { error } = await supabase.from('templates').insert({ name, body, sort });
+  if (error) throw error;
+}
+
+export async function updateTemplate(id: string, name: string, body: string): Promise<void> {
+  const { error } = await supabase.from('templates').update({ name, body }).eq('id', id);
+  if (error) throw error;
+}
+
+export async function removeTemplate(id: string): Promise<void> {
+  const { error } = await supabase.from('templates').delete().eq('id', id);
+  if (error) throw error;
 }
