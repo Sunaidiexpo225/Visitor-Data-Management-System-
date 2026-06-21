@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background: #ecebe7; }
+  ::selection { background: #d7def4; }
+  @media print {
+    @page { size: A4; margin: 11mm; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    html, body { background: #fff !important; }
+    .p-root { padding: 0 !important; min-height: 0 !important; background: #fff !important; }
+    .doc-page { box-shadow: none !important; border: none !important; max-width: none !important; border-radius: 0 !important; }
+    .p-cover { padding: 44px 40px 36px !important; }
+    .p-body { padding: 40px 40px 30px !important; }
+    .p-foot { padding: 16px 40px !important; }
+    .screen-shot, section, .kpi-row, table { break-inside: avoid; }
+    h2, h3 { break-after: avoid; }
+    p { orphans: 3; widows: 3; }
+  }
+</style>
+<script>
+addEventListener('load', () => {
+  (async () => {
+    try { await document.fonts.ready; } catch (e) {}
+    const imgs = Array.from(document.images).filter((i) => !i.complete);
+    await Promise.race([
+      Promise.allSettled(imgs.map((i) => i.decode())),
+      new Promise((r) => setTimeout(r, 8000)),
+    ]);
+    setTimeout(() => window.print(), 600);
+  })();
+});
+</script>
+</helmet>
+
+<div dir="rtl" lang="ar" class="p-root" style="background:#ecebe7; min-height:100vh; padding:56px 24px; font-family:'IBM Plex Sans Arabic',system-ui,sans-serif; color:#1b1b1d; -webkit-font-smoothing:antialiased;">
+  <article class="doc-page" style="max-width:980px; margin:0 auto; background:#fbfaf8; border:1px solid #e3e1db; box-shadow:0 24px 60px -28px rgba(20,30,60,0.28); border-radius:4px; overflow:hidden;">
+
+    <!-- ============ COVER ============ -->
+    <header class="p-cover" style="position:relative; padding:72px 76px 56px; background:#16224d; color:#f3f4f8; overflow:hidden;">
+      <div style="position:absolute; inset:0; background:radial-gradient(120% 100% at 0% 0%, rgba(120,150,230,0.28) 0%, rgba(22,34,77,0) 55%);"></div>
+      <div style="position:relative;">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:54px;">
+          <div style="width:30px; height:30px; border-radius:7px; background:#f3f4f8; display:flex; align-items:center; justify-content:center; color:#16224d; font-weight:700; font-size:15px;">S</div>
+          <span style="font-size:13px; font-weight:600; color:#aeb6d4;">سُنيدي إكسبو</span>
+          <span style="margin-right:auto; font-size:12px; font-weight:500; color:#8b94ba;">سري — لمراجعة الرئيس التنفيذي</span>
+        </div>
+        <div style="font-size:13px; font-weight:600; color:#9aa3c8; margin-bottom:22px;">مقترح داخلي</div>
+        <h1 style="font-family:'Cairo',sans-serif; font-weight:700; font-size:52px; line-height:1.15; margin:0 0 22px; max-width:18ch;">منصة إدارة بيانات الزوّار</h1>
+        <p style="font-size:18px; line-height:1.7; color:#c9cee2; margin:0; max-width:60ch; font-weight:400;">نقل سجلات الزوّار من قرص التخزين الشبكي المحلي إلى تطبيق ويب واحد وآمن — حيث يسجّل فريق التسويق الدخول، ويُنظّف البيانات ويُصفّيها، ويُطلق حملات واتساب عبر WATI مباشرة.</p>
+        <div style="display:flex; flex-wrap:wrap; gap:40px; margin-top:48px; padding-top:26px; border-top:1px solid rgba(174,182,212,0.28);">
+          <div>
+            <div style="font-size:11px; font-weight:600; color:#8b94ba; margin-bottom:7px;">مُعدّ لـ</div>
+            <div style="font-size:15px; color:#eef0f7; font-weight:600;">مكتب الرئيس التنفيذي</div>
+          </div>
+          <div>
+            <div style="font-size:11px; font-weight:600; color:#8b94ba; margin-bottom:7px;">القرار المطلوب</div>
+            <div style="font-size:15px; color:#eef0f7; font-weight:600;">الموافقة على التطوير الداخلي</div>
+          </div>
+          <div>
+            <div style="font-size:11px; font-weight:600; color:#8b94ba; margin-bottom:7px;">التاريخ</div>
+            <div style="font-size:15px; color:#eef0f7; font-weight:600;">يونيو 2026</div>
+          </div>
+          <div>
+            <div style="font-size:11px; font-weight:600; color:#8b94ba; margin-bottom:7px;">الحالة</div>
+            <div style="font-size:15px; color:#eef0f7; font-weight:600;">النسخة 1.0 — مسودة للمراجعة</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="p-body" style="padding:60px 76px 76px;">
+
+      <!-- ============ EXEC SUMMARY ============ -->
+      <section style="margin-bottom:64px;">
+        <div style="background:#eef1fa; border:1px solid #dde3f5; border-right:4px solid #1f3c88; border-radius:10px; padding:26px 28px;">
+          <div style="font-size:12px; font-weight:600; color:#1f3c88; margin-bottom:12px;">الطلب في سطر واحد</div>
+          <p style="font-size:18px; line-height:1.7; color:#1f2a4d; margin:0; font-weight:500;">تتواجد بيانات زوّارنا على قرص تخزين شبكي محلي، وتُشارَك كملفات Excel يدويًا مع كل طلب من التسويق. هذا غير آمن والبيانات مُبعثرة. نقترح بناء تطبيق ويب واحد وآمن لحفظ هذه البيانات وتنظيفها وتصفيتها والتعامل معها — بما في ذلك إرسال الحملات عبر WATI.</p>
+        </div>
+      </section>
+
+      <!-- ============ 01 CURRENT SITUATION ============ -->
+      <section style="margin-bottom:64px;">
+        <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:30px;">
+          <span style="font-family:'IBM Plex Mono'; font-size:13px; font-weight:500; color:#1f3c88;">01</span>
+          <h2 style="font-family:'Cairo',sans-serif; font-weight:700; font-size:31px; margin:0; color:#16224d;">الوضع الحالي</h2>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px;">
+          <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:22px 24px;">
+            <div style="font-size:15px; font-weight:700; color:#b0481f; margin-bottom:8px;">البيانات على قرص شبكي محلي واحد</div>
+            <p style="font-size:13.5px; line-height:1.7; color:#5a5853; margin:0;">قرص واحد يحتوي كل سجلات الزوّار — عطل واحد أو سرقة وتضيع البيانات.</p>
+          </div>
+          <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:22px 24px;">
+            <div style="font-size:15px; font-weight:700; color:#b0481f; margin-bottom:8px;">مشاركة ملفات Excel يدويًا</div>
+            <p style="font-size:13.5px; line-height:1.7; color:#5a5853; margin:0;">كل طلب من التسويق يعني تصدير جدول بيانات وإرساله يدويًا.</p>
+          </div>
+          <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:22px 24px;">
+            <div style="font-size:15px; font-weight:700; color:#b0481f; margin-bottom:8px;">بيانات حساسة مُبعثرة في كل مكان</div>
+            <p style="font-size:13.5px; line-height:1.7; color:#5a5853; margin:0;">تنتهي النسخ في صناديق البريد والأجهزة والمحادثات دون تحكّم أو سجل تدقيق.</p>
+          </div>
+          <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:22px 24px;">
+            <div style="font-size:15px; font-weight:700; color:#b0481f; margin-bottom:8px;">جودة البيانات في تدهور مستمر</div>
+            <p style="font-size:13.5px; line-height:1.7; color:#5a5853; margin:0;">التكرارات والسجلات القديمة والنسخ المتضاربة تتكاثر مع كل تصدير.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 02 PROPOSED SOLUTION ============ -->
+      <section style="margin-bottom:64px;">
+        <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:14px;">
+          <span style="font-family:'IBM Plex Mono'; font-size:13px; font-weight:500; color:#1f3c88;">02</span>
+          <h2 style="font-family:'Cairo',sans-serif; font-weight:700; font-size:31px; margin:0; color:#16224d;">الحل المقترح</h2>
+        </div>
+        <p style="font-size:14.5px; line-height:1.7; color:#6c6a66; margin:0 0 28px; max-width:66ch;">تطبيق ويب واحد وآمن لإدارة بيانات الزوّار — مصدر واحد موثوق، يُدخَل إليه عبر تسجيل الدخول، ومزوّد بالأدوات التي يحتاجها التسويق.</p>
+
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div style="display:flex; gap:18px; align-items:flex-start; background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:20px 24px;">
+            <span style="flex:none; width:30px; height:30px; border-radius:8px; background:#16224d; color:#fff; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono'; font-size:13px; font-weight:600;">1</span>
+            <div><div style="font-size:15px; font-weight:700; color:#16224d; margin-bottom:4px;">تسجيل دخول آمن بدل الملفات المشتركة</div><p style="font-size:13.5px; line-height:1.7; color:#5a5853; margin:0;">يسجّل التسويق الدخول بحسابه الخاص ويطّلع على البيانات مباشرة — دون إرسال جداول بالبريد.</p></div>
+          </div>
+          <div style="display:flex; gap:18px; align-items:flex-start; background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:20px 24px;">
+            <span style="flex:none; width:30px; height:30px; border-radius:8px; background:#16224d; color:#fff; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono'; font-size:13px; font-weight:600;">2</span>
+            <div><div style="font-size:15px; font-weight:700; color:#16224d; margin-bottom:4px;">تنظيف البيانات في مكانها</div><p style="font-size:13.5px; line-height:1.7; color:#5a5853; margin:0;">إزالة التكرار وتصحيح ودمج السجلات داخل التطبيق متى لزم الأمر.</p></div>
+          </div>
+          <div style="display:flex; gap:18px; align-items:flex-start; background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:20px 24px;">
+            <span style="flex:none; width:30px; height:30px; border-radius:8px; background:#16224d; color:#fff; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono'; font-size:13px; font-weight:600;">3</span>
+            <div><div style="font-size:15px; font-weight:700; color:#16224d; margin-bottom:4px;">تصفية الزوّار حسب كل فعالية</div><p style="font-size:13.5px; line-height:1.7; color:#5a5853; margin:0;">بناء جماهير مستهدفة في ثوانٍ حسب الفعالية أو التاريخ أو الشركة أو الحالة.</p></div>
+          </div>
+          <div style="display:flex; gap:18px; align-items:flex-start; background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:20px 24px;">
+            <span style="flex:none; width:30px; height:30px; border-radius:8px; background:#1f8a4c; color:#fff; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono'; font-size:13px; font-weight:600;">4</span>
+            <div><div style="font-size:15px; font-weight:700; color:#16224d; margin-bottom:4px;">إطلاق حملات واتساب عبر WATI</div><p style="font-size:13.5px; line-height:1.7; color:#5a5853; margin:0;">الاتصال بواجهة WATI وإرسال الحملات إلى شريحة مُصفّاة مباشرة من التطبيق.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 03 KEY CAPABILITIES ============ -->
+      <section style="margin-bottom:64px;">
+        <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:14px;">
+          <span style="font-family:'IBM Plex Mono'; font-size:13px; font-weight:500; color:#1f3c88;">03</span>
+          <h2 style="font-family:'Cairo',sans-serif; font-weight:700; font-size:31px; margin:0; color:#16224d;">القدرات الرئيسية</h2>
+        </div>
+        <p style="font-size:14.5px; line-height:1.7; color:#6c6a66; margin:0 0 26px; max-width:64ch;">النطاق الوظيفي المقترح للإصدار الأول.</p>
+
+        <div style="border:1px solid #e6e4de; border-radius:10px; overflow:hidden; background:#fff;">
+          <table style="width:100%; border-collapse:collapse; font-size:14.5px; text-align:right;">
+            <thead>
+              <tr style="background:#f1f0ec;">
+                <th style="text-align:right; padding:14px 20px; font-size:12px; color:#6c6a66; font-weight:600; width:32%;">القدرة</th>
+                <th style="text-align:right; padding:14px 20px; font-size:12px; color:#6c6a66; font-weight:600;">وظيفتها</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-top:1px solid #ececea;"><td style="padding:16px 20px; font-weight:700; color:#16224d; vertical-align:top;">تسجيل دخول وأدوار آمنة</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.7; vertical-align:top;">تسجيل دخول بالبريد الإلكتروني مع صلاحيات حسب الدور للتسويق والإداريين.</td></tr>
+              <tr style="border-top:1px solid #ececea; background:#fcfbf9;"><td style="padding:16px 20px; font-weight:700; color:#16224d; vertical-align:top;">مستودع زوّار مركزي</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.7; vertical-align:top;">مصدر موثوق واحد وآمن — يُغني عن القرص الشبكي وملفات Excel المشتركة.</td></tr>
+              <tr style="border-top:1px solid #ececea;"><td style="padding:16px 20px; font-weight:700; color:#16224d; vertical-align:top;">تنظيف البيانات داخل التطبيق</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.7; vertical-align:top;">إزالة التكرار ودمج وتصحيح سجلات الزوّار دون تصديرها.</td></tr>
+              <tr style="border-top:1px solid #ececea; background:#fcfbf9;"><td style="padding:16px 20px; font-weight:700; color:#16224d; vertical-align:top;">التصفية حسب الفعالية</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.7; vertical-align:top;">تقسيم الزوّار فورًا حسب الفعالية والتاريخ والشركة والحالة.</td></tr>
+              <tr style="border-top:1px solid #ececea;"><td style="padding:16px 20px; font-weight:700; color:#16224d; vertical-align:top;">حملات واتساب عبر WATI</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.7; vertical-align:top;">إرسال حملات واتساب إلى شريحة مُصفّاة مباشرة عبر واجهة WATI.</td></tr>
+              <tr style="border-top:1px solid #ececea; background:#fcfbf9;"><td style="padding:16px 20px; font-weight:700; color:#16224d; vertical-align:top;">تصدير مُتحكَّم به</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.7; vertical-align:top;">التصدير إلى CSV عند الحاجة فقط، مع تسجيل كل عملية تنزيل.</td></tr>
+              <tr style="border-top:1px solid #ececea;"><td style="padding:16px 20px; font-weight:700; color:#16224d; vertical-align:top;">سجل تدقيق ونسخ احتياطي</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.7; vertical-align:top;">تتبّع من اطّلع على ماذا، مع نسخ احتياطي سحابي آمن وتلقائي.</td></tr>
+              <tr style="border-top:1px solid #ececea; background:#fcfbf9;"><td style="padding:16px 20px; font-weight:700; color:#16224d; vertical-align:top;">لوحة معلومات شاملة</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.7; vertical-align:top;">أعداد الزوّار المباشرة لكل فعالية ونتائج الحملات بلمحة واحدة.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ 04 INTERFACE MOCKUPS ============ -->
+      <section style="margin-bottom:64px;">
+        <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:14px;">
+          <span style="font-family:'IBM Plex Mono'; font-size:13px; font-weight:500; color:#1f3c88;">04</span>
+          <h2 style="font-family:'Cairo',sans-serif; font-weight:700; font-size:31px; margin:0; color:#16224d;">نماذج الواجهة</h2>
+        </div>
+        <p style="font-size:14.5px; line-height:1.7; color:#6c6a66; margin:0 0 36px; max-width:64ch;">ثلاث شاشات تمثيلية توضّح كيف سيعمل فريق التسويق يوميًا.</p>
+
+        <!-- ---- Mockup 1: Login ---- -->
+        <div class="screen-shot" style="margin-bottom:44px;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+            <span style="font-family:'IBM Plex Mono'; font-size:11px; font-weight:500; color:#1f3c88; background:#eef1fa; border:1px solid #dde3f5; padding:3px 9px; border-radius:5px;">شاشة 1</span>
+            <span style="font-size:14px; font-weight:700; color:#16224d;">تسجيل دخول التسويق</span>
+          </div>
+          <div style="border:1px solid #dcdad4; border-radius:12px; overflow:hidden; box-shadow:0 18px 40px -24px rgba(20,30,60,0.35); background:#fff;">
+            <div dir="ltr" style="height:40px; background:#f1f0ec; border-bottom:1px solid #e3e1db; display:flex; align-items:center; padding:0 16px; gap:8px;">
+              <span style="width:11px; height:11px; border-radius:50%; background:#e0635a;"></span>
+              <span style="width:11px; height:11px; border-radius:50%; background:#e2b13c;"></span>
+              <span style="width:11px; height:11px; border-radius:50%; background:#52b06a;"></span>
+              <div style="margin:0 auto; background:#fff; border:1px solid #e3e1db; border-radius:6px; padding:4px 16px; font-family:'IBM Plex Mono'; font-size:11px; color:#8a8782;">data.sunaidiexpo.com/login</div>
+            </div>
+            <div style="display:flex; min-height:420px;">
+              <div style="flex:1; background:#16224d; color:#eef0f7; padding:44px 40px; position:relative; overflow:hidden;">
+                <div style="position:absolute; inset:0; background:radial-gradient(120% 90% at 100% 100%, rgba(120,150,230,0.3) 0%, rgba(22,34,77,0) 60%);"></div>
+                <div style="position:relative; height:100%; display:flex; flex-direction:column;">
+                  <div style="display:flex; align-items:center; gap:11px;">
+                    <div style="width:34px; height:34px; border-radius:8px; background:#eef0f7; display:flex; align-items:center; justify-content:center; color:#16224d; font-weight:700; font-size:17px;">S</div>
+                    <span style="font-weight:700; font-size:15px;">سُنيدي إكسبو</span>
+                  </div>
+                  <div style="margin-top:auto;">
+                    <div style="font-family:'Cairo',sans-serif; font-size:25px; line-height:1.3; font-weight:700; margin-bottom:12px;">إدارة بيانات الزوّار</div>
+                    <p style="font-size:13.5px; line-height:1.7; color:#b8bedb; margin:0; max-width:32ch;">مكان واحد آمن لكل سجل زائر — دون أقراص مشتركة أو ملفات مُرسلة بالبريد.</p>
+                  </div>
+                </div>
+              </div>
+              <div style="flex:1.05; padding:48px 46px; display:flex; flex-direction:column; justify-content:center;">
+                <h3 style="font-family:'Cairo',sans-serif; font-weight:700; font-size:24px; color:#16224d; margin:0 0 6px;">سجّل الدخول إلى حسابك</h3>
+                <p style="font-size:13.5px; color:#7a7873; margin:0 0 28px;">أدخل بيانات الدخول الخاصة بالعمل للمتابعة.</p>
+
+                <label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:7px;">البريد الإلكتروني</label>
+                <div dir="ltr" style="border:1.5px solid #1f3c88; background:#fff; border-radius:8px; padding:12px 14px; font-size:14px; color:#1b1b1d; margin-bottom:18px; box-shadow:0 0 0 3px rgba(31,60,136,0.1); display:flex; align-items:center; justify-content:flex-end; gap:2px;"><span style="width:1.5px; height:17px; background:#1f3c88; display:inline-block;"></span>marketing@sunaidiexpo.com</div>
+
+                <label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:7px;">كلمة المرور</label>
+                <div style="border:1px solid #d8d6d0; background:#fff; border-radius:8px; padding:12px 14px; font-size:16px; letter-spacing:3px; color:#9a978f; margin-bottom:10px; display:flex; align-items:center;">••••••••••••</div>
+
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
+                  <label style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:#5a5853;"><span style="width:15px; height:15px; border-radius:4px; border:1px solid #c9c7c1; background:#fff; display:inline-block;"></span>إبقائي مسجّل الدخول</label>
+                  <span style="font-size:12.5px; color:#1f3c88; font-weight:600;">نسيت كلمة المرور؟</span>
+                </div>
+
+                <button style="width:100%; background:#1f3c88; color:#fff; border:none; border-radius:8px; padding:13px; font-family:'IBM Plex Sans Arabic'; font-size:14.5px; font-weight:700; cursor:pointer; box-shadow:0 8px 18px -8px rgba(31,60,136,0.6);">تسجيل الدخول</button>
+                <p style="font-size:12px; color:#9a978f; text-align:center; margin:20px 0 0;">الدخول مقصور على موظفي سُنيدي إكسبو المخوّلين.</p>
+              </div>
+            </div>
+          </div>
+          <p style="font-size:11.5px; color:#8a8782; margin:13px 0 0;">الشكل 1 — يسجّل التسويق الدخول بحسابه الخاص؛ لا تغادر أي ملفات المنصة.</p>
+        </div>
+
+        <!-- ---- Mockup 2: Dashboard ---- -->
+        <div class="screen-shot" style="margin-bottom:44px;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+            <span style="font-family:'IBM Plex Mono'; font-size:11px; font-weight:500; color:#1f3c88; background:#eef1fa; border:1px solid #dde3f5; padding:3px 9px; border-radius:5px;">شاشة 2</span>
+            <span style="font-size:14px; font-weight:700; color:#16224d;">لوحة بيانات الزوّار</span>
+          </div>
+          <div style="border:1px solid #dcdad4; border-radius:12px; overflow:hidden; box-shadow:0 18px 40px -24px rgba(20,30,60,0.35); background:#f7f6f3;">
+            <div dir="ltr" style="height:40px; background:#f1f0ec; border-bottom:1px solid #e3e1db; display:flex; align-items:center; padding:0 16px; gap:8px;">
+              <span style="width:11px; height:11px; border-radius:50%; background:#e0635a;"></span>
+              <span style="width:11px; height:11px; border-radius:50%; background:#e2b13c;"></span>
+              <span style="width:11px; height:11px; border-radius:50%; background:#52b06a;"></span>
+              <div style="margin:0 auto; background:#fff; border:1px solid #e3e1db; border-radius:6px; padding:4px 16px; font-family:'IBM Plex Mono'; font-size:11px; color:#8a8782;">data.sunaidiexpo.com/dashboard</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:18px; padding:0 24px; height:56px; background:#16224d; color:#eef0f7;">
+              <div style="display:flex; align-items:center; gap:9px;">
+                <div style="width:26px; height:26px; border-radius:6px; background:#eef0f7; display:flex; align-items:center; justify-content:center; color:#16224d; font-weight:700; font-size:13px;">S</div>
+                <span style="font-weight:700; font-size:14.5px;">إدارة الزوّار</span>
+              </div>
+              <nav style="display:flex; gap:22px; margin-right:18px; font-size:13px;">
+                <span style="color:#fff; font-weight:700; padding-bottom:2px; border-bottom:2px solid #6f8be0;">لوحة المعلومات</span>
+                <span style="color:#aab2d4;">الزوّار</span>
+                <span style="color:#aab2d4;">الحملات</span>
+                <span style="color:#aab2d4;">التقارير</span>
+              </nav>
+              <div style="margin-right:auto; display:flex; align-items:center; gap:14px;">
+                <span style="width:30px; height:30px; border-radius:50%; background:#2c3a6e; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; color:#cdd3eb;">MK</span>
+              </div>
+            </div>
+            <div style="padding:26px 28px 30px;">
+              <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:22px;">
+                <div>
+                  <h3 style="font-family:'Cairo',sans-serif; font-weight:700; font-size:23px; color:#16224d; margin:0 0 4px;">لوحة الزوّار</h3>
+                  <p style="font-size:12.5px; color:#7a7873; margin:0;">كل الفعاليات — نظرة مباشرة</p>
+                </div>
+                <div style="display:flex; gap:9px;">
+                  <span style="font-size:12.5px; color:#4a4945; background:#fff; border:1px solid #e0ddd6; border-radius:7px; padding:7px 13px;">كل الفعاليات ▾</span>
+                  <span style="font-size:12.5px; color:#fff; background:#1f3c88; border-radius:7px; padding:7px 13px; font-weight:600;">تصدير CSV</span>
+                </div>
+              </div>
+
+              <div class="kpi-row" style="display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:18px;">
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:18px;">
+                  <div style="font-size:11px; font-weight:600; color:#7a7873; margin-bottom:10px;">إجمالي الزوّار</div>
+                  <div style="font-size:30px; font-weight:700; color:#16224d; line-height:1;">24,810</div>
+                  <div style="font-size:11.5px; color:#7a7873; margin-top:8px;">عبر 6 فعاليات</div>
+                </div>
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:18px;">
+                  <div style="font-size:11px; font-weight:600; color:#7a7873; margin-bottom:10px;">السجلات المُنظَّفة</div>
+                  <div style="font-size:30px; font-weight:700; color:#16224d; line-height:1;">96<span style="font-size:16px; font-weight:600; color:#7a7873;">٪</span></div>
+                  <div style="font-size:11.5px; color:#7a7873; margin-top:8px;">دمج 421 تكرارًا</div>
+                </div>
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:18px;">
+                  <div style="font-size:11px; font-weight:600; color:#7a7873; margin-bottom:10px;">الحملات المُرسَلة</div>
+                  <div style="font-size:30px; font-weight:700; color:#16224d; line-height:1;">38</div>
+                  <div style="font-size:11.5px; color:#7a7873; margin-top:8px;">عبر WATI هذا الربع</div>
+                </div>
+              </div>
+
+              <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:14px;">
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:20px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+                    <span style="font-size:13.5px; font-weight:700; color:#16224d;">الزوّار حسب الفعالية</span>
+                    <span style="font-size:11px; color:#9a978f;">إجمالي المسجّلين</span>
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:13px;">
+                    <div style="display:flex; align-items:center; gap:12px;"><span style="width:120px; font-size:12px; color:#5a5853;">إكسبو الربيع 2026</span><div style="flex:1; height:14px; background:#eef1fa; border-radius:4px; overflow:hidden;"><div style="width:92%; height:100%; background:#1f3c88;"></div></div><span style="width:46px; font-family:'IBM Plex Mono'; font-size:11.5px; color:#16224d; font-weight:500;">7,420</span></div>
+                    <div style="display:flex; align-items:center; gap:12px;"><span style="width:120px; font-size:12px; color:#5a5853;">منتدى التقنية</span><div style="flex:1; height:14px; background:#eef1fa; border-radius:4px; overflow:hidden;"><div style="width:71%; height:100%; background:#1f3c88;"></div></div><span style="width:46px; font-family:'IBM Plex Mono'; font-size:11.5px; color:#16224d; font-weight:500;">5,680</span></div>
+                    <div style="display:flex; align-items:center; gap:12px;"><span style="width:120px; font-size:12px; color:#5a5853;">أيام التجارة</span><div style="flex:1; height:14px; background:#eef1fa; border-radius:4px; overflow:hidden;"><div style="width:55%; height:100%; background:#5478c4;"></div></div><span style="width:46px; font-family:'IBM Plex Mono'; font-size:11.5px; color:#16224d; font-weight:500;">4,390</span></div>
+                    <div style="display:flex; align-items:center; gap:12px;"><span style="width:120px; font-size:12px; color:#5a5853;">أسبوع التصميم</span><div style="flex:1; height:14px; background:#eef1fa; border-radius:4px; overflow:hidden;"><div style="width:42%; height:100%; background:#5478c4;"></div></div><span style="width:46px; font-family:'IBM Plex Mono'; font-size:11.5px; color:#16224d; font-weight:500;">3,310</span></div>
+                    <div style="display:flex; align-items:center; gap:12px;"><span style="width:120px; font-size:12px; color:#5a5853;">ملتقى الناشئة</span><div style="flex:1; height:14px; background:#eef1fa; border-radius:4px; overflow:hidden;"><div style="width:28%; height:100%; background:#9bb0db;"></div></div><span style="width:46px; font-family:'IBM Plex Mono'; font-size:11.5px; color:#16224d; font-weight:500;">2,210</span></div>
+                  </div>
+                </div>
+
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:20px;">
+                  <div style="font-size:13.5px; font-weight:700; color:#16224d; margin-bottom:16px;">أحدث تحديثات السجلات</div>
+                  <div style="display:flex; flex-direction:column; gap:14px;">
+                    <div style="display:flex; align-items:center; gap:11px;"><span style="width:30px; height:30px; border-radius:50%; background:#eef1fa; color:#1f3c88; font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:center;">FK</span><div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:600; color:#1b1b1d;">فيصل خان</div><div style="font-size:11px; color:#9a978f;">تحديث رقم الهاتف</div></div><span style="flex:none; font-size:10px; color:#1f3c88; background:#eef1fa; border:1px solid #dde3f5; border-radius:5px; padding:2px 7px;">تعديل</span></div>
+                    <div style="display:flex; align-items:center; gap:11px;"><span style="width:30px; height:30px; border-radius:50%; background:#eef1fa; color:#1f3c88; font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:center;">LM</span><div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:600; color:#1b1b1d;">لينا منصور</div><div style="font-size:11px; color:#9a978f;">دمج سجل مكرر</div></div><span style="flex:none; font-size:10px; color:#1f6a47; background:#e6f1ea; border:1px solid #cfe8d8; border-radius:5px; padding:2px 7px;">دمج</span></div>
+                    <div style="display:flex; align-items:center; gap:11px;"><span style="width:30px; height:30px; border-radius:50%; background:#eef1fa; color:#1f3c88; font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:center;">RA</span><div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:600; color:#1b1b1d;">رامي السعيد</div><div style="font-size:11px; color:#9a978f;">ضبط الموافقة على: موافق</div></div><span style="flex:none; font-size:10px; color:#1f3c88; background:#eef1fa; border:1px solid #dde3f5; border-radius:5px; padding:2px 7px;">تحديث</span></div>
+                    <div style="display:flex; align-items:center; gap:11px;"><span style="width:30px; height:30px; border-radius:50%; background:#eef1fa; color:#1f3c88; font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:center;">SH</span><div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:600; color:#1b1b1d;">سارة حبيب</div><div style="font-size:11px; color:#9a978f;">تصحيح البريد الإلكتروني</div></div><span style="flex:none; font-size:10px; color:#1f3c88; background:#eef1fa; border:1px solid #dde3f5; border-radius:5px; padding:2px 7px;">تعديل</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p style="font-size:11.5px; color:#8a8782; margin:13px 0 0;">الشكل 2 — أعداد الزوّار المباشرة وحالة جودة البيانات ونشاط الحملات في عرض واحد.</p>
+        </div>
+
+        <!-- ---- Mockup 3: Filtering + WATI ---- -->
+        <div class="screen-shot">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+            <span style="font-family:'IBM Plex Mono'; font-size:11px; font-weight:500; color:#1f3c88; background:#eef1fa; border:1px solid #dde3f5; padding:3px 9px; border-radius:5px;">شاشة 3</span>
+            <span style="font-size:14px; font-weight:700; color:#16224d;">التصفية حسب الفعالية وحملة WATI</span>
+          </div>
+          <div style="border:1px solid #dcdad4; border-radius:12px; overflow:hidden; box-shadow:0 18px 40px -24px rgba(20,30,60,0.35); background:#f7f6f3;">
+            <div dir="ltr" style="height:40px; background:#f1f0ec; border-bottom:1px solid #e3e1db; display:flex; align-items:center; padding:0 16px; gap:8px;">
+              <span style="width:11px; height:11px; border-radius:50%; background:#e0635a;"></span>
+              <span style="width:11px; height:11px; border-radius:50%; background:#e2b13c;"></span>
+              <span style="width:11px; height:11px; border-radius:50%; background:#52b06a;"></span>
+              <div style="margin:0 auto; background:#fff; border:1px solid #e3e1db; border-radius:6px; padding:4px 16px; font-family:'IBM Plex Mono'; font-size:11px; color:#8a8782;">data.sunaidiexpo.com/visitors</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:18px; padding:0 24px; height:56px; background:#16224d; color:#eef0f7;">
+              <div style="display:flex; align-items:center; gap:9px;">
+                <div style="width:26px; height:26px; border-radius:6px; background:#eef0f7; display:flex; align-items:center; justify-content:center; color:#16224d; font-weight:700; font-size:13px;">S</div>
+                <span style="font-weight:700; font-size:14.5px;">إدارة الزوّار</span>
+              </div>
+              <nav style="display:flex; gap:22px; margin-right:18px; font-size:13px;">
+                <span style="color:#aab2d4;">لوحة المعلومات</span>
+                <span style="color:#fff; font-weight:700; padding-bottom:2px; border-bottom:2px solid #6f8be0;">الزوّار</span>
+                <span style="color:#aab2d4;">الحملات</span>
+                <span style="color:#aab2d4;">التقارير</span>
+              </nav>
+              <div style="margin-right:auto; display:flex; align-items:center; gap:14px;">
+                <span style="width:30px; height:30px; border-radius:50%; background:#2c3a6e; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; color:#cdd3eb;">MK</span>
+              </div>
+            </div>
+
+            <div style="padding:26px 28px 30px;">
+              <h3 style="font-family:'Cairo',sans-serif; font-weight:700; font-size:23px; color:#16224d; margin:0 0 16px;">البيانات الرئيسية للزوّار</h3>
+
+              <div style="display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:16px;">
+                <span style="font-size:11px; font-weight:600; color:#9a978f;">تصفية</span>
+                <span style="font-size:12.5px; color:#fff; background:#1f3c88; border:1px solid #1f3c88; border-radius:20px; padding:7px 14px; font-weight:500;">الفعالية: إكسبو الربيع 2026 ✕</span>
+                <span style="font-size:12.5px; color:#1b1b1d; background:#fff; border:1px solid #e0ddd6; border-radius:20px; padding:7px 14px;">الحالة: الكل ▾</span>
+                <span style="font-size:12.5px; color:#1b1b1d; background:#fff; border:1px solid #e0ddd6; border-radius:20px; padding:7px 14px;">الموافقة: موافق ▾</span>
+                <span style="margin-right:auto; font-size:12px; color:#9a978f; font-family:'IBM Plex Mono';">7,420 زائر</span>
+              </div>
+
+              <div style="display:grid; grid-template-columns:1.35fr 1fr; gap:16px;">
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; overflow:hidden;">
+                  <div style="display:flex; align-items:center; justify-content:space-between; padding:13px 16px; border-bottom:1px solid #ececea; background:#f6f5f2;">
+                    <span style="font-size:12.5px; font-weight:700; color:#16224d;">الزوّار المُصفّون</span>
+                    <span style="font-size:11px; color:#1f3c88; background:#eef1fa; border:1px solid #dde3f5; border-radius:5px; padding:3px 9px; font-weight:500;">2,180 محدَّد</span>
+                  </div>
+                  <table style="width:100%; border-collapse:collapse; font-size:12.5px; text-align:right;">
+                    <tbody>
+                      <tr style="border-bottom:1px solid #ececea;"><td style="padding:11px 16px; width:30px;"><span style="width:15px; height:15px; border-radius:4px; background:#1f3c88; display:inline-block;"></span></td><td style="padding:11px 8px; font-weight:600; color:#1b1b1d;">فيصل خان</td><td dir="ltr" style="padding:11px 8px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:11px; text-align:left;">+966 5•• ••• 142</td><td style="padding:11px 16px;"><span style="font-size:10.5px; color:#1f6a47; background:#e6f1ea; border-radius:5px; padding:3px 8px;">موافق</span></td></tr>
+                      <tr style="border-bottom:1px solid #ececea; background:#fcfbf9;"><td style="padding:11px 16px;"><span style="width:15px; height:15px; border-radius:4px; background:#1f3c88; display:inline-block;"></span></td><td style="padding:11px 8px; font-weight:600; color:#1b1b1d;">لينا منصور</td><td dir="ltr" style="padding:11px 8px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:11px; text-align:left;">+966 5•• ••• 087</td><td style="padding:11px 16px;"><span style="font-size:10.5px; color:#1f6a47; background:#e6f1ea; border-radius:5px; padding:3px 8px;">موافق</span></td></tr>
+                      <tr style="border-bottom:1px solid #ececea;"><td style="padding:11px 16px;"><span style="width:15px; height:15px; border-radius:4px; background:#1f3c88; display:inline-block;"></span></td><td style="padding:11px 8px; font-weight:600; color:#1b1b1d;">رامي السعيد</td><td dir="ltr" style="padding:11px 8px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:11px; text-align:left;">+966 5•• ••• 309</td><td style="padding:11px 16px;"><span style="font-size:10.5px; color:#1f6a47; background:#e6f1ea; border-radius:5px; padding:3px 8px;">موافق</span></td></tr>
+                      <tr style="border-bottom:1px solid #ececea; background:#fcfbf9;"><td style="padding:11px 16px;"><span style="width:15px; height:15px; border-radius:4px; background:#1f3c88; display:inline-block;"></span></td><td style="padding:11px 8px; font-weight:600; color:#1b1b1d;">سارة حبيب</td><td dir="ltr" style="padding:11px 8px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:11px; text-align:left;">+966 5•• ••• 561</td><td style="padding:11px 16px;"><span style="font-size:10.5px; color:#1f6a47; background:#e6f1ea; border-radius:5px; padding:3px 8px;">موافق</span></td></tr>
+                      <tr style="border-bottom:1px solid #ececea;"><td style="padding:11px 16px;"><span style="width:15px; height:15px; border-radius:4px; background:#fff; border:1px solid #c9c7c1; display:inline-block;"></span></td><td style="padding:11px 8px; font-weight:600; color:#1b1b1d;">عمر طارق</td><td dir="ltr" style="padding:11px 8px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:11px; text-align:left;">+966 5•• ••• 778</td><td style="padding:11px 16px;"><span style="font-size:10.5px; color:#b07a1e; background:#f6efe0; border-radius:5px; padding:3px 8px;">قيد الانتظار</span></td></tr>
+                      <tr><td style="padding:11px 16px;"><span style="width:15px; height:15px; border-radius:4px; background:#1f3c88; display:inline-block;"></span></td><td style="padding:11px 8px; font-weight:600; color:#1b1b1d;">هدى ناصر</td><td dir="ltr" style="padding:11px 8px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:11px; text-align:left;">+966 5•• ••• 234</td><td style="padding:11px 16px;"><span style="font-size:10.5px; color:#1f6a47; background:#e6f1ea; border-radius:5px; padding:3px 8px;">موافق</span></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:20px; display:flex; flex-direction:column;">
+                  <div style="display:flex; align-items:center; gap:9px; margin-bottom:16px;">
+                    <span style="width:26px; height:26px; border-radius:7px; background:#1f8a4c; color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">W</span>
+                    <span style="font-size:13.5px; font-weight:700; color:#16224d;">إرسال حملة واتساب</span>
+                    <span style="margin-right:auto; font-size:10px; font-family:'IBM Plex Mono'; color:#1f8a4c; background:#e7f4ec; border:1px solid #cfe8d8; border-radius:5px; padding:2px 7px;">WATI API</span>
+                  </div>
+
+                  <div style="font-size:11.5px; color:#7a7873; margin-bottom:7px;">القالب</div>
+                  <div style="border:1px solid #e0ddd6; border-radius:8px; padding:9px 12px; font-size:12.5px; color:#1b1b1d; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between;"><span dir="ltr">spring_expo_followup</span> <span style="color:#9a978f;">▾</span></div>
+
+                  <div style="font-size:11.5px; color:#7a7873; margin-bottom:7px;">معاينة</div>
+                  <div style="background:#e7f6ea; border-radius:10px 10px 2px 10px; padding:11px 13px; font-size:12.5px; line-height:1.7; color:#1f3327; margin-bottom:16px;">
+                    مرحبًا فيصل، شكرًا لزيارتك إكسبو سُنيدي ربيع 2026! 🎉 إليك الكتيّب الذي طلبته — أجب بـ «نعم» لحجز اجتماع متابعة.
+                    <div dir="ltr" style="font-size:9.5px; color:#5b8a6b; text-align:left; margin-top:5px; font-family:'IBM Plex Mono';">10:02 ✓✓</div>
+                  </div>
+
+                  <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 13px; background:#f6f5f2; border-radius:8px; margin-bottom:16px;">
+                    <span style="font-size:12px; color:#5a5853;">المستلمون</span>
+                    <span style="font-size:13px; font-weight:700; color:#16224d;">2,180 موافق</span>
+                  </div>
+
+                  <button style="width:100%; background:#1f8a4c; color:#fff; border:none; border-radius:8px; padding:12px; font-family:'IBM Plex Sans Arabic'; font-size:13.5px; font-weight:700; cursor:pointer; box-shadow:0 8px 18px -8px rgba(31,138,76,0.6);">إرسال عبر WATI</button>
+                  <p style="font-size:10.5px; color:#9a978f; text-align:center; margin:11px 0 0;">تُراسَل جهات الاتصال الموافِقة فقط.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p style="font-size:11.5px; color:#8a8782; margin:13px 0 0;">الشكل 3 — صفِّ حسب الفعالية، اختر شريحة، وأرسل حملة واتساب عبر WATI — دون أي تصدير.</p>
+        </div>
+      </section>
+
+      <!-- ============ 05 TECHNICAL REQUIREMENTS ============ -->
+      <section style="margin-bottom:64px;">
+        <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:14px;">
+          <span style="font-family:'IBM Plex Mono'; font-size:13px; font-weight:500; color:#1f3c88;">05</span>
+          <h2 style="font-family:'Cairo',sans-serif; font-weight:700; font-size:31px; margin:0; color:#16224d;">المتطلبات التقنية</h2>
+        </div>
+        <p style="font-size:14.5px; line-height:1.7; color:#6c6a66; margin:0 0 26px; max-width:64ch;">الأدوات والخدمات اللازمة لبناء المنصة وتشغيلها.</p>
+
+        <div style="border:1px solid #e6e4de; border-radius:10px; overflow:hidden; background:#fff;">
+          <table style="width:100%; border-collapse:collapse; font-size:14.5px; text-align:right;">
+            <thead>
+              <tr style="background:#f1f0ec;">
+                <th style="text-align:right; padding:14px 20px; font-size:12px; color:#6c6a66; font-weight:600; width:28%;">المورد</th>
+                <th style="text-align:right; padding:14px 20px; font-size:12px; color:#6c6a66; font-weight:600;">الغرض</th>
+                <th style="text-align:right; padding:14px 20px; font-size:12px; color:#6c6a66; font-weight:600; width:16%;">النوع</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-top:1px solid #ececea;"><td style="padding:16px 20px; font-weight:700; color:#16224d; vertical-align:top;">خادم Supabase مباشر</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.7; vertical-align:top;">قاعدة بيانات مُستضافة ومصادقة وتخزين آمن لكل سجلات الزوّار.</td><td style="padding:16px 20px; color:#5a5853; vertical-align:top;">اشتراك</td></tr>
+              <tr style="border-top:1px solid #ececea; background:#fcfbf9;"><td style="padding:16px 20px; font-weight:700; color:#16224d; vertical-align:top;">اشتراك Claude Code</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.7; vertical-align:top;">تطوير بمساعدة الذكاء الاصطناعي لبناء التطبيق وصيانته.</td><td style="padding:16px 20px; color:#5a5853; vertical-align:top;">اشتراك</td></tr>
+              <tr style="border-top:1px solid #ececea;"><td style="padding:16px 20px; font-weight:700; color:#16224d; vertical-align:top;">حساب واجهة WATI</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.7; vertical-align:top;">وصول إلى واجهة واتساب للأعمال لإرسال الحملات للزوّار.</td><td style="padding:16px 20px; color:#5a5853; vertical-align:top;">اشتراك</td></tr>
+              <tr style="border-top:1px solid #ececea; background:#fcfbf9;"><td style="padding:16px 20px; font-weight:700; color:#16224d; vertical-align:top;">استضافة ويب ونطاق</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.7; vertical-align:top;">استضافة مُدارة مع شهادة SSL ونطاق للشركة لتشغيل التطبيق عبر الإنترنت.</td><td style="padding:16px 20px; color:#5a5853; vertical-align:top;">متكرر</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ 06 WHY THIS MATTERS ============ -->
+      <section style="margin-bottom:8px;">
+        <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:26px;">
+          <span style="font-family:'IBM Plex Mono'; font-size:13px; font-weight:500; color:#1f3c88;">06</span>
+          <h2 style="font-family:'Cairo',sans-serif; font-weight:700; font-size:31px; margin:0; color:#16224d;">لماذا هذا مهم</h2>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:30px;">
+          <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:22px 24px;">
+            <div style="font-size:15px; font-weight:700; color:#16224d; margin-bottom:8px;">الأمن والامتثال</div>
+            <p style="font-size:13.5px; line-height:1.7; color:#5a5853; margin:0;">بيانات الزوّار مُتحكَّم بها ومُسجَّل الوصول إليها ومنسوخة احتياطيًا — لا مُبعثرة في البريد.</p>
+          </div>
+          <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:22px 24px;">
+            <div style="font-size:15px; font-weight:700; color:#16224d; margin-bottom:8px;">أسرع للتسويق</div>
+            <p style="font-size:13.5px; line-height:1.7; color:#5a5853; margin:0;">وصول ذاتي وحملات بنقرة واحدة بدل طلبات الملفات المتكررة.</p>
+          </div>
+          <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:22px 24px;">
+            <div style="font-size:15px; font-weight:700; color:#16224d; margin-bottom:8px;">عائد أكبر من كل فعالية</div>
+            <p style="font-size:13.5px; line-height:1.7; color:#5a5853; margin:0;">بيانات نظيفة وحملات WATI تحوّل قوائم الزوّار إلى متابعة قابلة للقياس.</p>
+          </div>
+        </div>
+
+        <div style="background:#16224d; color:#eef0f7; border-radius:12px; padding:30px 34px; display:flex; align-items:center; gap:28px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:260px;">
+            <div style="font-size:12px; font-weight:600; color:#9aa3c8; margin-bottom:10px;">التوصية</div>
+            <p style="font-size:17px; line-height:1.7; margin:0; font-weight:500;">الموافقة على تطوير منصة إدارة بيانات الزوّار داخليًا، بدءًا بتسجيل الدخول ولوحة البيانات ووحدة حملات WATI.</p>
+          </div>
+          <div style="display:flex; gap:12px;">
+            <div style="background:rgba(255,255,255,0.08); border:1px solid rgba(174,182,212,0.25); border-radius:9px; padding:14px 18px; text-align:center;"><div style="font-size:11px; color:#aeb6d4; margin-bottom:5px;">الخطوة التالية</div><div style="font-size:14px; font-weight:700;">النطاق والجدول الزمني</div></div>
+            <div style="background:rgba(255,255,255,0.08); border:1px solid rgba(174,182,212,0.25); border-radius:9px; padding:14px 18px; text-align:center;"><div style="font-size:11px; color:#aeb6d4; margin-bottom:5px;">المسؤول</div><div style="font-size:14px; font-weight:700;">تقنية المعلومات والتسويق</div></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <footer class="p-foot" style="padding:22px 76px; border-top:1px solid #e3e1db; background:#f4f3ef; display:flex; align-items:center; justify-content:space-between;">
+      <span style="font-size:11px; color:#9a978f;">سُنيدي إكسبو — منصة إدارة بيانات الزوّار</span>
+      <span style="font-size:11px; color:#9a978f;">سري · النسخة 1.0 · يونيو 2026</span>
+    </footer>
+
+  </article>
+</div>
+</x-dc>
+</body>
+</html>

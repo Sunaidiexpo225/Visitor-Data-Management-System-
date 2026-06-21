@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background: #ecebe7; }
+  ::selection { background: #d7def4; }
+  @media print {
+    @page { size: A4; margin: 11mm; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    html, body { background: #fff !important; }
+    .p-root { padding: 0 !important; min-height: 0 !important; background: #fff !important; }
+    .doc-page { box-shadow: none !important; border: none !important; max-width: none !important; border-radius: 0 !important; }
+    .p-cover { padding: 44px 40px 36px !important; }
+    .p-body { padding: 40px 40px 30px !important; }
+    .p-foot { padding: 16px 40px !important; }
+    .screen-shot, section, .kpi-row, table, .doc-page > div > .screen-shot > div { break-inside: avoid; }
+    h2, h3 { break-after: avoid; }
+    p { orphans: 3; widows: 3; }
+  }
+</style>
+<script>
+addEventListener('load', () => {
+  (async () => {
+    try { await document.fonts.ready; } catch (e) {}
+    const imgs = Array.from(document.images).filter((i) => !i.complete);
+    await Promise.race([
+      Promise.allSettled(imgs.map((i) => i.decode())),
+      new Promise((r) => setTimeout(r, 8000)),
+    ]);
+    setTimeout(() => window.print(), 600);
+  })();
+});
+</script>
+</helmet>
+
+<div class="p-root" style="background:#ecebe7; min-height:100vh; padding:56px 24px; font-family:'IBM Plex Sans',system-ui,sans-serif; color:#1b1b1d; -webkit-font-smoothing:antialiased;">
+  <article class="doc-page" style="max-width:980px; margin:0 auto; background:#fbfaf8; border:1px solid #e3e1db; box-shadow:0 24px 60px -28px rgba(20,30,60,0.28); border-radius:4px; overflow:hidden;">
+
+    <!-- ============ COVER ============ -->
+    <header class="p-cover" style="position:relative; padding:72px 76px 56px; background:#16224d; color:#f3f4f8; overflow:hidden;">
+      <div style="position:absolute; inset:0; background:radial-gradient(120% 100% at 100% 0%, rgba(120,150,230,0.28) 0%, rgba(22,34,77,0) 55%);"></div>
+      <div style="position:relative;">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:54px;">
+          <div style="width:30px; height:30px; border-radius:7px; background:#f3f4f8; display:flex; align-items:center; justify-content:center; color:#16224d; font-weight:700; font-size:15px;">S</div>
+          <span style="font-family:'IBM Plex Mono'; font-size:12.5px; letter-spacing:0.18em; text-transform:uppercase; color:#aeb6d4;">Sunaidi&nbsp;Expo</span>
+          <span style="margin-left:auto; font-family:'IBM Plex Mono'; font-size:11.5px; letter-spacing:0.16em; text-transform:uppercase; color:#8b94ba;">Confidential — For CEO Review</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono'; font-size:12.5px; letter-spacing:0.22em; text-transform:uppercase; color:#9aa3c8; margin-bottom:22px;">Internal Proposal</div>
+        <h1 style="font-family:'Newsreader',serif; font-weight:500; font-size:56px; line-height:1.04; letter-spacing:-0.015em; margin:0 0 22px; max-width:18ch;">Visitor Data Management Platform</h1>
+        <p style="font-size:18px; line-height:1.5; color:#c9cee2; margin:0; max-width:58ch; font-weight:400;">Moving visitor records off the shared NAS drive into one secure web application — where marketing can log in, clean and filter the data, and launch WhatsApp campaigns through WATI directly.</p>
+        <div style="display:flex; flex-wrap:wrap; gap:40px; margin-top:48px; padding-top:26px; border-top:1px solid rgba(174,182,212,0.28);">
+          <div>
+            <div style="font-family:'IBM Plex Mono'; font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:#8b94ba; margin-bottom:7px;">Prepared for</div>
+            <div style="font-size:15px; color:#eef0f7; font-weight:500;">Office of the CEO</div>
+          </div>
+          <div>
+            <div style="font-family:'IBM Plex Mono'; font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:#8b94ba; margin-bottom:7px;">The decision</div>
+            <div style="font-size:15px; color:#eef0f7; font-weight:500;">Approve in-house build</div>
+          </div>
+          <div>
+            <div style="font-family:'IBM Plex Mono'; font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:#8b94ba; margin-bottom:7px;">Date</div>
+            <div style="font-size:15px; color:#eef0f7; font-weight:500;">June 2026</div>
+          </div>
+          <div>
+            <div style="font-family:'IBM Plex Mono'; font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:#8b94ba; margin-bottom:7px;">Status</div>
+            <div style="font-size:15px; color:#eef0f7; font-weight:500;">v1.0 — Review draft</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="p-body" style="padding:60px 76px 76px;">
+
+      <!-- ============ EXEC SUMMARY ============ -->
+      <section style="margin-bottom:64px;">
+        <div style="background:#eef1fa; border:1px solid #dde3f5; border-left:4px solid #1f3c88; border-radius:10px; padding:26px 28px;">
+          <div style="font-family:'IBM Plex Mono'; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#1f3c88; margin-bottom:12px;">The ask in one line</div>
+          <p style="font-size:18px; line-height:1.5; color:#1f2a4d; margin:0; font-weight:500;">Our visitor data sits on a local NAS drive and is hand-shared as Excel files on every marketing request. It is unsafe and scattered. We propose building one secure web application to hold, clean, filter, and act on this data — including sending campaigns through WATI.</p>
+        </div>
+      </section>
+
+      <!-- ============ 01 CURRENT SITUATION ============ -->
+      <section style="margin-bottom:64px;">
+        <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:30px;">
+          <span style="font-family:'IBM Plex Mono'; font-size:13px; font-weight:500; color:#1f3c88;">01</span>
+          <h2 style="font-family:'Newsreader',serif; font-weight:500; font-size:33px; letter-spacing:-0.01em; margin:0; color:#16224d;">The Current Situation</h2>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px;">
+          <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:22px 24px;">
+            <div style="font-size:15px; font-weight:600; color:#b0481f; margin-bottom:6px;">Data lives on one local NAS drive</div>
+            <p style="font-size:13.5px; line-height:1.5; color:#5a5853; margin:0;">A single drive holds every visitor record — one failure or theft and it is gone.</p>
+          </div>
+          <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:22px 24px;">
+            <div style="font-size:15px; font-weight:600; color:#b0481f; margin-bottom:6px;">Excel files shared by hand</div>
+            <p style="font-size:13.5px; line-height:1.5; color:#5a5853; margin:0;">Every marketing request means manually exporting and sending a spreadsheet.</p>
+          </div>
+          <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:22px 24px;">
+            <div style="font-size:15px; font-weight:600; color:#b0481f; margin-bottom:6px;">Sensitive data spread everywhere</div>
+            <p style="font-size:13.5px; line-height:1.5; color:#5a5853; margin:0;">Copies end up in inboxes, laptops, and chats with no control or audit trail.</p>
+          </div>
+          <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:22px 24px;">
+            <div style="font-size:15px; font-weight:600; color:#b0481f; margin-bottom:6px;">Data quality keeps degrading</div>
+            <p style="font-size:13.5px; line-height:1.5; color:#5a5853; margin:0;">Duplicates, stale entries, and conflicting versions multiply with every export.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 02 PROPOSED SOLUTION ============ -->
+      <section style="margin-bottom:64px;">
+        <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:14px;">
+          <span style="font-family:'IBM Plex Mono'; font-size:13px; font-weight:500; color:#1f3c88;">02</span>
+          <h2 style="font-family:'Newsreader',serif; font-weight:500; font-size:33px; letter-spacing:-0.01em; margin:0; color:#16224d;">The Proposed Solution</h2>
+        </div>
+        <p style="font-size:14.5px; line-height:1.5; color:#6c6a66; margin:0 0 28px; max-width:64ch;">A single, secure Visitor Data Management web application — one source of truth, accessed through a login, with the tools marketing needs built in.</p>
+
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div style="display:flex; gap:18px; align-items:flex-start; background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:20px 24px;">
+            <span style="flex:none; width:30px; height:30px; border-radius:8px; background:#16224d; color:#fff; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono'; font-size:13px; font-weight:600;">1</span>
+            <div><div style="font-size:15px; font-weight:600; color:#16224d; margin-bottom:3px;">Secure login replaces shared files</div><p style="font-size:13.5px; line-height:1.5; color:#5a5853; margin:0;">Marketing logs in with their own account and views data live — no more emailing spreadsheets.</p></div>
+          </div>
+          <div style="display:flex; gap:18px; align-items:flex-start; background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:20px 24px;">
+            <span style="flex:none; width:30px; height:30px; border-radius:8px; background:#16224d; color:#fff; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono'; font-size:13px; font-weight:600;">2</span>
+            <div><div style="font-size:15px; font-weight:600; color:#16224d; margin-bottom:3px;">Clean the data in place</div><p style="font-size:13.5px; line-height:1.5; color:#5a5853; margin:0;">De-duplicate, correct, and merge records inside the app whenever required.</p></div>
+          </div>
+          <div style="display:flex; gap:18px; align-items:flex-start; background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:20px 24px;">
+            <span style="flex:none; width:30px; height:30px; border-radius:8px; background:#16224d; color:#fff; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono'; font-size:13px; font-weight:600;">3</span>
+            <div><div style="font-size:15px; font-weight:600; color:#16224d; margin-bottom:3px;">Filter visitors event by event</div><p style="font-size:13.5px; line-height:1.5; color:#5a5853; margin:0;">Build targeted audiences in seconds by event, date, company, or status.</p></div>
+          </div>
+          <div style="display:flex; gap:18px; align-items:flex-start; background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:20px 24px;">
+            <span style="flex:none; width:30px; height:30px; border-radius:8px; background:#1f8a4c; color:#fff; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono'; font-size:13px; font-weight:600;">4</span>
+            <div><div style="font-size:15px; font-weight:600; color:#16224d; margin-bottom:3px;">Launch WhatsApp campaigns via WATI</div><p style="font-size:13.5px; line-height:1.5; color:#5a5853; margin:0;">Connect to the WATI API and send campaigns to a filtered segment directly from the app.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 03 KEY CAPABILITIES ============ -->
+      <section style="margin-bottom:64px;">
+        <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:14px;">
+          <span style="font-family:'IBM Plex Mono'; font-size:13px; font-weight:500; color:#1f3c88;">03</span>
+          <h2 style="font-family:'Newsreader',serif; font-weight:500; font-size:33px; letter-spacing:-0.01em; margin:0; color:#16224d;">Key Capabilities</h2>
+        </div>
+        <p style="font-size:14.5px; line-height:1.5; color:#6c6a66; margin:0 0 26px; max-width:62ch;">The functional scope proposed for the first release.</p>
+
+        <div style="border:1px solid #e6e4de; border-radius:10px; overflow:hidden; background:#fff;">
+          <table style="width:100%; border-collapse:collapse; font-size:14.5px;">
+            <thead>
+              <tr style="background:#f1f0ec;">
+                <th style="text-align:left; padding:14px 20px; font-family:'IBM Plex Mono'; font-size:10.5px; letter-spacing:0.14em; text-transform:uppercase; color:#6c6a66; font-weight:600; width:34%;">Capability</th>
+                <th style="text-align:left; padding:14px 20px; font-family:'IBM Plex Mono'; font-size:10.5px; letter-spacing:0.14em; text-transform:uppercase; color:#6c6a66; font-weight:600;">What it does</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-top:1px solid #ececea;"><td style="padding:16px 20px; font-weight:600; color:#16224d; vertical-align:top;">Secure Login &amp; Roles</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.5; vertical-align:top;">Email-based sign in with role-based access for marketing and administrators.</td></tr>
+              <tr style="border-top:1px solid #ececea; background:#fcfbf9;"><td style="padding:16px 20px; font-weight:600; color:#16224d; vertical-align:top;">Central Visitor Repository</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.5; vertical-align:top;">One secure source of truth — retires the NAS drive and shared Excel files.</td></tr>
+              <tr style="border-top:1px solid #ececea;"><td style="padding:16px 20px; font-weight:600; color:#16224d; vertical-align:top;">In-App Data Cleanup</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.5; vertical-align:top;">De-duplicate, merge, and correct visitor records without exporting them.</td></tr>
+              <tr style="border-top:1px solid #ececea; background:#fcfbf9;"><td style="padding:16px 20px; font-weight:600; color:#16224d; vertical-align:top;">Event-wise Filtering</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.5; vertical-align:top;">Segment visitors instantly by event, date, company, and status.</td></tr>
+              <tr style="border-top:1px solid #ececea;"><td style="padding:16px 20px; font-weight:600; color:#16224d; vertical-align:top;">WATI WhatsApp Campaigns</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.5; vertical-align:top;">Send WhatsApp campaigns to a filtered segment directly through the WATI API.</td></tr>
+              <tr style="border-top:1px solid #ececea; background:#fcfbf9;"><td style="padding:16px 20px; font-weight:600; color:#16224d; vertical-align:top;">Controlled Export</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.5; vertical-align:top;">Export to CSV only when needed, with every download logged.</td></tr>
+              <tr style="border-top:1px solid #ececea;"><td style="padding:16px 20px; font-weight:600; color:#16224d; vertical-align:top;">Audit Trail &amp; Backup</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.5; vertical-align:top;">Track who accessed what, with automatic secure cloud backups.</td></tr>
+              <tr style="border-top:1px solid #ececea; background:#fcfbf9;"><td style="padding:16px 20px; font-weight:600; color:#16224d; vertical-align:top;">Overview Dashboard</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.5; vertical-align:top;">Live visitor counts per event and campaign results at a glance.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ 04 INTERFACE MOCKUPS ============ -->
+      <section style="margin-bottom:64px;">
+        <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:14px;">
+          <span style="font-family:'IBM Plex Mono'; font-size:13px; font-weight:500; color:#1f3c88;">04</span>
+          <h2 style="font-family:'Newsreader',serif; font-weight:500; font-size:33px; letter-spacing:-0.01em; margin:0; color:#16224d;">Interface Mockups</h2>
+        </div>
+        <p style="font-size:14.5px; line-height:1.5; color:#6c6a66; margin:0 0 36px; max-width:62ch;">Three representative screens showing how the marketing team would work day to day.</p>
+
+        <!-- ---- Mockup 1: Login ---- -->
+        <div class="screen-shot" style="margin-bottom:44px;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+            <span style="font-family:'IBM Plex Mono'; font-size:11px; font-weight:500; color:#1f3c88; background:#eef1fa; border:1px solid #dde3f5; padding:3px 9px; border-radius:5px;">Screen 1</span>
+            <span style="font-size:14px; font-weight:600; color:#16224d;">Marketing Login</span>
+          </div>
+          <div style="border:1px solid #dcdad4; border-radius:12px; overflow:hidden; box-shadow:0 18px 40px -24px rgba(20,30,60,0.35); background:#fff;">
+            <div style="height:40px; background:#f1f0ec; border-bottom:1px solid #e3e1db; display:flex; align-items:center; padding:0 16px; gap:8px;">
+              <span style="width:11px; height:11px; border-radius:50%; background:#e0635a;"></span>
+              <span style="width:11px; height:11px; border-radius:50%; background:#e2b13c;"></span>
+              <span style="width:11px; height:11px; border-radius:50%; background:#52b06a;"></span>
+              <div style="margin:0 auto; background:#fff; border:1px solid #e3e1db; border-radius:6px; padding:4px 16px; font-family:'IBM Plex Mono'; font-size:11px; color:#8a8782;">data.sunaidiexpo.com/login</div>
+            </div>
+            <div style="display:flex; min-height:420px;">
+              <div style="flex:1; background:#16224d; color:#eef0f7; padding:44px 40px; position:relative; overflow:hidden;">
+                <div style="position:absolute; inset:0; background:radial-gradient(120% 90% at 0% 100%, rgba(120,150,230,0.3) 0%, rgba(22,34,77,0) 60%);"></div>
+                <div style="position:relative; height:100%; display:flex; flex-direction:column;">
+                  <div style="display:flex; align-items:center; gap:11px;">
+                    <div style="width:34px; height:34px; border-radius:8px; background:#eef0f7; display:flex; align-items:center; justify-content:center; color:#16224d; font-weight:700; font-size:17px;">S</div>
+                    <span style="font-weight:600; font-size:15px;">Sunaidi Expo</span>
+                  </div>
+                  <div style="margin-top:auto;">
+                    <div style="font-family:'Newsreader',serif; font-size:27px; line-height:1.15; font-weight:500; margin-bottom:12px;">Visitor Data Management</div>
+                    <p style="font-size:13.5px; line-height:1.5; color:#b8bedb; margin:0; max-width:30ch;">One secure place for every visitor record — no more shared drives or emailed files.</p>
+                  </div>
+                </div>
+              </div>
+              <div style="flex:1.05; padding:48px 46px; display:flex; flex-direction:column; justify-content:center;">
+                <h3 style="font-family:'Newsreader',serif; font-weight:500; font-size:26px; color:#16224d; margin:0 0 6px;">Sign in to your account</h3>
+                <p style="font-size:13.5px; color:#7a7873; margin:0 0 28px;">Enter your work credentials to continue.</p>
+
+                <label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:7px;">Email</label>
+                <div style="border:1.5px solid #1f3c88; background:#fff; border-radius:8px; padding:12px 14px; font-size:14px; color:#1b1b1d; margin-bottom:18px; box-shadow:0 0 0 3px rgba(31,60,136,0.1); display:flex; align-items:center;">marketing@sunaidiexpo.com<span style="width:1.5px; height:17px; background:#1f3c88; margin-left:2px; display:inline-block;"></span></div>
+
+                <label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:7px;">Password</label>
+                <div style="border:1px solid #d8d6d0; background:#fff; border-radius:8px; padding:12px 14px; font-size:16px; letter-spacing:3px; color:#9a978f; margin-bottom:10px; display:flex; align-items:center;">••••••••••••</div>
+
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
+                  <label style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:#5a5853;"><span style="width:15px; height:15px; border-radius:4px; border:1px solid #c9c7c1; background:#fff; display:inline-block;"></span>Keep me signed in</label>
+                  <span style="font-size:12.5px; color:#1f3c88; font-weight:500;">Forgot password?</span>
+                </div>
+
+                <button style="width:100%; background:#1f3c88; color:#fff; border:none; border-radius:8px; padding:13px; font-family:'IBM Plex Sans'; font-size:14.5px; font-weight:600; cursor:pointer; box-shadow:0 8px 18px -8px rgba(31,60,136,0.6);">Sign In</button>
+                <p style="font-size:12px; color:#9a978f; text-align:center; margin:20px 0 0;">Access restricted to authorized Sunaidi Expo staff.</p>
+              </div>
+            </div>
+          </div>
+          <p style="font-family:'IBM Plex Mono'; font-size:11.5px; color:#8a8782; margin:13px 0 0;">Fig. 1 — Marketing signs in with their own account; no files leave the platform.</p>
+        </div>
+
+        <!-- ---- Mockup 2: Data Management Dashboard ---- -->
+        <div class="screen-shot" style="margin-bottom:44px;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+            <span style="font-family:'IBM Plex Mono'; font-size:11px; font-weight:500; color:#1f3c88; background:#eef1fa; border:1px solid #dde3f5; padding:3px 9px; border-radius:5px;">Screen 2</span>
+            <span style="font-size:14px; font-weight:600; color:#16224d;">Visitor Data Dashboard</span>
+          </div>
+          <div style="border:1px solid #dcdad4; border-radius:12px; overflow:hidden; box-shadow:0 18px 40px -24px rgba(20,30,60,0.35); background:#f7f6f3;">
+            <div style="height:40px; background:#f1f0ec; border-bottom:1px solid #e3e1db; display:flex; align-items:center; padding:0 16px; gap:8px;">
+              <span style="width:11px; height:11px; border-radius:50%; background:#e0635a;"></span>
+              <span style="width:11px; height:11px; border-radius:50%; background:#e2b13c;"></span>
+              <span style="width:11px; height:11px; border-radius:50%; background:#52b06a;"></span>
+              <div style="margin:0 auto; background:#fff; border:1px solid #e3e1db; border-radius:6px; padding:4px 16px; font-family:'IBM Plex Mono'; font-size:11px; color:#8a8782;">data.sunaidiexpo.com/dashboard</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:18px; padding:0 24px; height:56px; background:#16224d; color:#eef0f7;">
+              <div style="display:flex; align-items:center; gap:9px;">
+                <div style="width:26px; height:26px; border-radius:6px; background:#eef0f7; display:flex; align-items:center; justify-content:center; color:#16224d; font-weight:700; font-size:13px;">S</div>
+                <span style="font-weight:600; font-size:14.5px;">Visitor Management</span>
+              </div>
+              <nav style="display:flex; gap:22px; margin-left:18px; font-size:13px;">
+                <span style="color:#fff; font-weight:600; padding-bottom:2px; border-bottom:2px solid #6f8be0;">Dashboard</span>
+                <span style="color:#aab2d4;">Visitors</span>
+                <span style="color:#aab2d4;">Campaigns</span>
+                <span style="color:#aab2d4;">Reports</span>
+              </nav>
+              <div style="margin-left:auto; display:flex; align-items:center; gap:14px;">
+                <span style="width:30px; height:30px; border-radius:50%; background:#2c3a6e; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; color:#cdd3eb;">MK</span>
+              </div>
+            </div>
+            <div style="padding:26px 28px 30px;">
+              <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:22px;">
+                <div>
+                  <h3 style="font-family:'Newsreader',serif; font-weight:500; font-size:24px; color:#16224d; margin:0 0 4px;">Visitors Dashboard</h3>
+                  <p style="font-size:12.5px; color:#7a7873; margin:0;">All events — live overview</p>
+                </div>
+                <div style="display:flex; gap:9px;">
+                  <span style="font-size:12.5px; color:#4a4945; background:#fff; border:1px solid #e0ddd6; border-radius:7px; padding:7px 13px;">All events ▾</span>
+                  <span style="font-size:12.5px; color:#fff; background:#1f3c88; border-radius:7px; padding:7px 13px; font-weight:500;">Export CSV</span>
+                </div>
+              </div>
+
+              <div class="kpi-row" style="display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:18px;">
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:18px;">
+                  <div style="font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#7a7873; margin-bottom:10px;">Total Visitors</div>
+                  <div style="font-size:30px; font-weight:700; color:#16224d; letter-spacing:-0.02em; line-height:1;">24,810</div>
+                  <div style="font-size:11.5px; color:#7a7873; margin-top:8px;">Across 6 events</div>
+                </div>
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:18px;">
+                  <div style="font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#7a7873; margin-bottom:10px;">Cleaned Records</div>
+                  <div style="font-size:30px; font-weight:700; color:#16224d; letter-spacing:-0.02em; line-height:1;">96<span style="font-size:16px; font-weight:600; color:#7a7873;">%</span></div>
+                  <div style="font-size:11.5px; color:#7a7873; margin-top:8px;">421 duplicates merged</div>
+                </div>
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:18px;">
+                  <div style="font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#7a7873; margin-bottom:10px;">Campaigns Sent</div>
+                  <div style="font-size:30px; font-weight:700; color:#16224d; letter-spacing:-0.02em; line-height:1;">38</div>
+                  <div style="font-size:11.5px; color:#7a7873; margin-top:8px;">via WATI this quarter</div>
+                </div>
+              </div>
+
+              <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:14px;">
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:20px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+                    <span style="font-size:13.5px; font-weight:600; color:#16224d;">Visitors by event</span>
+                    <span style="font-family:'IBM Plex Mono'; font-size:10.5px; color:#9a978f;">total registered</span>
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:13px;">
+                    <div style="display:flex; align-items:center; gap:12px;"><span style="width:120px; font-size:12px; color:#5a5853;">Spring Expo 2026</span><div style="flex:1; height:14px; background:#eef1fa; border-radius:4px; overflow:hidden;"><div style="width:92%; height:100%; background:#1f3c88;"></div></div><span style="width:46px; text-align:right; font-family:'IBM Plex Mono'; font-size:11.5px; color:#16224d; font-weight:500;">7,420</span></div>
+                    <div style="display:flex; align-items:center; gap:12px;"><span style="width:120px; font-size:12px; color:#5a5853;">Tech Forum</span><div style="flex:1; height:14px; background:#eef1fa; border-radius:4px; overflow:hidden;"><div style="width:71%; height:100%; background:#1f3c88;"></div></div><span style="width:46px; text-align:right; font-family:'IBM Plex Mono'; font-size:11.5px; color:#16224d; font-weight:500;">5,680</span></div>
+                    <div style="display:flex; align-items:center; gap:12px;"><span style="width:120px; font-size:12px; color:#5a5853;">Trade Days</span><div style="flex:1; height:14px; background:#eef1fa; border-radius:4px; overflow:hidden;"><div style="width:55%; height:100%; background:#5478c4;"></div></div><span style="width:46px; text-align:right; font-family:'IBM Plex Mono'; font-size:11.5px; color:#16224d; font-weight:500;">4,390</span></div>
+                    <div style="display:flex; align-items:center; gap:12px;"><span style="width:120px; font-size:12px; color:#5a5853;">Design Week</span><div style="flex:1; height:14px; background:#eef1fa; border-radius:4px; overflow:hidden;"><div style="width:42%; height:100%; background:#5478c4;"></div></div><span style="width:46px; text-align:right; font-family:'IBM Plex Mono'; font-size:11.5px; color:#16224d; font-weight:500;">3,310</span></div>
+                    <div style="display:flex; align-items:center; gap:12px;"><span style="width:120px; font-size:12px; color:#5a5853;">Startup Meet</span><div style="flex:1; height:14px; background:#eef1fa; border-radius:4px; overflow:hidden;"><div style="width:28%; height:100%; background:#9bb0db;"></div></div><span style="width:46px; text-align:right; font-family:'IBM Plex Mono'; font-size:11.5px; color:#16224d; font-weight:500;">2,210</span></div>
+                  </div>
+                </div>
+
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:20px;">
+                  <div style="font-size:13.5px; font-weight:600; color:#16224d; margin-bottom:16px;">Recent record updates</div>
+                  <div style="display:flex; flex-direction:column; gap:14px;">
+                    <div style="display:flex; align-items:center; gap:11px;"><span style="width:30px; height:30px; border-radius:50%; background:#eef1fa; color:#1f3c88; font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:center;">FK</span><div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:500; color:#1b1b1d;">Faisal Khan</div><div style="font-size:11px; color:#9a978f;">Phone number updated</div></div><span style="flex:none; font-size:10px; color:#1f3c88; background:#eef1fa; border:1px solid #dde3f5; border-radius:5px; padding:2px 7px;">Edited</span></div>
+                    <div style="display:flex; align-items:center; gap:11px;"><span style="width:30px; height:30px; border-radius:50%; background:#eef1fa; color:#1f3c88; font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:center;">LM</span><div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:500; color:#1b1b1d;">Lina Mansour</div><div style="font-size:11px; color:#9a978f;">Duplicate merged</div></div><span style="flex:none; font-size:10px; color:#1f6a47; background:#e6f1ea; border:1px solid #cfe8d8; border-radius:5px; padding:2px 7px;">Merged</span></div>
+                    <div style="display:flex; align-items:center; gap:11px;"><span style="width:30px; height:30px; border-radius:50%; background:#eef1fa; color:#1f3c88; font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:center;">RA</span><div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:500; color:#1b1b1d;">Rami Al-Said</div><div style="font-size:11px; color:#9a978f;">Consent set to opted-in</div></div><span style="flex:none; font-size:10px; color:#1f3c88; background:#eef1fa; border:1px solid #dde3f5; border-radius:5px; padding:2px 7px;">Updated</span></div>
+                    <div style="display:flex; align-items:center; gap:11px;"><span style="width:30px; height:30px; border-radius:50%; background:#eef1fa; color:#1f3c88; font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:center;">SH</span><div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:500; color:#1b1b1d;">Sara Habib</div><div style="font-size:11px; color:#9a978f;">Email corrected</div></div><span style="flex:none; font-size:10px; color:#1f3c88; background:#eef1fa; border:1px solid #dde3f5; border-radius:5px; padding:2px 7px;">Edited</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p style="font-family:'IBM Plex Mono'; font-size:11.5px; color:#8a8782; margin:13px 0 0;">Fig. 2 — Live visitor counts, data-quality status, and campaign activity in one view.</p>
+        </div>
+
+        <!-- ---- Mockup 3: Event Filtering + WATI Campaign ---- -->
+        <div class="screen-shot">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+            <span style="font-family:'IBM Plex Mono'; font-size:11px; font-weight:500; color:#1f3c88; background:#eef1fa; border:1px solid #dde3f5; padding:3px 9px; border-radius:5px;">Screen 3</span>
+            <span style="font-size:14px; font-weight:600; color:#16224d;">Event Filtering &amp; WATI Campaign</span>
+          </div>
+          <div style="border:1px solid #dcdad4; border-radius:12px; overflow:hidden; box-shadow:0 18px 40px -24px rgba(20,30,60,0.35); background:#f7f6f3;">
+            <div style="height:40px; background:#f1f0ec; border-bottom:1px solid #e3e1db; display:flex; align-items:center; padding:0 16px; gap:8px;">
+              <span style="width:11px; height:11px; border-radius:50%; background:#e0635a;"></span>
+              <span style="width:11px; height:11px; border-radius:50%; background:#e2b13c;"></span>
+              <span style="width:11px; height:11px; border-radius:50%; background:#52b06a;"></span>
+              <div style="margin:0 auto; background:#fff; border:1px solid #e3e1db; border-radius:6px; padding:4px 16px; font-family:'IBM Plex Mono'; font-size:11px; color:#8a8782;">data.sunaidiexpo.com/visitors</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:18px; padding:0 24px; height:56px; background:#16224d; color:#eef0f7;">
+              <div style="display:flex; align-items:center; gap:9px;">
+                <div style="width:26px; height:26px; border-radius:6px; background:#eef0f7; display:flex; align-items:center; justify-content:center; color:#16224d; font-weight:700; font-size:13px;">S</div>
+                <span style="font-weight:600; font-size:14.5px;">Visitor Management</span>
+              </div>
+              <nav style="display:flex; gap:22px; margin-left:18px; font-size:13px;">
+                <span style="color:#aab2d4;">Dashboard</span>
+                <span style="color:#fff; font-weight:600; padding-bottom:2px; border-bottom:2px solid #6f8be0;">Visitors</span>
+                <span style="color:#aab2d4;">Campaigns</span>
+                <span style="color:#aab2d4;">Reports</span>
+              </nav>
+              <div style="margin-left:auto; display:flex; align-items:center; gap:14px;">
+                <span style="width:30px; height:30px; border-radius:50%; background:#2c3a6e; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; color:#cdd3eb;">MK</span>
+              </div>
+            </div>
+
+            <div style="padding:26px 28px 30px;">
+              <h3 style="font-family:'Newsreader',serif; font-weight:500; font-size:24px; color:#16224d; margin:0 0 16px;">Visitor Master Data</h3>
+
+              <div style="display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:16px;">
+                <span style="font-family:'IBM Plex Mono'; font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase; color:#9a978f;">Filter</span>
+                <span style="font-size:12.5px; color:#fff; background:#1f3c88; border:1px solid #1f3c88; border-radius:20px; padding:7px 14px; font-weight:500;">Event: Spring Expo 2026 ✕</span>
+                <span style="font-size:12.5px; color:#1b1b1d; background:#fff; border:1px solid #e0ddd6; border-radius:20px; padding:7px 14px;">Status: All ▾</span>
+                <span style="font-size:12.5px; color:#1b1b1d; background:#fff; border:1px solid #e0ddd6; border-radius:20px; padding:7px 14px;">Consent: Opted-in ▾</span>
+                <span style="margin-left:auto; font-size:12px; color:#9a978f; font-family:'IBM Plex Mono';">7,420 visitors</span>
+              </div>
+
+              <div style="display:grid; grid-template-columns:1.35fr 1fr; gap:16px;">
+                <!-- table -->
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; overflow:hidden;">
+                  <div style="display:flex; align-items:center; justify-content:space-between; padding:13px 16px; border-bottom:1px solid #ececea; background:#f6f5f2;">
+                    <span style="font-size:12.5px; font-weight:600; color:#16224d;">Filtered visitors</span>
+                    <span style="font-size:11px; color:#1f3c88; background:#eef1fa; border:1px solid #dde3f5; border-radius:5px; padding:3px 9px; font-weight:500;">2,180 selected</span>
+                  </div>
+                  <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+                    <tbody>
+                      <tr style="border-bottom:1px solid #ececea;"><td style="padding:11px 16px; width:30px;"><span style="width:15px; height:15px; border-radius:4px; background:#1f3c88; display:inline-block; position:relative;"></span></td><td style="padding:11px 8px; font-weight:500; color:#1b1b1d;">Faisal Khan</td><td style="padding:11px 8px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:11px;">+966 5•• ••• 142</td><td style="padding:11px 16px;"><span style="font-size:10.5px; color:#1f6a47; background:#e6f1ea; border-radius:5px; padding:3px 8px;">Opted-in</span></td></tr>
+                      <tr style="border-bottom:1px solid #ececea; background:#fcfbf9;"><td style="padding:11px 16px;"><span style="width:15px; height:15px; border-radius:4px; background:#1f3c88; display:inline-block;"></span></td><td style="padding:11px 8px; font-weight:500; color:#1b1b1d;">Lina Mansour</td><td style="padding:11px 8px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:11px;">+966 5•• ••• 087</td><td style="padding:11px 16px;"><span style="font-size:10.5px; color:#1f6a47; background:#e6f1ea; border-radius:5px; padding:3px 8px;">Opted-in</span></td></tr>
+                      <tr style="border-bottom:1px solid #ececea;"><td style="padding:11px 16px;"><span style="width:15px; height:15px; border-radius:4px; background:#1f3c88; display:inline-block;"></span></td><td style="padding:11px 8px; font-weight:500; color:#1b1b1d;">Rami Al-Said</td><td style="padding:11px 8px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:11px;">+966 5•• ••• 309</td><td style="padding:11px 16px;"><span style="font-size:10.5px; color:#1f6a47; background:#e6f1ea; border-radius:5px; padding:3px 8px;">Opted-in</span></td></tr>
+                      <tr style="border-bottom:1px solid #ececea; background:#fcfbf9;"><td style="padding:11px 16px;"><span style="width:15px; height:15px; border-radius:4px; background:#1f3c88; display:inline-block;"></span></td><td style="padding:11px 8px; font-weight:500; color:#1b1b1d;">Sara Habib</td><td style="padding:11px 8px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:11px;">+966 5•• ••• 561</td><td style="padding:11px 16px;"><span style="font-size:10.5px; color:#1f6a47; background:#e6f1ea; border-radius:5px; padding:3px 8px;">Opted-in</span></td></tr>
+                      <tr style="border-bottom:1px solid #ececea;"><td style="padding:11px 16px;"><span style="width:15px; height:15px; border-radius:4px; background:#fff; border:1px solid #c9c7c1; display:inline-block;"></span></td><td style="padding:11px 8px; font-weight:500; color:#1b1b1d;">Omar Tariq</td><td style="padding:11px 8px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:11px;">+966 5•• ••• 778</td><td style="padding:11px 16px;"><span style="font-size:10.5px; color:#b07a1e; background:#f6efe0; border-radius:5px; padding:3px 8px;">Pending</span></td></tr>
+                      <tr><td style="padding:11px 16px;"><span style="width:15px; height:15px; border-radius:4px; background:#1f3c88; display:inline-block;"></span></td><td style="padding:11px 8px; font-weight:500; color:#1b1b1d;">Huda Nasser</td><td style="padding:11px 8px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:11px;">+966 5•• ••• 234</td><td style="padding:11px 16px;"><span style="font-size:10.5px; color:#1f6a47; background:#e6f1ea; border-radius:5px; padding:3px 8px;">Opted-in</span></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- WATI composer -->
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:20px; display:flex; flex-direction:column;">
+                  <div style="display:flex; align-items:center; gap:9px; margin-bottom:16px;">
+                    <span style="width:26px; height:26px; border-radius:7px; background:#1f8a4c; color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">W</span>
+                    <span style="font-size:13.5px; font-weight:600; color:#16224d;">Send WhatsApp Campaign</span>
+                    <span style="margin-left:auto; font-size:10px; font-family:'IBM Plex Mono'; color:#1f8a4c; background:#e7f4ec; border:1px solid #cfe8d8; border-radius:5px; padding:2px 7px;">WATI API</span>
+                  </div>
+
+                  <div style="font-size:11.5px; color:#7a7873; margin-bottom:7px;">Template</div>
+                  <div style="border:1px solid #e0ddd6; border-radius:8px; padding:9px 12px; font-size:12.5px; color:#1b1b1d; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between;">spring_expo_followup <span style="color:#9a978f;">▾</span></div>
+
+                  <div style="font-size:11.5px; color:#7a7873; margin-bottom:7px;">Preview</div>
+                  <div style="background:#e7f6ea; border-radius:10px 10px 10px 2px; padding:11px 13px; font-size:12.5px; line-height:1.5; color:#1f3327; margin-bottom:16px; position:relative;">
+                    Hi Faisal, thank you for visiting Sunaidi Expo Spring 2026! 🎉 Here's the catalogue you requested — reply <b>YES</b> to book a follow-up meeting.
+                    <div style="font-size:9.5px; color:#5b8a6b; text-align:right; margin-top:5px; font-family:'IBM Plex Mono';">10:02 ✓✓</div>
+                  </div>
+
+                  <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 13px; background:#f6f5f2; border-radius:8px; margin-bottom:16px;">
+                    <span style="font-size:12px; color:#5a5853;">Recipients</span>
+                    <span style="font-size:13px; font-weight:600; color:#16224d;">2,180 opted-in</span>
+                  </div>
+
+                  <button style="width:100%; background:#1f8a4c; color:#fff; border:none; border-radius:8px; padding:12px; font-family:'IBM Plex Sans'; font-size:13.5px; font-weight:600; cursor:pointer; box-shadow:0 8px 18px -8px rgba(31,138,76,0.6); display:flex; align-items:center; justify-content:center; gap:8px;">Send via WATI</button>
+                  <p style="font-size:10.5px; color:#9a978f; text-align:center; margin:11px 0 0;">Only opted-in contacts are messaged.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p style="font-family:'IBM Plex Mono'; font-size:11.5px; color:#8a8782; margin:13px 0 0;">Fig. 3 — Filter by event, select a segment, and send a WhatsApp campaign through WATI — no exports.</p>
+        </div>
+      </section>
+
+      <!-- ============ 05 TECHNICAL REQUIREMENTS ============ -->
+      <section style="margin-bottom:64px;">
+        <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:14px;">
+          <span style="font-family:'IBM Plex Mono'; font-size:13px; font-weight:500; color:#1f3c88;">05</span>
+          <h2 style="font-family:'Newsreader',serif; font-weight:500; font-size:33px; letter-spacing:-0.01em; margin:0; color:#16224d;">Technical Requirements</h2>
+        </div>
+        <p style="font-size:14.5px; line-height:1.5; color:#6c6a66; margin:0 0 26px; max-width:62ch;">The tools and services needed to build and run the platform.</p>
+
+        <div style="border:1px solid #e6e4de; border-radius:10px; overflow:hidden; background:#fff;">
+          <table style="width:100%; border-collapse:collapse; font-size:14.5px;">
+            <thead>
+              <tr style="background:#f1f0ec;">
+                <th style="text-align:left; padding:14px 20px; font-family:'IBM Plex Mono'; font-size:10.5px; letter-spacing:0.14em; text-transform:uppercase; color:#6c6a66; font-weight:600; width:30%;">Resource</th>
+                <th style="text-align:left; padding:14px 20px; font-family:'IBM Plex Mono'; font-size:10.5px; letter-spacing:0.14em; text-transform:uppercase; color:#6c6a66; font-weight:600;">Purpose</th>
+                <th style="text-align:left; padding:14px 20px; font-family:'IBM Plex Mono'; font-size:10.5px; letter-spacing:0.14em; text-transform:uppercase; color:#6c6a66; font-weight:600; width:16%;">Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-top:1px solid #ececea;"><td style="padding:16px 20px; font-weight:600; color:#16224d; vertical-align:top;">Live Supabase server</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.5; vertical-align:top;">Hosted database, authentication, and secure storage for all visitor records.</td><td style="padding:16px 20px; color:#5a5853; vertical-align:top; font-family:'IBM Plex Mono'; font-size:11.5px;">Subscription</td></tr>
+              <tr style="border-top:1px solid #ececea; background:#fcfbf9;"><td style="padding:16px 20px; font-weight:600; color:#16224d; vertical-align:top;">Claude Code subscription</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.5; vertical-align:top;">AI-assisted development to build and maintain the application.</td><td style="padding:16px 20px; color:#5a5853; vertical-align:top; font-family:'IBM Plex Mono'; font-size:11.5px;">Subscription</td></tr>
+              <tr style="border-top:1px solid #ececea;"><td style="padding:16px 20px; font-weight:600; color:#16224d; vertical-align:top;">WATI API account</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.5; vertical-align:top;">WhatsApp Business API access to send campaigns to visitors.</td><td style="padding:16px 20px; color:#5a5853; vertical-align:top; font-family:'IBM Plex Mono'; font-size:11.5px;">Subscription</td></tr>
+              <tr style="border-top:1px solid #ececea; background:#fcfbf9;"><td style="padding:16px 20px; font-weight:600; color:#16224d; vertical-align:top;">Web hosting &amp; domain</td><td style="padding:16px 20px; color:#3b3a37; line-height:1.5; vertical-align:top;">Managed hosting with SSL and a company domain to run the app online.</td><td style="padding:16px 20px; color:#5a5853; vertical-align:top; font-family:'IBM Plex Mono'; font-size:11.5px;">Recurring</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ 06 WHY THIS MATTERS ============ -->
+      <section style="margin-bottom:8px;">
+        <div style="display:flex; align-items:baseline; gap:16px; margin-bottom:26px;">
+          <span style="font-family:'IBM Plex Mono'; font-size:13px; font-weight:500; color:#1f3c88;">06</span>
+          <h2 style="font-family:'Newsreader',serif; font-weight:500; font-size:33px; letter-spacing:-0.01em; margin:0; color:#16224d;">Why This Matters</h2>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:30px;">
+          <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:22px 24px;">
+            <div style="font-size:15px; font-weight:600; color:#16224d; margin-bottom:6px;">Security &amp; compliance</div>
+            <p style="font-size:13.5px; line-height:1.5; color:#5a5853; margin:0;">Visitor data is controlled, access-logged, and backed up — not loose in inboxes.</p>
+          </div>
+          <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:22px 24px;">
+            <div style="font-size:15px; font-weight:600; color:#16224d; margin-bottom:6px;">Faster for marketing</div>
+            <p style="font-size:13.5px; line-height:1.5; color:#5a5853; margin:0;">Self-serve access and one-click campaigns replace repeated file requests.</p>
+          </div>
+          <div style="background:#fff; border:1px solid #e6e4de; border-radius:10px; padding:22px 24px;">
+            <div style="font-size:15px; font-weight:600; color:#16224d; margin-bottom:6px;">More from each event</div>
+            <p style="font-size:13.5px; line-height:1.5; color:#5a5853; margin:0;">Clean data plus WATI campaigns turn visitor lists into measurable follow-up.</p>
+          </div>
+        </div>
+
+        <div style="background:#16224d; color:#eef0f7; border-radius:12px; padding:30px 34px; display:flex; align-items:center; gap:28px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:260px;">
+            <div style="font-family:'IBM Plex Mono'; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#9aa3c8; margin-bottom:10px;">Recommendation</div>
+            <p style="font-size:17px; line-height:1.5; margin:0; font-weight:500;">Approve development of the in-house Visitor Data Management Platform, starting with the login, data dashboard, and WATI campaign module.</p>
+          </div>
+          <div style="display:flex; gap:12px;">
+            <div style="background:rgba(255,255,255,0.08); border:1px solid rgba(174,182,212,0.25); border-radius:9px; padding:14px 18px; text-align:center;"><div style="font-size:11px; color:#aeb6d4; margin-bottom:5px;">Next step</div><div style="font-size:14px; font-weight:600;">Scope &amp; timeline</div></div>
+            <div style="background:rgba(255,255,255,0.08); border:1px solid rgba(174,182,212,0.25); border-radius:9px; padding:14px 18px; text-align:center;"><div style="font-size:11px; color:#aeb6d4; margin-bottom:5px;">Owner</div><div style="font-size:14px; font-weight:600;">IT &amp; Marketing</div></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <footer class="p-foot" style="padding:22px 76px; border-top:1px solid #e3e1db; background:#f4f3ef; display:flex; align-items:center; justify-content:space-between;">
+      <span style="font-family:'IBM Plex Mono'; font-size:11px; color:#9a978f;">Sunaidi Expo — Visitor Data Management Platform</span>
+      <span style="font-family:'IBM Plex Mono'; font-size:11px; color:#9a978f;">Confidential · v1.0 · June 2026</span>
+    </footer>
+
+  </article>
+</div>
+</x-dc>
+</body>
+</html>

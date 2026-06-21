@@ -1,0 +1,1826 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background: #eef0f4; }
+  ::selection { background: #d7def4; }
+  input, textarea, select, button { font-family: inherit; }
+  input:focus, textarea:focus, select:focus { outline: none; }
+  select { -webkit-appearance: none; appearance: none; cursor: pointer; }
+  button { cursor: pointer; }
+  @keyframes toastIn { from { opacity:0; transform:translate(-50%,12px); } to { opacity:1; transform:translate(-50%,0); } }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+  @media (max-width: 960px) {
+    .vdm-main { padding: 20px 16px 44px !important; }
+    .vdm-kpi4 { grid-template-columns: repeat(2,1fr) !important; }
+    .vdm-kpi3 { grid-template-columns: repeat(2,1fr) !important; }
+    .vdm-split { grid-template-columns: 1fr !important; }
+    .vdm-admin2 { grid-template-columns: 1fr !important; }
+    .vdm-login { flex-direction: column !important; min-height: unset !important; }
+    .vdm-login-brand { display: none !important; }
+    .vdm-nav { overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+    .vdm-hide-sm { display: none !important; }
+  }
+  @media (max-width: 600px) {
+    .vdm-kpi4, .vdm-kpi3 { grid-template-columns: 1fr !important; }
+    .vdm-topbar { padding: 0 12px !important; height: 52px !important; }
+  }
+</style>
+</helmet>
+
+<div style="min-height:100vh; background:#eef0f4; font-family:'IBM Plex Sans',system-ui,sans-serif; color:#1b1b1d; -webkit-font-smoothing:antialiased;">
+
+  <!-- ============ LOGIN ============ -->
+  <sc-if value="{{ showLogin }}" hint-placeholder-val="{{ true }}">
+    <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;">
+      <div class="vdm-login" style="width:100%; max-width:920px; border:1px solid #dcdad4; border-radius:16px; overflow:hidden; box-shadow:0 30px 70px -34px rgba(20,30,60,0.4); background:#fff; display:flex; min-height:540px;">
+        <div class="vdm-login-brand" style="flex:1; background:#16224d; color:#eef0f7; padding:52px 46px; position:relative; overflow:hidden;">
+          <div style="position:absolute; inset:0; background:radial-gradient(120% 90% at 0% 100%, rgba(120,150,230,0.32) 0%, rgba(22,34,77,0) 60%);"></div>
+          <div style="position:relative; height:100%; display:flex; flex-direction:column;">
+            <div style="display:flex; align-items:center; gap:11px;">
+              <div style="width:36px; height:36px; border-radius:9px; background:#eef0f7; display:flex; align-items:center; justify-content:center; color:#16224d; font-weight:700; font-size:18px;">S</div>
+              <span style="font-weight:600; font-size:16px;">Sunaidi Expo</span>
+            </div>
+            <div style="margin-top:auto;">
+              <div style="font-family:'Newsreader',serif; font-size:32px; line-height:1.12; font-weight:500; margin-bottom:14px;">Visitor Data Management</div>
+              <p style="font-size:14px; line-height:1.6; color:#b8bedb; margin:0 0 26px; max-width:32ch;">One secure place for every visitor record — clean it, filter it, and launch WhatsApp campaigns through WATI.</p>
+              <div style="display:flex; flex-direction:column; gap:11px;">
+                <div style="display:flex; align-items:center; gap:10px; font-size:13px; color:#cdd3eb;"><span style="width:6px; height:6px; border-radius:50%; background:#6f8be0;"></span>Centralized, access-controlled data</div>
+                <div style="display:flex; align-items:center; gap:10px; font-size:13px; color:#cdd3eb;"><span style="width:6px; height:6px; border-radius:50%; background:#6f8be0;"></span>Event-wise filtering &amp; cleanup</div>
+                <div style="display:flex; align-items:center; gap:10px; font-size:13px; color:#cdd3eb;"><span style="width:6px; height:6px; border-radius:50%; background:#6f8be0;"></span>WATI WhatsApp campaigns built in</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="flex:1.05; padding:54px 50px; display:flex; flex-direction:column; justify-content:center;">
+          <h1 style="font-family:'Newsreader',serif; font-weight:500; font-size:28px; color:#16224d; margin:0 0 6px;">Sign in to your account</h1>
+          <p style="font-size:13.5px; color:#7a7873; margin:0 0 22px;">Enter your work credentials to continue.</p>
+
+          <div style="display:flex; gap:4px; background:#f1f0ec; border:1px solid #e3e1db; border-radius:10px; padding:4px; margin-bottom:20px;">
+            <button onClick="{{ setLoginStaff }}" style="{{ loginStaffStyle }}">Staff login</button>
+            <button onClick="{{ setLoginAdmin }}" style="{{ loginAdminStyle }}">Admin login</button>
+          </div>
+
+          <label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:7px;">Email</label>
+          <input type="email" value="{{ email }}" onChange="{{ onEmail }}" placeholder="you@sunaidiexpo.com" style="width:100%; border:1px solid #d8d6d0; background:#fff; border-radius:9px; padding:13px 14px; font-size:14px; color:#1b1b1d; margin-bottom:18px;" style-focus="border-color:#1f3c88; box-shadow:0 0 0 3px rgba(31,60,136,0.12);" />
+
+          <label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:7px;">Password</label>
+          <input type="password" value="{{ password }}" onChange="{{ onPassword }}" placeholder="••••••••" style="width:100%; border:1px solid #d8d6d0; background:#fff; border-radius:9px; padding:13px 14px; font-size:14px; color:#1b1b1d; margin-bottom:22px;" style-focus="border-color:#1f3c88; box-shadow:0 0 0 3px rgba(31,60,136,0.12);" />
+
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:26px;">
+            <label style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:#5a5853;"><span style="width:15px; height:15px; border-radius:4px; border:1px solid #c9c7c1; background:#fff; display:inline-block;"></span>Keep me signed in</label>
+            <span style="font-size:12.5px; color:#1f3c88; font-weight:500;">Forgot password?</span>
+          </div>
+
+          <button onClick="{{ signIn }}" style="width:100%; background:#1f3c88; color:#fff; border:none; border-radius:9px; padding:14px; font-size:14.5px; font-weight:600; box-shadow:0 10px 22px -10px rgba(31,60,136,0.6);" style-hover="background:#1a3375;">Sign In</button>
+          <p style="font-size:12px; color:#9a978f; text-align:center; margin:22px 0 0;">Access restricted to authorized Sunaidi Expo staff.</p>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ APP ============ -->
+  <sc-if value="{{ showApp }}" hint-placeholder-val="{{ false }}">
+    <div style="min-height:100vh; display:flex; flex-direction:column;">
+      <!-- top bar -->
+      <header class="vdm-topbar" style="display:flex; align-items:center; gap:18px; padding:0 28px; height:60px; background:#16224d; color:#eef0f7; position:sticky; top:0; z-index:20;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:28px; height:28px; border-radius:7px; background:#eef0f7; display:flex; align-items:center; justify-content:center; color:#16224d; font-weight:700; font-size:14px;">S</div>
+          <span style="font-weight:600; font-size:15px;">Visitor Management</span>
+        </div>
+        <nav class="vdm-nav" style="display:flex; gap:6px; margin-left:20px;">
+          <sc-for list="{{ navItems }}" as="nav" hint-placeholder-count="4">
+            <button onClick="{{ nav.onClick }}" style="{{ nav.style }}">{{ nav.label }}</button>
+          </sc-for>
+        </nav>
+        <div style="margin-left:auto; display:flex; align-items:center; gap:14px;">
+          <span style="font-size:10.5px; font-weight:600; letter-spacing:0.04em; color:#cdd3eb; background:rgba(255,255,255,0.12); border:1px solid rgba(174,182,212,0.3); border-radius:6px; padding:3px 9px;">{{ roleBadge }}</span>
+          <span style="font-size:12.5px; color:#aab2d4;">{{ userEmail }}</span>
+          <span style="width:32px; height:32px; border-radius:50%; background:#2c3a6e; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; color:#cdd3eb;">{{ avatarInitials }}</span>
+          <button onClick="{{ signOut }}" style="background:rgba(255,255,255,0.08); border:1px solid rgba(174,182,212,0.3); color:#dfe3f1; border-radius:8px; padding:7px 13px; font-size:12.5px; font-weight:500;" style-hover="background:rgba(255,255,255,0.16);">Sign out</button>
+        </div>
+      </header>
+
+      <main class="vdm-main" style="flex:1; padding:30px 32px 56px; max-width:1180px; width:100%; margin:0 auto;">
+
+        <!-- ===== DASHBOARD ===== -->
+        <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeIn .25s ease;">
+            <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:22px;">
+              <div>
+                <h2 style="font-family:'Newsreader',serif; font-weight:500; font-size:27px; color:#16224d; margin:0 0 4px;">Visitors Dashboard</h2>
+                <p style="font-size:13px; color:#7a7873; margin:0;">All events — live overview</p>
+              </div>
+              <button onClick="{{ exportAll }}" style="font-size:13px; color:#fff; background:#1f3c88; border:none; border-radius:8px; padding:9px 15px; font-weight:500;" style-hover="background:#1a3375;">Export CSV</button>
+            </div>
+
+            <div class="vdm-kpi3" style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:18px;">
+              <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; padding:20px;">
+                <div style="font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; margin-bottom:10px;">Total Records</div>
+                <div style="font-size:32px; font-weight:700; color:#16224d; line-height:1;">{{ kpiTotal }}</div>
+                <div style="font-size:11.5px; color:#7a7873; margin-top:8px;">{{ kpiEvents }} events</div>
+              </div>
+              <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; padding:20px;">
+                <div style="font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; margin-bottom:10px;">Opted-in Contacts</div>
+                <div style="font-size:32px; font-weight:700; color:#16224d; line-height:1;">{{ kpiOptedIn }}</div>
+                <div style="font-size:11.5px; color:#1f6a47; margin-top:8px; font-weight:500;">{{ kpiOptedInPct }}% reachable</div>
+              </div>
+              <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; padding:20px;">
+                <div style="font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; margin-bottom:10px;">Campaigns Sent</div>
+                <div style="font-size:32px; font-weight:700; color:#16224d; line-height:1;">{{ kpiCampaigns }}</div>
+                <div style="font-size:11.5px; color:#7a7873; margin-top:8px;">via WATI</div>
+              </div>
+            </div>
+
+            <div class="vdm-split" style="display:grid; grid-template-columns:1.5fr 1fr; gap:16px;">
+              <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; padding:22px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                  <span style="font-size:14px; font-weight:600; color:#16224d;">Visitors by event</span>
+                  <span style="font-family:'IBM Plex Mono'; font-size:10.5px; color:#9a978f;">total records</span>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:15px;">
+                  <sc-for list="{{ eventStats }}" as="ev" hint-placeholder-count="5">
+                    <div style="display:flex; align-items:center; gap:14px;">
+                      <span style="width:130px; font-size:12.5px; color:#5a5853;">{{ ev.name }}</span>
+                      <div style="flex:1; height:16px; background:#eef1fa; border-radius:5px; overflow:hidden;"><div style="{{ ev.barStyle }}"></div></div>
+                      <span style="width:34px; text-align:right; font-family:'IBM Plex Mono'; font-size:12px; color:#16224d; font-weight:500;">{{ ev.count }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; padding:22px;">
+                <div style="font-size:14px; font-weight:600; color:#16224d; margin-bottom:18px;">Recent activity</div>
+                <div style="display:flex; flex-direction:column; gap:15px;">
+                  <sc-for list="{{ activity }}" as="act" hint-placeholder-count="4">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                      <span style="{{ act.iconStyle }}">{{ act.initials }}</span>
+                      <div style="flex:1; min-width:0;">
+                        <div style="font-size:13px; font-weight:500; color:#1b1b1d;">{{ act.name }}</div>
+                        <div style="font-size:11px; color:#9a978f;">{{ act.detail }}</div>
+                      </div>
+                      <span style="{{ act.tagStyle }}">{{ act.tag }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== VISITORS ===== -->
+        <sc-if value="{{ isVisitors }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeIn .25s ease;">
+            <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:18px;">
+              <div>
+                <h2 style="font-family:'Newsreader',serif; font-weight:500; font-size:27px; color:#16224d; margin:0 0 4px;">Visitor Master Data</h2>
+                <p style="font-size:13px; color:#7a7873; margin:0;">{{ filteredCount }} of {{ kpiTotal }} records shown</p>
+              </div>
+              <button onClick="{{ exportFiltered }}" style="font-size:13px; color:#1f3c88; background:#fff; border:1px solid #cdd6ee; border-radius:8px; padding:9px 15px; font-weight:500;" style-hover="background:#eef1fa;">Export filtered</button>
+            </div>
+
+            <!-- filters -->
+            <div style="display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:16px;">
+              <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="Search name, company, email…" style="flex:1; min-width:220px; border:1px solid #dcdad4; background:#fff; border-radius:9px; padding:10px 14px; font-size:13px;" style-focus="border-color:#1f3c88; box-shadow:0 0 0 3px rgba(31,60,136,0.1);" />
+              <div style="position:relative;"><select value="{{ filterEvent }}" onChange="{{ onFilterEvent }}" style="border:1px solid #dcdad4; background:#fff; border-radius:9px; padding:10px 34px 10px 14px; font-size:13px; color:#1b1b1d;"><option value="all">All events</option><sc-for list="{{ eventOptions }}" as="eo" hint-placeholder-count="5"><option value="{{ eo }}">{{ eo }}</option></sc-for></select><span style="position:absolute; right:13px; top:50%; transform:translateY(-50%); pointer-events:none; color:#9a978f; font-size:11px;">▾</span></div>
+              <div style="position:relative;"><select value="{{ filterStatus }}" onChange="{{ onFilterStatus }}" style="border:1px solid #dcdad4; background:#fff; border-radius:9px; padding:10px 34px 10px 14px; font-size:13px; color:#1b1b1d;"><option value="all">Any status</option><option value="Category">Category</option><option value="Pre-registered">Pre-registered</option><option value="Engaged">Engaged</option><option value="Pending">Pending</option></select><span style="position:absolute; right:13px; top:50%; transform:translateY(-50%); pointer-events:none; color:#9a978f; font-size:11px;">▾</span></div>
+              <div style="position:relative;"><select value="{{ filterConsent }}" onChange="{{ onFilterConsent }}" style="border:1px solid #dcdad4; background:#fff; border-radius:9px; padding:10px 34px 10px 14px; font-size:13px; color:#1b1b1d;"><option value="all">Any consent</option><option value="Opted-in">Opted-in</option><option value="Pending">Pending</option><option value="Opted-out">Opted-out</option></select><span style="position:absolute; right:13px; top:50%; transform:translateY(-50%); pointer-events:none; color:#9a978f; font-size:11px;">▾</span></div>
+            </div>
+
+            <div class="vdm-split" style="display:grid; grid-template-columns:1.5fr 360px; gap:16px; align-items:start;">
+              <!-- table -->
+              <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; overflow:hidden;">
+                <div style="display:flex; align-items:center; gap:12px; padding:13px 18px; border-bottom:1px solid #ececea; background:#f6f5f2;">
+                  <button onClick="{{ toggleAll }}" style="{{ selectAllStyle }}"></button>
+                  <span style="font-size:12.5px; font-weight:600; color:#16224d;">Select all on view</span>
+                  <span style="margin-left:auto; font-size:11.5px; color:#1f3c88; background:#eef1fa; border:1px solid #dde3f5; border-radius:6px; padding:3px 10px; font-weight:500;">{{ selectedCount }} selected</span>
+                </div>
+                <div style="max-height:460px; overflow:auto;">
+                  <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+                    <tbody>
+                      <sc-for list="{{ visitorsList }}" as="v" hint-placeholder-count="8">
+                        <tr style="{{ v.rowStyle }}">
+                          <td style="padding:11px 18px; width:34px;"><button onClick="{{ v.onToggle }}" style="{{ v.checkboxStyle }}"></button></td>
+                          <td style="padding:11px 8px;"><div style="font-weight:600; color:#1b1b1d;">{{ v.name }}</div><div style="font-size:11px; color:#9a978f;">{{ v.company }}</div></td>
+                          <td style="padding:11px 8px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:11px;">{{ v.phoneMasked }}</td>
+                          <td style="padding:11px 8px; color:#5a5853;">{{ v.event }}</td>
+                          <td style="padding:11px 8px;"><span style="{{ v.statusStyle }}">{{ v.status }}</span></td>
+                          <td style="padding:11px 8px;"><span style="{{ v.consentStyle }}">{{ v.consent }}</span></td>
+                          <td style="padding:11px 14px; text-align:right;"><button onClick="{{ v.onEdit }}" style="background:none; border:none; color:#1f3c88; font-size:12px; font-weight:600;" style-hover="text-decoration:underline;">Edit</button></td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                  <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+                    <div style="padding:44px; text-align:center; color:#9a978f; font-size:13px;">No visitors match these filters.</div>
+                  </sc-if>
+                </div>
+              </div>
+
+              <!-- WATI composer -->
+              <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; padding:22px; position:sticky; top:80px;">
+                <div style="display:flex; align-items:center; gap:9px; margin-bottom:18px;">
+                  <span style="width:28px; height:28px; border-radius:8px; background:#1f8a4c; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700;">W</span>
+                  <span style="font-size:14px; font-weight:600; color:#16224d;">Send WhatsApp Campaign</span>
+                  <span style="margin-left:auto; font-size:10px; font-family:'IBM Plex Mono'; color:#1f8a4c; background:#e7f4ec; border:1px solid #cfe8d8; border-radius:5px; padding:2px 7px;">WATI API</span>
+                </div>
+
+                <div style="font-size:11.5px; color:#7a7873; margin-bottom:7px;">Template</div>
+                <div style="position:relative; margin-bottom:14px;"><select value="{{ template }}" onChange="{{ onTemplate }}" style="width:100%; border:1px solid #e0ddd6; border-radius:8px; padding:10px 32px 10px 12px; font-size:12.5px; color:#1b1b1d;"><sc-for list="{{ templateOptions }}" as="t" hint-placeholder-count="4"><option value="{{ t.value }}">{{ t.label }}</option></sc-for></select><span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); pointer-events:none; color:#9a978f; font-size:11px;">▾</span></div>
+
+                <div style="font-size:11.5px; color:#7a7873; margin-bottom:7px;">Message</div>
+                <textarea value="{{ message }}" onChange="{{ onMessage }}" rows="5" style="width:100%; border:1px solid #e0ddd6; border-radius:8px; padding:11px 13px; font-size:12.5px; line-height:1.55; color:#1f3327; resize:vertical; background:#f3fbf5;" style-focus="border-color:#1f8a4c; box-shadow:0 0 0 3px rgba(31,138,76,0.1);"></textarea>
+
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 13px; background:#f6f5f2; border-radius:8px; margin:14px 0 16px;">
+                  <span style="font-size:12px; color:#5a5853;">Recipients (opted-in)</span>
+                  <span style="font-size:14px; font-weight:700; color:#16224d;">{{ recipientsCount }}</span>
+                </div>
+
+                <button onClick="{{ sendCampaign }}" style="{{ sendBtnStyle }}">Send via WATI</button>
+                <p style="font-size:10.5px; color:#9a978f; text-align:center; margin:11px 0 0;">Only opted-in contacts are messaged.</p>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== CLEANUP ===== -->
+        <sc-if value="{{ isCleanup }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeIn .25s ease;">
+            <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:18px;">
+              <div>
+                <h2 style="font-family:'Newsreader',serif; font-weight:500; font-size:27px; color:#16224d; margin:0 0 4px;">Data Cleanup</h2>
+                <p style="font-size:13px; color:#7a7873; margin:0;">{{ cleanedCount }} of {{ kpiTotal }} records cleaned</p>
+              </div>
+              <div style="display:flex; gap:9px; flex-wrap:wrap;">
+                <div style="position:relative;"><select value="{{ cleanupEventFilter }}" onChange="{{ onCleanupEventFilter }}" style="border:1px solid #dcdad4; background:#fff; border-radius:9px; padding:10px 34px 10px 14px; font-size:13px; color:#1b1b1d;"><option value="all">All events</option><sc-for list="{{ eventOptions }}" as="eo" hint-placeholder-count="5"><option value="{{ eo }}">{{ eo }}</option></sc-for></select><span style="position:absolute; right:13px; top:50%; transform:translateY(-50%); pointer-events:none; color:#9a978f; font-size:11px;">▾</span></div>
+                <div style="position:relative;"><select value="{{ cleanupFilter }}" onChange="{{ onCleanupFilter }}" style="border:1px solid #dcdad4; background:#fff; border-radius:9px; padding:10px 34px 10px 14px; font-size:13px; color:#1b1b1d;"><option value="all">All records</option><option value="not">Not cleaned</option><option value="cleaned">Cleaned</option></select><span style="position:absolute; right:13px; top:50%; transform:translateY(-50%); pointer-events:none; color:#9a978f; font-size:11px;">▾</span></div>
+              </div>
+            </div>
+            <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; overflow:hidden;">
+              <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+                <thead><tr style="background:#f6f5f2;"><th style="text-align:left; padding:12px 18px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Visitor</th><th style="text-align:left; padding:12px 8px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Phone</th><th style="text-align:left; padding:12px 8px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Event</th><th style="text-align:left; padding:12px 8px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Cleanup status</th><th style="text-align:right; padding:12px 18px;"></th></tr></thead>
+                <tbody>
+                  <sc-for list="{{ cleanupList }}" as="c" hint-placeholder-count="8">
+                    <tr style="{{ c.rowStyle }}">
+                      <td style="padding:11px 18px;"><div style="font-weight:600; color:#1b1b1d;">{{ c.name }}</div><div style="font-size:11px; color:#9a978f;">{{ c.company }}</div></td>
+                      <td style="padding:11px 8px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:11px;">{{ c.phoneMasked }}</td>
+                      <td style="padding:11px 8px; color:#5a5853;">{{ c.event }}</td>
+                      <td style="padding:11px 8px;"><span style="{{ c.cleanedStyle }}">{{ c.cleanedLabel }}</span></td>
+                      <td style="padding:11px 18px; text-align:right;"><div style="display:flex; gap:6px; justify-content:flex-end;"><button onClick="{{ c.onCall }}" style="font-size:12px; font-weight:600; border-radius:7px; padding:7px 11px; border:1px solid #cdd6ee; background:#fff; color:#1f3c88;" style-hover="background:#eef1fa;">📞 Call</button><button onClick="{{ c.onEdit }}" style="font-size:12px; font-weight:600; border-radius:7px; padding:7px 11px; border:1px solid #dcdad4; background:#fff; color:#5a5853;" style-hover="background:#f1f0ec;">Edit</button></div></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+              <sc-if value="{{ noCleanup }}" hint-placeholder-val="{{ false }}"><div style="padding:44px; text-align:center; color:#9a978f; font-size:13px;">No records in this view.</div></sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== CALLS / TELEPROMPTER ===== -->
+        <sc-if value="{{ isCalls }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeIn .25s ease;">
+            <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:18px;">
+              <div>
+                <h2 style="font-family:'Newsreader',serif; font-weight:500; font-size:27px; color:#16224d; margin:0 0 4px;">Call &amp; Invite</h2>
+                <p style="font-size:13px; color:#7a7873; margin:0;">{{ invitedCount }} visitors invited so far</p>
+              </div>
+              <div style="display:flex; gap:9px; flex-wrap:wrap;">
+                <div style="position:relative;"><select value="{{ callEventFilter }}" onChange="{{ onCallEventFilter }}" style="border:1px solid #dcdad4; background:#fff; border-radius:9px; padding:10px 34px 10px 14px; font-size:13px; color:#1b1b1d;"><option value="all">All events</option><sc-for list="{{ eventOptions }}" as="eo" hint-placeholder-count="5"><option value="{{ eo }}">{{ eo }}</option></sc-for></select><span style="position:absolute; right:13px; top:50%; transform:translateY(-50%); pointer-events:none; color:#9a978f; font-size:11px;">▾</span></div>
+                <div style="position:relative;"><select value="{{ callFilter }}" onChange="{{ onCallFilter }}" style="border:1px solid #dcdad4; background:#fff; border-radius:9px; padding:10px 34px 10px 14px; font-size:13px; color:#1b1b1d;"><option value="all">All visitors</option><option value="none">Not contacted</option><option value="Pending">Has pending</option><option value="Invited">Has invited</option><option value="Not interested">Not interested</option></select><span style="position:absolute; right:13px; top:50%; transform:translateY(-50%); pointer-events:none; color:#9a978f; font-size:11px;">▾</span></div>
+              </div>
+            </div>
+
+            <div style="background:#16224d; color:#eef0f7; border-radius:12px; padding:22px 24px; margin-bottom:16px; display:flex; gap:24px; align-items:center; flex-wrap:wrap;">
+              <div style="flex:1; min-width:300px;">
+                <div style="font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#9aa3c8; margin-bottom:8px;">Call script — teleprompter</div>
+                <p style="font-size:16px; line-height:1.6; margin:0; color:#eef0f7;">{{ callScript }}</p>
+              </div>
+              <div>
+                <div style="font-size:11px; color:#aab2d4; margin-bottom:6px;">Inviting to</div>
+                <div style="position:relative;"><select value="{{ targetEvent }}" onChange="{{ onTargetEvent }}" style="border:1px solid rgba(174,182,212,0.4); background:rgba(255,255,255,0.08); color:#fff; border-radius:9px; padding:10px 34px 10px 14px; font-size:13px;"><option value="Autumn Expo 2026">Autumn Expo 2026</option><option value="Winter Showcase 2027">Winter Showcase 2027</option><option value="Tech Forum 2026">Tech Forum 2026</option></select><span style="position:absolute; right:13px; top:50%; transform:translateY(-50%); pointer-events:none; color:#cdd3eb; font-size:11px;">▾</span></div>
+              </div>
+            </div>
+
+            <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; overflow:hidden;">
+              <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+                <thead><tr style="background:#f6f5f2;"><th style="text-align:left; padding:12px 18px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Visitor</th><th style="text-align:left; padding:12px 8px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Phone</th><th style="text-align:left; padding:12px 8px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Event</th><th style="text-align:left; padding:12px 8px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Latest status</th><th style="text-align:left; padding:12px 8px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Invitations</th><th style="text-align:right; padding:12px 18px;"></th></tr></thead>
+                <tbody>
+                  <sc-for list="{{ callsList }}" as="c" hint-placeholder-count="8">
+                    <tr style="{{ c.rowStyle }}">
+                      <td style="padding:11px 18px;"><div style="font-weight:600; color:#1b1b1d;">{{ c.name }}</div><div style="font-size:11px; color:#9a978f;">{{ c.company }}</div></td>
+                      <td style="padding:11px 8px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:11px;">{{ c.phoneFull }}</td>
+                      <td style="padding:11px 8px; color:#5a5853;">{{ c.event }}</td>
+                      <td style="padding:11px 8px;"><div style="display:flex; align-items:center; gap:8px;"><span style="{{ c.dotStyle }}"></span><span style="{{ c.latestStyle }}">{{ c.latestLabel }}</span></div></td>
+                      <td style="padding:11px 8px; color:#5a5853;">{{ c.inviteCountLabel }}</td>
+                      <td style="padding:11px 18px; text-align:right;"><div style="display:flex; gap:6px; justify-content:flex-end;"><button onClick="{{ c.onCall }}" style="font-size:12px; font-weight:600; border-radius:7px; padding:7px 11px; border:1px solid #cdd6ee; background:#fff; color:#1f3c88;" style-hover="background:#eef1fa;">📞 Call</button><button onClick="{{ c.onOpen }}" style="font-size:12px; font-weight:600; border-radius:7px; padding:7px 11px; border:1px solid #dcdad4; background:#fff; color:#5a5853;" style-hover="background:#f1f0ec;">Invites</button></div></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+              <sc-if value="{{ noCalls }}" hint-placeholder-val="{{ false }}"><div style="padding:44px; text-align:center; color:#9a978f; font-size:13px;">No calls in this view.</div></sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== CAMPAIGNS ===== -->
+        <sc-if value="{{ isCampaigns }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeIn .25s ease;">
+            <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:22px;">
+              <div>
+                <h2 style="font-family:'Newsreader',serif; font-weight:500; font-size:27px; color:#16224d; margin:0 0 4px;">Campaigns</h2>
+                <p style="font-size:13px; color:#7a7873; margin:0;">WhatsApp campaigns — each event uses its own WATI line</p>
+              </div>
+              <button onClick="{{ openNewCampaign }}" style="font-size:13px; color:#fff; background:#1f8a4c; border:none; border-radius:8px; padding:10px 16px; font-weight:600; box-shadow:0 10px 22px -10px rgba(31,138,76,0.6);" style-hover="background:#1a7842;">+ New campaign</button>
+            </div>
+
+            <sc-if value="{{ noCampaigns }}" hint-placeholder-val="{{ false }}">
+              <div style="background:#fff; border:1px dashed #d8d6d0; border-radius:12px; padding:54px; text-align:center; color:#9a978f; font-size:13.5px;">No campaigns yet. Select visitors on the Visitors tab and send one via WATI.</div>
+            </sc-if>
+            <sc-if value="{{ hasCampaigns }}" hint-placeholder-val="{{ false }}">
+              <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; overflow:hidden;">
+                <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                  <thead>
+                    <tr style="background:#f1f0ec;">
+                      <th style="text-align:left; padding:13px 20px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#7a7873; font-weight:600;">Campaign</th>
+                      <th style="text-align:left; padding:13px 20px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#7a7873; font-weight:600;">Audience</th>
+                      <th style="text-align:left; padding:13px 20px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#7a7873; font-weight:600;">WATI line</th>
+                      <th style="text-align:left; padding:13px 20px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#7a7873; font-weight:600;">Recipients</th>
+                      <th style="text-align:left; padding:13px 20px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#7a7873; font-weight:600;">Sent</th>
+                      <th style="text-align:left; padding:13px 20px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#7a7873; font-weight:600;">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <sc-for list="{{ campaignsList }}" as="c" hint-placeholder-count="3">
+                      <tr style="{{ c.rowStyle }}">
+                        <td style="padding:14px 20px; font-weight:600; color:#16224d;">{{ c.name }}</td>
+                        <td style="padding:14px 20px; color:#5a5853;">{{ c.event }}</td>
+                        <td style="padding:14px 20px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:12px;">{{ c.watiLabel }}</td>
+                        <td style="padding:14px 20px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:12px;">{{ c.recipients }}</td>
+                        <td style="padding:14px 20px; color:#5a5853;">{{ c.sentAt }}</td>
+                        <td style="padding:14px 20px;"><span style="font-size:11px; color:#1f6a47; background:#e6f1ea; border-radius:5px; padding:3px 10px; font-weight:500;">{{ c.statusLabel }}</span></td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- ===== REPORTS ===== -->
+        <sc-if value="{{ isReports }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeIn .25s ease;">
+            <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:18px;">
+              <div>
+                <h2 style="font-family:'Newsreader',serif; font-weight:500; font-size:27px; color:#16224d; margin:0 0 4px;">Reports &amp; Analytics</h2>
+                <p style="font-size:13px; color:#7a7873; margin:0;">Detailed reporting across cleanup, calls and campaigns</p>
+              </div>
+              <div style="display:flex; gap:9px;">
+                <button onClick="{{ exportEvent }}" style="font-size:13px; color:#1f3c88; background:#fff; border:1px solid #cdd6ee; border-radius:8px; padding:9px 15px; font-weight:500;" style-hover="background:#eef1fa;">Export CSV</button>
+                <button onClick="{{ downloadPdf }}" style="font-size:13px; color:#fff; background:#1f3c88; border:none; border-radius:8px; padding:9px 15px; font-weight:500;" style-hover="background:#1a3375;">Download PDF</button>
+              </div>
+            </div>
+
+            <!-- filter bar -->
+            <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; padding:14px 18px; margin-bottom:16px; display:flex; flex-wrap:wrap; align-items:center; gap:12px;">
+              <span style="font-family:'IBM Plex Mono'; font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase; color:#9a978f;">Filters</span>
+                            <div style="position:relative;"><select value="{{ reportEvent }}" onChange="{{ onReportEvent }}" style="border:1px solid #dcdad4; background:#fff; border-radius:9px; padding:9px 32px 9px 13px; font-size:13px; color:#1b1b1d;"><option value="all">All events</option><sc-for list="{{ eventOptions }}" as="eo" hint-placeholder-count="5"><option value="{{ eo }}">{{ eo }}</option></sc-for></select><span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); pointer-events:none; color:#9a978f; font-size:11px;">▾</span></div>
+              <sc-if value="{{ isRepCalls }}" hint-placeholder-val="{{ false }}">
+                <div style="position:relative;"><select value="{{ repStatus }}" onChange="{{ onRepStatus }}" style="border:1px solid #dcdad4; background:#fff; border-radius:9px; padding:9px 32px 9px 13px; font-size:13px; color:#1b1b1d;"><option value="all">Any outcome</option><option value="Invited">Invited</option><option value="Pending">Pending</option><option value="Not interested">Not interested</option></select><span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); pointer-events:none; color:#9a978f; font-size:11px;">▾</span></div>
+              </sc-if>
+              <span style="margin-left:auto; font-size:12.5px; color:#7a7873;">{{ reportRowsCount }} visitor records in scope</span>
+            </div>
+
+            <!-- category tabs -->
+            <div style="display:flex; gap:9px; margin-bottom:18px;">
+              <sc-for list="{{ repCats }}" as="rc" hint-placeholder-count="3">
+                <button onClick="{{ rc.onClick }}" style="{{ rc.style }}">{{ rc.label }}</button>
+              </sc-for>
+            </div>
+
+            <!-- CLEANUP REPORT -->
+            <sc-if value="{{ isRepCleanup }}" hint-placeholder-val="{{ false }}">
+              <div class="vdm-kpi3" style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:16px;">
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; padding:20px;"><div style="font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; margin-bottom:10px;">Cleaned</div><div style="font-size:30px; font-weight:700; color:#1f6a47; line-height:1;">{{ repCleanedN }}</div><div style="font-size:11.5px; color:#7a7873; margin-top:8px;">{{ repCleanedPct }}% of scope</div></div>
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; padding:20px;"><div style="font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; margin-bottom:10px;">Not cleaned</div><div style="font-size:30px; font-weight:700; color:#b07a1e; line-height:1;">{{ repNotCleanedN }}</div><div style="font-size:11.5px; color:#7a7873; margin-top:8px;">pending review</div></div>
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; padding:20px;"><div style="font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; margin-bottom:10px;">Total in scope</div><div style="font-size:30px; font-weight:700; color:#16224d; line-height:1;">{{ reportRowsCount }}</div><div style="font-size:11.5px; color:#7a7873; margin-top:8px;">visitor records</div></div>
+              </div>
+              <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; padding:22px;">
+                <div style="font-size:14px; font-weight:600; color:#16224d; margin-bottom:18px;">Cleanup progress</div>
+                <div style="display:flex; flex-direction:column; gap:14px;">
+                  <sc-for list="{{ cleanBarsR }}" as="b" hint-placeholder-count="2">
+                    <div style="display:flex; align-items:center; gap:14px;"><span style="width:110px; font-size:12.5px; color:#5a5853;">{{ b.label }}</span><div style="flex:1; height:16px; background:#f1f0ec; border-radius:5px; overflow:hidden;"><div style="{{ b.barStyle }}"></div></div><span style="width:40px; text-align:right; font-family:'IBM Plex Mono'; font-size:12px; color:#16224d; font-weight:500;">{{ b.n }}</span></div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- CALLS REPORT -->
+            <sc-if value="{{ isRepCalls }}" hint-placeholder-val="{{ false }}">
+              <div class="vdm-kpi3" style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:16px;">
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; padding:20px;"><div style="font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; margin-bottom:10px;">Calls logged</div><div style="font-size:30px; font-weight:700; color:#16224d; line-height:1;">{{ totalCalls }}</div><div style="font-size:11.5px; color:#7a7873; margin-top:8px;">in scope</div></div>
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; padding:20px;"><div style="font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; margin-bottom:10px;">Total talk time</div><div style="font-size:30px; font-weight:700; color:#16224d; line-height:1;">{{ totalCallLabel }}</div><div style="font-size:11.5px; color:#7a7873; margin-top:8px;">mm:ss</div></div>
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; padding:20px;"><div style="font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; margin-bottom:10px;">Avg. call length</div><div style="font-size:30px; font-weight:700; color:#16224d; line-height:1;">{{ avgCallLabel }}</div><div style="font-size:11.5px; color:#7a7873; margin-top:8px;">per call</div></div>
+              </div>
+              <div class="vdm-split" style="display:grid; grid-template-columns:1fr 1.6fr; gap:16px;">
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; padding:22px;">
+                  <div style="font-size:14px; font-weight:600; color:#16224d; margin-bottom:18px;">Outcomes</div>
+                  <div style="display:flex; flex-direction:column; gap:14px;">
+                    <sc-for list="{{ callBarsR }}" as="b" hint-placeholder-count="3">
+                      <div style="display:flex; align-items:center; gap:12px;"><span style="width:96px; font-size:12px; color:#5a5853;">{{ b.label }}</span><div style="flex:1; height:14px; background:#f1f0ec; border-radius:5px; overflow:hidden;"><div style="{{ b.barStyle }}"></div></div><span style="width:28px; text-align:right; font-family:'IBM Plex Mono'; font-size:12px; color:#16224d; font-weight:500;">{{ b.n }}</span></div>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; overflow:hidden;">
+                  <div style="padding:14px 18px; border-bottom:1px solid #ececea; background:#f6f5f2; font-size:13px; font-weight:600; color:#16224d;">Call time log</div>
+                  <div style="max-height:260px; overflow:auto;">
+                    <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                      <thead><tr style="background:#fbfaf8;"><th style="text-align:left; padding:9px 16px; font-family:'IBM Plex Mono'; font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:#9a978f; font-weight:600;">Time</th><th style="text-align:left; padding:9px 8px; font-family:'IBM Plex Mono'; font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:#9a978f; font-weight:600;">Visitor</th><th style="text-align:left; padding:9px 8px; font-family:'IBM Plex Mono'; font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:#9a978f; font-weight:600;">Duration</th><th style="text-align:left; padding:9px 16px; font-family:'IBM Plex Mono'; font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:#9a978f; font-weight:600;">Outcome</th></tr></thead>
+                      <tbody>
+                        <sc-for list="{{ callLogList }}" as="l" hint-placeholder-count="5">
+                          <tr style="{{ l.rowStyle }}">
+                            <td style="padding:10px 16px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:11px;">{{ l.time }}</td>
+                            <td style="padding:10px 8px;"><div style="font-weight:600; color:#1b1b1d;">{{ l.name }}</div><div style="font-size:10.5px; color:#9a978f;">{{ l.event }}</div></td>
+                            <td style="padding:10px 8px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:11px;">{{ l.durationLabel }}</td>
+                            <td style="padding:10px 16px;"><span style="{{ l.outcomeStyle }}">{{ l.outcome }}</span></td>
+                          </tr>
+                        </sc-for>
+                      </tbody>
+                    </table>
+                    <sc-if value="{{ noCallLog }}" hint-placeholder-val="{{ false }}"><div style="padding:34px; text-align:center; color:#9a978f; font-size:12.5px;">No calls logged for this filter.</div></sc-if>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- CAMPAIGNS REPORT -->
+            <sc-if value="{{ isRepCampaigns }}" hint-placeholder-val="{{ false }}">
+              <div class="vdm-kpi3" style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:16px;">
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; padding:20px;"><div style="font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; margin-bottom:10px;">Campaigns sent</div><div style="font-size:30px; font-weight:700; color:#16224d; line-height:1;">{{ repCampaignCount }}</div><div style="font-size:11.5px; color:#7a7873; margin-top:8px;">in scope</div></div>
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; padding:20px;"><div style="font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; margin-bottom:10px;">Messages delivered</div><div style="font-size:30px; font-weight:700; color:#1f8a4c; line-height:1;">{{ campMsgs }}</div><div style="font-size:11.5px; color:#7a7873; margin-top:8px;">via WATI</div></div>
+                <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; padding:20px;"><div style="font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; margin-bottom:10px;">Events covered</div><div style="font-size:30px; font-weight:700; color:#16224d; line-height:1;">{{ kpiEvents }}</div><div style="font-size:11.5px; color:#7a7873; margin-top:8px;">total</div></div>
+              </div>
+              <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; padding:22px;">
+                <div style="font-size:14px; font-weight:600; color:#16224d; margin-bottom:18px;">Messages by event</div>
+                <div style="display:flex; flex-direction:column; gap:14px;">
+                  <sc-for list="{{ campBarsR }}" as="b" hint-placeholder-count="3">
+                    <div style="display:flex; align-items:center; gap:14px;"><span style="width:130px; font-size:12.5px; color:#5a5853;">{{ b.label }}</span><div style="flex:1; height:16px; background:#eef1fa; border-radius:5px; overflow:hidden;"><div style="{{ b.barStyle }}"></div></div><span style="width:50px; text-align:right; font-family:'IBM Plex Mono'; font-size:12px; color:#16224d; font-weight:500;">{{ b.n }}</span></div>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ noCampBars }}" hint-placeholder-val="{{ false }}"><div style="padding:24px; text-align:center; color:#9a978f; font-size:12.5px;">No campaigns for this filter.</div></sc-if>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- ===== ADMIN ===== -->
+        <sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeIn .25s ease;">
+            <h2 style="font-family:'Newsreader',serif; font-weight:500; font-size:27px; color:#16224d; margin:0 0 4px;">Admin &amp; Settings</h2>
+            <p style="font-size:13px; color:#7a7873; margin:0 0 22px;">Manage users, data, integrations and backups</p>
+
+            <!-- Users & Access -->
+            <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; overflow:hidden; margin-bottom:16px;">
+              <div style="display:flex; align-items:center; padding:18px 22px; border-bottom:1px solid #ececea;">
+                <div><div style="font-size:15px; font-weight:600; color:#16224d;">Users &amp; access</div><div style="font-size:12px; color:#9a978f; margin-top:2px;">Create accounts, assign roles, reset passwords</div></div>
+                <button onClick="{{ openAddUser }}" style="margin-left:auto; font-size:13px; color:#fff; background:#1f3c88; border:none; border-radius:8px; padding:9px 15px; font-weight:500;" style-hover="background:#1a3375;">+ Add user</button>
+              </div>
+              <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                <thead><tr style="background:#f6f5f2;"><th style="text-align:left; padding:11px 22px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">User</th><th style="text-align:left; padding:11px 8px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Role</th><th style="text-align:left; padding:11px 8px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Permissions</th><th style="text-align:left; padding:11px 8px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Status</th><th style="text-align:right; padding:11px 22px;"></th></tr></thead>
+                <tbody>
+                  <sc-for list="{{ usersList }}" as="u" hint-placeholder-count="4">
+                    <tr style="{{ u.rowStyle }}">
+                      <td style="padding:13px 22px;"><div style="display:flex; align-items:center; gap:11px;"><span style="width:32px; height:32px; border-radius:50%; background:#eef1fa; color:#1f3c88; font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:center;">{{ u.initials }}</span><div><div style="font-weight:600; color:#1b1b1d;">{{ u.name }}</div><div style="font-size:11px; color:#9a978f;">{{ u.email }}</div></div></div></td>
+                      <td style="padding:13px 8px; color:#5a5853;">{{ u.role }}</td>
+                      <td style="padding:13px 8px;"><div style="display:flex; gap:6px; flex-wrap:wrap;"><button onClick="{{ u.onEditPerm }}" style="{{ u.editStyle }}">{{ u.editLabel }}</button><button onClick="{{ u.onDeletePerm }}" style="{{ u.deleteStyle }}">{{ u.deleteLabel }}</button><button onClick="{{ u.onCallPerm }}" style="{{ u.callStyle }}">{{ u.callLabel }}</button></div></td>
+                      <td style="padding:13px 8px;"><span style="{{ u.statusStyle }}">{{ u.status }}</span></td>
+                      <td style="padding:13px 22px; text-align:right;"><div style="display:flex; gap:6px; justify-content:flex-end;"><button onClick="{{ u.onReset }}" style="font-size:12px; font-weight:600; border-radius:7px; padding:7px 11px; border:1px solid #cdd6ee; background:#fff; color:#1f3c88;" style-hover="background:#eef1fa;">Reset password</button><button onClick="{{ u.onToggle }}" style="font-size:12px; font-weight:600; border-radius:7px; padding:7px 11px; border:1px solid #dcdad4; background:#fff; color:#5a5853;" style-hover="background:#f1f0ec;">{{ u.toggleLabel }}</button></div></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+
+            <div style="margin-bottom:16px;">
+              <!-- Import data -->
+              <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; padding:22px;">
+                <div style="font-size:15px; font-weight:600; color:#16224d; margin-bottom:6px;">Import visitor data</div>
+                <p style="font-size:12.5px; line-height:1.55; color:#7a7873; margin:0 0 16px;">Upload a CSV with columns: Name, Company, Phone, Email, Event. Records are added to the master data.</p>
+                <label style="display:block; border:1.5px dashed #c7cdd9; border-radius:10px; padding:26px; text-align:center; cursor:pointer; background:#fafbfd;" style-hover="border-color:#1f3c88; background:#f4f7fd;">
+                  <div style="font-size:22px; margin-bottom:8px;">⬆️</div>
+                  <div style="font-size:13px; font-weight:600; color:#1f3c88;">Choose CSV file</div>
+                  <div style="font-size:11px; color:#9a978f; margin-top:4px;">or drag and drop</div>
+                  <input type="file" accept=".csv,text/csv" onChange="{{ importFile }}" style="display:none;" />
+                </label>
+              </div>
+            </div>
+
+            <!-- Events -->
+            <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; overflow:hidden; margin-bottom:16px;">
+              <div style="display:flex; align-items:center; flex-wrap:wrap; gap:12px; padding:18px 22px; border-bottom:1px solid #ececea;">
+                <div><div style="font-size:15px; font-weight:600; color:#16224d;">Events</div><div style="font-size:12px; color:#9a978f; margin-top:2px;">Create an event, then import its visitor data</div></div>
+                <div style="margin-left:auto; display:flex; align-items:center; gap:9px;">
+                  <input value="{{ newEventName }}" onChange="{{ onNewEventName }}" placeholder="New event name…" style="border:1px solid #dcdad4; background:#fff; border-radius:8px; padding:9px 12px; font-size:13px; width:220px;" style-focus="border-color:#1f3c88; box-shadow:0 0 0 3px rgba(31,60,136,0.1);" />
+                  <button onClick="{{ createEvent }}" style="font-size:13px; color:#fff; background:#1f3c88; border:none; border-radius:8px; padding:9px 15px; font-weight:500;" style-hover="background:#1a3375;">+ Create event</button>
+                </div>
+              </div>
+              <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                <thead><tr style="background:#f6f5f2;"><th style="text-align:left; padding:11px 22px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Event</th><th style="text-align:left; padding:11px 8px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Visitors</th><th style="text-align:right; padding:11px 22px;"></th></tr></thead>
+                <tbody>
+                  <sc-for list="{{ eventsList }}" as="ev" hint-placeholder-count="5">
+                    <tr style="{{ ev.rowStyle }}">
+                      <td style="padding:13px 22px; font-weight:600; color:#16224d;">{{ ev.name }}</td>
+                      <td style="padding:13px 8px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:12px;">{{ ev.count }}</td>
+                      <td style="padding:13px 22px; text-align:right;"><div style="display:flex; gap:6px; justify-content:flex-end;"><label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; border-radius:7px; padding:7px 13px; border:1px solid #cdd6ee; background:#fff; color:#1f3c88; cursor:pointer;" style-hover="background:#eef1fa;">⬆️ Import<input type="file" accept=".csv,text/csv" onChange="{{ ev.onImport }}" style="display:none;" /></label><button onClick="{{ ev.onEdit }}" style="font-size:12px; font-weight:600; border-radius:7px; padding:7px 11px; border:1px solid #dcdad4; background:#fff; color:#5a5853;" style-hover="background:#f1f0ec;">Edit</button><button onClick="{{ ev.onDelete }}" style="font-size:12px; font-weight:600; border-radius:7px; padding:7px 11px; border:1px solid #ecd9d2; background:#fff; color:#b0481f;" style-hover="background:#f7ece8;">Delete</button></div></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Call APIs (add / remove) -->
+            <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; overflow:hidden; margin-bottom:16px;">
+              <div style="display:flex; align-items:center; padding:18px 22px; border-bottom:1px solid #ececea;">
+                <div><div style="font-size:15px; font-weight:600; color:#16224d;">Call APIs</div><div style="font-size:12px; color:#9a978f; margin-top:2px;">{{ callApiActiveCount }} connected — telephony providers for tele-calling</div></div>
+                <button onClick="{{ openAddCallApi }}" style="margin-left:auto; font-size:13px; color:#fff; background:#1f3c88; border:none; border-radius:8px; padding:9px 15px; font-weight:500;" style-hover="background:#1a3375;">+ Add call API</button>
+              </div>
+              <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                <thead><tr style="background:#f6f5f2;"><th style="text-align:left; padding:11px 22px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Provider</th><th style="text-align:left; padding:11px 8px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Caller ID</th><th style="text-align:left; padding:11px 8px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">API key</th><th style="text-align:left; padding:11px 8px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Status</th><th style="text-align:right; padding:11px 22px;"></th></tr></thead>
+                <tbody>
+                  <sc-for list="{{ callApiList }}" as="c" hint-placeholder-count="2">
+                    <tr style="{{ c.rowStyle }}">
+                      <td style="padding:13px 22px; font-weight:600; color:#16224d;">{{ c.provider }}</td>
+                      <td style="padding:13px 8px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:12px;">{{ c.callerId }}</td>
+                      <td style="padding:13px 8px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:12px;">{{ c.key }}</td>
+                      <td style="padding:13px 8px;"><span style="{{ c.statusStyle }}">{{ c.statusLabel }}</span></td>
+                      <td style="padding:13px 22px; text-align:right;"><div style="display:flex; gap:6px; justify-content:flex-end;"><button onClick="{{ c.onTest }}" style="font-size:12px; font-weight:600; border-radius:7px; padding:7px 11px; border:1px solid #cdd6ee; background:#fff; color:#1f3c88;" style-hover="background:#eef1fa;">Test</button><button onClick="{{ c.onToggle }}" style="font-size:12px; font-weight:600; border-radius:7px; padding:7px 11px; border:1px solid #dcdad4; background:#fff; color:#5a5853;" style-hover="background:#f1f0ec;">{{ c.toggleLabel }}</button><button onClick="{{ c.onRemove }}" style="font-size:12px; font-weight:600; border-radius:7px; padding:7px 11px; border:1px solid #ecd9d2; background:#fff; color:#b0481f;" style-hover="background:#f7ece8;">Remove</button></div></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- WATI connections -->
+            <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; overflow:hidden; margin-bottom:16px;">
+              <div style="display:flex; align-items:center; padding:18px 22px; border-bottom:1px solid #ececea;">
+                <div><div style="font-size:15px; font-weight:600; color:#16224d;">WATI WhatsApp connections</div><div style="font-size:12px; color:#9a978f; margin-top:2px;">{{ watiActiveCount }} active — one line per event</div></div>
+                <button onClick="{{ openAddWati }}" style="margin-left:auto; font-size:13px; color:#fff; background:#1f8a4c; border:none; border-radius:8px; padding:9px 15px; font-weight:500;" style-hover="background:#1a7842;">+ Add connection</button>
+              </div>
+              <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                <thead><tr style="background:#f6f5f2;"><th style="text-align:left; padding:11px 22px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Event</th><th style="text-align:left; padding:11px 8px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Sender</th><th style="text-align:left; padding:11px 8px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">API key</th><th style="text-align:left; padding:11px 8px; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Status</th><th style="text-align:right; padding:11px 22px;"></th></tr></thead>
+                <tbody>
+                  <sc-for list="{{ watiList }}" as="w" hint-placeholder-count="5">
+                    <tr style="{{ w.rowStyle }}">
+                      <td style="padding:13px 22px; font-weight:600; color:#16224d;">{{ w.event }}</td>
+                      <td style="padding:13px 8px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:12px;">{{ w.sender }}</td>
+                      <td style="padding:13px 8px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:12px;">{{ w.api }}</td>
+                      <td style="padding:13px 8px;"><span style="{{ w.statusStyle }}">{{ w.statusLabel }}</span></td>
+                      <td style="padding:13px 22px; text-align:right;"><button onClick="{{ w.onToggle }}" style="font-size:12px; font-weight:600; border-radius:7px; padding:7px 11px; border:1px solid #dcdad4; background:#fff; color:#5a5853;" style-hover="background:#f1f0ec;">{{ w.toggleLabel }}</button></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Backup -->
+            <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; padding:22px; display:flex; align-items:center; gap:18px; flex-wrap:wrap;">
+              <div style="flex:1; min-width:240px;">
+                <div style="font-size:15px; font-weight:600; color:#16224d; margin-bottom:4px;">Data backup &amp; export</div>
+                <p style="font-size:12.5px; line-height:1.55; color:#7a7873; margin:0;">Automatic secure cloud backup of all visitor data. Last backup: today, 02:00.</p>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:12.5px; color:#5a5853;">Auto-backup {{ autoBackupLabel }}</span>
+                <button onClick="{{ toggleAutoBackup }}" style="{{ autoBackupStyle }}"><span style="{{ autoBackupKnob }}"></span></button>
+              </div>
+              <button onClick="{{ exportAll }}" style="font-size:13px; color:#1f3c88; background:#fff; border:1px solid #cdd6ee; border-radius:8px; padding:9px 15px; font-weight:500;" style-hover="background:#eef1fa;">Export all (CSV)</button>
+            </div>
+
+            <!-- Audit log (SOC 2) -->
+            <div style="background:#fff; border:1px solid #e6e4de; border-radius:12px; overflow:hidden; margin-top:16px;">
+              <div style="display:flex; align-items:center; flex-wrap:wrap; gap:12px; padding:18px 22px; border-bottom:1px solid #ececea;">
+                <div><div style="font-size:15px; font-weight:600; color:#16224d;">Audit trail</div><div style="font-size:12px; color:#9a978f; margin-top:2px;">SOC 2 — immutable, attributable activity log · {{ auditCount }} events · 1-year retention</div></div>
+                <div style="margin-left:auto; display:flex; align-items:center; gap:9px;">
+                  <input value="{{ auditSearch }}" onChange="{{ onAuditSearch }}" placeholder="Search actor, action, IP…" style="border:1px solid #dcdad4; background:#fff; border-radius:8px; padding:8px 12px; font-size:12.5px; width:200px;" style-focus="border-color:#1f3c88; box-shadow:0 0 0 3px rgba(31,60,136,0.1);" />
+                  <div style="position:relative;"><select value="{{ auditCat }}" onChange="{{ onAuditCat }}" style="border:1px solid #dcdad4; background:#fff; border-radius:8px; padding:8px 30px 8px 12px; font-size:12.5px; color:#1b1b1d;"><option value="all">All categories</option><option value="Authentication">Authentication</option><option value="User Management">User Management</option><option value="Data">Data</option><option value="Campaign">Campaign</option><option value="Call">Call</option><option value="Integration">Integration</option><option value="Export">Export</option></select><span style="position:absolute; right:11px; top:50%; transform:translateY(-50%); pointer-events:none; color:#9a978f; font-size:10px;">▾</span></div>
+                  <button onClick="{{ exportAudit }}" style="font-size:12.5px; color:#fff; background:#1f3c88; border:none; border-radius:8px; padding:9px 14px; font-weight:500;" style-hover="background:#1a3375;">Export log</button>
+                </div>
+              </div>
+              <div style="max-height:360px; overflow:auto;">
+                <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                  <thead><tr style="background:#f6f5f2; position:sticky; top:0;"><th style="text-align:left; padding:10px 22px; font-family:'IBM Plex Mono'; font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Timestamp</th><th style="text-align:left; padding:10px 8px; font-family:'IBM Plex Mono'; font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Actor</th><th style="text-align:left; padding:10px 8px; font-family:'IBM Plex Mono'; font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Action</th><th style="text-align:left; padding:10px 8px; font-family:'IBM Plex Mono'; font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Target</th><th style="text-align:left; padding:10px 8px; font-family:'IBM Plex Mono'; font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Category</th><th style="text-align:left; padding:10px 8px; font-family:'IBM Plex Mono'; font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Source IP</th><th style="text-align:left; padding:10px 22px; font-family:'IBM Plex Mono'; font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7873; font-weight:600;">Result</th></tr></thead>
+                  <tbody>
+                    <sc-for list="{{ auditList }}" as="e" hint-placeholder-count="6">
+                      <tr style="{{ e.rowStyle }}">
+                        <td style="padding:10px 22px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:11px; white-space:nowrap;">{{ e.time }}</td>
+                        <td style="padding:10px 8px;"><div style="font-weight:600; color:#1b1b1d;">{{ e.actor }}</div><div style="font-size:10px; color:#9a978f;">{{ e.role }}</div></td>
+                        <td style="padding:10px 8px; color:#1b1b1d;">{{ e.action }}</td>
+                        <td style="padding:10px 8px; color:#5a5853;">{{ e.target }}</td>
+                        <td style="padding:10px 8px;"><span style="{{ e.catStyle }}">{{ e.category }}</span></td>
+                        <td style="padding:10px 8px; color:#5a5853; font-family:'IBM Plex Mono'; font-size:11px;">{{ e.ip }}</td>
+                        <td style="padding:10px 22px;"><span style="{{ e.resultStyle }}">{{ e.result }}</span></td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+                <sc-if value="{{ noAudit }}" hint-placeholder-val="{{ false }}"><div style="padding:36px; text-align:center; color:#9a978f; font-size:12.5px;">No audit events match this filter.</div></sc-if>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+      </main>
+    </div>
+  </sc-if>
+
+  <!-- ============ EDIT MODAL ============ -->
+  <sc-if value="{{ showEdit }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeEdit }}" style="position:fixed; inset:0; background:rgba(20,28,55,0.45); display:flex; align-items:center; justify-content:center; z-index:40; animation:fadeIn .15s ease;">
+      <div onClick="{{ stop }}" style="width:100%; max-width:440px; background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 30px 70px -24px rgba(10,20,50,0.5);">
+        <div style="padding:22px 26px; border-bottom:1px solid #ececea;">
+          <div style="font-family:'Newsreader',serif; font-size:21px; color:#16224d; font-weight:500;">Edit visitor record</div>
+          <div style="font-size:12.5px; color:#9a978f; margin-top:3px;">Clean up details before campaigns go out.</div>
+        </div>
+        <div style="padding:24px 26px; display:flex; flex-direction:column; gap:16px;">
+          <div style="display:flex; gap:14px;">
+            <div style="flex:1;">
+              <label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:6px;">Full name</label>
+              <input value="{{ editName }}" onChange="{{ onEditName }}" style="width:100%; border:1px solid #dcdad4; border-radius:8px; padding:11px 13px; font-size:13.5px;" style-focus="border-color:#1f3c88; box-shadow:0 0 0 3px rgba(31,60,136,0.1);" />
+            </div>
+            <div style="flex:1;">
+              <label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:6px;">Company</label>
+              <input value="{{ editCompany }}" onChange="{{ onEditCompany }}" style="width:100%; border:1px solid #dcdad4; border-radius:8px; padding:11px 13px; font-size:13.5px;" style-focus="border-color:#1f3c88; box-shadow:0 0 0 3px rgba(31,60,136,0.1);" />
+            </div>
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:6px;">Phone number</label>
+            <input value="{{ editPhone }}" onChange="{{ onEditPhone }}" style="width:100%; border:1px solid #dcdad4; border-radius:8px; padding:11px 13px; font-size:13.5px; font-family:'IBM Plex Mono';" style-focus="border-color:#1f3c88; box-shadow:0 0 0 3px rgba(31,60,136,0.1);" />
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:6px;">Email</label>
+            <input value="{{ editEmail }}" onChange="{{ onEditEmail }}" style="width:100%; border:1px solid #dcdad4; border-radius:8px; padding:11px 13px; font-size:13.5px;" style-focus="border-color:#1f3c88; box-shadow:0 0 0 3px rgba(31,60,136,0.1);" />
+          </div>
+          <div style="display:flex; gap:14px;">
+            <div style="flex:1;">
+              <label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:6px;">Consent</label>
+              <div style="position:relative;"><select value="{{ editConsent }}" onChange="{{ onEditConsent }}" style="width:100%; border:1px solid #dcdad4; border-radius:8px; padding:11px 32px 11px 13px; font-size:13.5px; color:#1b1b1d;"><option value="Opted-in">Opted-in</option><option value="Pending">Pending</option><option value="Opted-out">Opted-out</option></select><span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); pointer-events:none; color:#9a978f; font-size:11px;">▾</span></div>
+            </div>
+            <div style="flex:1;">
+              <label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:6px;">Mark cleaned</label>
+              <div style="position:relative;"><select value="{{ editCleaned }}" onChange="{{ onEditCleaned }}" style="width:100%; border:1px solid #dcdad4; border-radius:8px; padding:11px 32px 11px 13px; font-size:13.5px; color:#1b1b1d;"><option value="Yes">Yes — cleaned</option><option value="No">No — not cleaned</option></select><span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); pointer-events:none; color:#9a978f; font-size:11px;">▾</span></div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:18px 26px; border-top:1px solid #ececea; display:flex; justify-content:flex-end; gap:10px; background:#faf9f7;">
+          <button onClick="{{ closeEdit }}" style="font-size:13px; color:#5a5853; background:#fff; border:1px solid #dcdad4; border-radius:8px; padding:10px 16px; font-weight:500;" style-hover="background:#f1f0ec;">Cancel</button>
+          <button onClick="{{ saveEdit }}" style="font-size:13px; color:#fff; background:#1f3c88; border:none; border-radius:8px; padding:10px 18px; font-weight:600;" style-hover="background:#1a3375;">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ CALL / INVITATION HISTORY MODAL ============ -->
+  <sc-if value="{{ showCall }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeCall }}" style="position:fixed; inset:0; background:rgba(20,28,55,0.45); display:flex; align-items:center; justify-content:center; z-index:40; animation:fadeIn .15s ease;">
+      <div onClick="{{ stop }}" style="width:100%; max-width:500px; background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 30px 70px -24px rgba(10,20,50,0.5);">
+        <div style="padding:22px 26px; border-bottom:1px solid #ececea;">
+          <div style="font-family:'Newsreader',serif; font-size:21px; color:#16224d; font-weight:500;">{{ callName }}</div>
+          <div style="font-size:12.5px; color:#9a978f; margin-top:3px; font-family:'IBM Plex Mono';">{{ callPhone }}</div>
+        </div>
+        <div style="padding:22px 26px;">
+          <div style="font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#7a7873; margin-bottom:12px;">Invitation history</div>
+          <sc-if value="{{ noInvites }}" hint-placeholder-val="{{ false }}"><div style="padding:18px; text-align:center; color:#9a978f; font-size:12.5px; background:#f6f5f2; border-radius:9px;">No invitations yet — add the first one below.</div></sc-if>
+          <sc-if value="{{ hasInvites }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <sc-for list="{{ callInvites }}" as="iv" hint-placeholder-count="2">
+                <div style="display:flex; align-items:center; gap:12px; padding:12px 14px; border:1px solid #ececea; border-radius:9px;">
+                  <div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:600; color:#16224d;">{{ iv.event }}</div><div style="font-size:11px; color:#9a978f; font-family:'IBM Plex Mono';">{{ iv.date }}</div></div>
+                  <div style="position:relative;"><select value="{{ iv.status }}" onChange="{{ iv.onStatus }}" style="border:1px solid #dcdad4; background:#fff; border-radius:7px; padding:7px 28px 7px 11px; font-size:12px; color:#1b1b1d;"><option value="Invited">Invited</option><option value="Pending">Pending</option><option value="Not interested">Not interested</option></select><span style="position:absolute; right:10px; top:50%; transform:translateY(-50%); pointer-events:none; color:#9a978f; font-size:10px;">▾</span></div>
+                  <button onClick="{{ iv.onRemove }}" style="background:none; border:none; color:#b0481f; font-size:16px; line-height:1; padding:4px 6px;" style-hover="color:#8a3a2e;">×</button>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <div style="font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#7a7873; margin:22px 0 12px;">Log a new invitation</div>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <div style="position:relative; flex:1;"><select value="{{ addInviteEvent }}" onChange="{{ onAddInviteEvent }}" style="width:100%; border:1px solid #dcdad4; background:#fff; border-radius:8px; padding:10px 30px 10px 12px; font-size:12.5px; color:#1b1b1d;"><option value="Autumn Expo 2026">Autumn Expo 2026</option><option value="Winter Showcase 2027">Winter Showcase 2027</option><option value="Tech Forum 2026">Tech Forum 2026</option></select><span style="position:absolute; right:11px; top:50%; transform:translateY(-50%); pointer-events:none; color:#9a978f; font-size:10px;">▾</span></div>
+            <div style="position:relative;"><select value="{{ addInviteStatus }}" onChange="{{ onAddInviteStatus }}" style="border:1px solid #dcdad4; background:#fff; border-radius:8px; padding:10px 30px 10px 12px; font-size:12.5px; color:#1b1b1d;"><option value="Invited">Invited</option><option value="Pending">Pending</option><option value="Not interested">Not interested</option></select><span style="position:absolute; right:11px; top:50%; transform:translateY(-50%); pointer-events:none; color:#9a978f; font-size:10px;">▾</span></div>
+            <button onClick="{{ addInvite }}" style="font-size:12.5px; color:#fff; background:#1f3c88; border:none; border-radius:8px; padding:10px 16px; font-weight:600; white-space:nowrap;" style-hover="background:#1a3375;">Add</button>
+          </div>
+        </div>
+        <div style="padding:16px 26px; border-top:1px solid #ececea; display:flex; justify-content:flex-end; background:#faf9f7;">
+          <button onClick="{{ closeCall }}" style="font-size:13px; color:#5a5853; background:#fff; border:1px solid #dcdad4; border-radius:8px; padding:10px 18px; font-weight:500;" style-hover="background:#f1f0ec;">Done</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ NEW CAMPAIGN MODAL ============ -->
+  <sc-if value="{{ ncOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeNewCampaign }}" style="position:fixed; inset:0; background:rgba(20,28,55,0.45); display:flex; align-items:center; justify-content:center; z-index:40; animation:fadeIn .15s ease;">
+      <div onClick="{{ stop }}" style="width:100%; max-width:480px; background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 30px 70px -24px rgba(10,20,50,0.5);">
+        <div style="padding:22px 26px; border-bottom:1px solid #ececea; display:flex; align-items:center; gap:10px;">
+          <span style="width:28px; height:28px; border-radius:8px; background:#1f8a4c; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700;">W</span>
+          <div style="font-family:'Newsreader',serif; font-size:21px; color:#16224d; font-weight:500;">New WhatsApp Campaign</div>
+        </div>
+        <div style="padding:24px 26px; display:flex; flex-direction:column; gap:16px;">
+          <div>
+            <label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:8px;">Events — select one or more</label>
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+              <sc-for list="{{ ncEventChips }}" as="ev" hint-placeholder-count="5">
+                <button onClick="{{ ev.onToggle }}" style="{{ ev.style }}">{{ ev.name }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <sc-for list="{{ ncWatiLines }}" as="w" hint-placeholder-count="1">
+              <div style="background:#e7f4ec; border:1px solid #cfe8d8; border-radius:9px; padding:11px 14px; display:flex; align-items:center; gap:12px;">
+                <span style="font-size:10px; font-family:'IBM Plex Mono'; color:#1f8a4c; background:#fff; border:1px solid #cfe8d8; border-radius:5px; padding:2px 7px;">WATI</span>
+                <div style="flex:1; min-width:0;"><div style="font-size:12.5px; font-weight:600; color:#16323f;">{{ w.event }}</div><div style="font-size:11px; color:#4f7a63; font-family:'IBM Plex Mono';">{{ w.line }}</div></div>
+                <div style="text-align:right;"><div style="font-size:16px; font-weight:700; color:#16323f;">{{ w.count }}</div><div style="font-size:9.5px; color:#4f7a63;">selected</div></div>
+              </div>
+            </sc-for>
+          </div>
+          <div>
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+              <button onClick="{{ toggleNcAll }}" style="{{ ncSelectAllStyle }}"></button>
+              <label style="font-size:12px; font-weight:600; color:#4a4945;">Recipients — select records</label>
+              <span style="margin-left:auto; font-size:11.5px; color:#1f8a4c; font-weight:600;">{{ ncSelectedCount }} of {{ ncPoolTotal }}</span>
+            </div>
+            <div style="max-height:160px; overflow:auto; border:1px solid #ececea; border-radius:9px; padding:6px;">
+              <sc-for list="{{ ncPool }}" as="p" hint-placeholder-count="4">
+                <div style="{{ p.rowStyle }}">
+                  <button onClick="{{ p.onToggle }}" style="{{ p.checkboxStyle }}"></button>
+                  <div style="flex:1; min-width:0;"><div style="font-size:12.5px; font-weight:500; color:#1b1b1d;">{{ p.name }}</div><div style="font-size:10.5px; color:#9a978f;">{{ p.company }}</div></div>
+                  <span style="flex:none; font-size:10px; color:#1f3c88; background:#eef1fa; border:1px solid #dde3f5; border-radius:5px; padding:2px 8px;">{{ p.event }}</span>
+                </div>
+              </sc-for>
+              <sc-if value="{{ noNcPool }}" hint-placeholder-val="{{ false }}"><div style="padding:18px; text-align:center; color:#9a978f; font-size:12px;">No opted-in visitors for the selected events.</div></sc-if>
+            </div>
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:6px;">Template</label>
+            <div style="position:relative;"><select value="{{ ncTemplate }}" onChange="{{ onNcTemplate }}" style="width:100%; border:1px solid #dcdad4; border-radius:8px; padding:11px 32px 11px 13px; font-size:13.5px; color:#1b1b1d;"><sc-for list="{{ templateOptions }}" as="t" hint-placeholder-count="4"><option value="{{ t.value }}">{{ t.label }}</option></sc-for></select><span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); pointer-events:none; color:#9a978f; font-size:11px;">▾</span></div>
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:6px;">Message</label>
+            <textarea value="{{ ncMessage }}" onChange="{{ onNcMessage }}" rows="4" style="width:100%; border:1px solid #e0ddd6; border-radius:8px; padding:11px 13px; font-size:12.5px; line-height:1.55; color:#1f3327; resize:vertical; background:#f3fbf5;" style-focus="border-color:#1f8a4c; box-shadow:0 0 0 3px rgba(31,138,76,0.1);"></textarea>
+          </div>
+        </div>
+        <div style="padding:16px 26px; border-top:1px solid #ececea; display:flex; justify-content:flex-end; gap:10px; background:#faf9f7;">
+          <button onClick="{{ closeNewCampaign }}" style="font-size:13px; color:#5a5853; background:#fff; border:1px solid #dcdad4; border-radius:8px; padding:10px 16px; font-weight:500;" style-hover="background:#f1f0ec;">Cancel</button>
+          <button onClick="{{ sendNewCampaign }}" style="font-size:13px; color:#fff; background:#1f8a4c; border:none; border-radius:8px; padding:10px 18px; font-weight:600;" style-hover="background:#1a7842;">Send via WATI</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ ACTIVE CALL ============ -->
+  <sc-if value="{{ showActiveCall }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed; inset:0; background:rgba(20,28,55,0.5); display:flex; align-items:center; justify-content:center; z-index:50; animation:fadeIn .15s ease;">
+      <div style="width:100%; max-width:380px; background:#16224d; color:#eef0f7; border-radius:16px; overflow:hidden; box-shadow:0 30px 70px -24px rgba(10,20,50,0.6); text-align:center;">
+        <div style="padding:34px 30px 26px;">
+          <div style="font-family:'IBM Plex Mono'; font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:#8fa0d8; margin-bottom:18px;">● Call in progress</div>
+          <div style="width:66px; height:66px; border-radius:50%; background:#2c3a6e; margin:0 auto 16px; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:600; color:#cdd3eb;">{{ avatarInitialsCall }}</div>
+          <div style="font-family:'Newsreader',serif; font-size:24px; font-weight:500; margin-bottom:4px;">{{ acName }}</div>
+          <div style="font-size:12.5px; color:#aab2d4; margin-bottom:2px;">{{ acCompany }}</div>
+          <div style="font-size:12px; color:#8fa0d8;">{{ acEvent }}</div>
+          <div style="font-family:'IBM Plex Mono'; font-size:40px; font-weight:500; letter-spacing:0.02em; margin:22px 0 6px;">{{ callTimer }}</div>
+          <a href="{{ acTelHref }}" style="font-size:12px; color:#8fa0d8; text-decoration:none;">Dial on this device →</a>
+        </div>
+        <div style="padding:20px 26px 26px;">
+          <div style="font-size:11.5px; color:#8fa0d8; margin-bottom:10px;">End call &amp; log outcome</div>
+          <div style="display:flex; gap:9px; margin-bottom:10px;">
+            <button onClick="{{ endInvited }}" style="flex:1; background:#1f8a4c; color:#fff; border:none; border-radius:9px; padding:12px; font-size:13px; font-weight:600;" style-hover="background:#1a7842;">Invited</button>
+            <button onClick="{{ endPending }}" style="flex:1; background:#b07a1e; color:#fff; border:none; border-radius:9px; padding:12px; font-size:13px; font-weight:600;" style-hover="background:#946615;">Pending</button>
+            <button onClick="{{ endNot }}" style="flex:1; background:#b0481f; color:#fff; border:none; border-radius:9px; padding:12px; font-size:13px; font-weight:600;" style-hover="background:#933a18;">Not interested</button>
+          </div>
+          <button onClick="{{ cancelCall }}" style="width:100%; background:rgba(255,255,255,0.08); color:#cdd3eb; border:1px solid rgba(174,182,212,0.3); border-radius:9px; padding:10px; font-size:12.5px; font-weight:500;" style-hover="background:rgba(255,255,255,0.16);">Discard call</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ INDIVIDUAL WHATSAPP ============ -->
+  <sc-if value="{{ waOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeWa }}" style="position:fixed; inset:0; background:rgba(20,28,55,0.45); display:flex; align-items:center; justify-content:center; z-index:40; animation:fadeIn .15s ease;">
+      <div onClick="{{ stop }}" style="width:100%; max-width:430px; background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 30px 70px -24px rgba(10,20,50,0.5);">
+        <div style="padding:22px 26px; border-bottom:1px solid #ececea; display:flex; align-items:center; gap:10px;">
+          <span style="width:28px; height:28px; border-radius:8px; background:#1f8a4c; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700;">W</span>
+          <div><div style="font-family:'Newsreader',serif; font-size:20px; color:#16224d; font-weight:500;">Message {{ waName }}</div><div style="font-size:11.5px; color:#9a978f; margin-top:1px;">via WATI {{ waSender }}</div></div>
+        </div>
+        <div style="padding:22px 26px; display:flex; flex-direction:column; gap:15px;">
+          <div>
+            <label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:6px;">Template</label>
+            <div style="position:relative;"><select value="{{ waTemplate }}" onChange="{{ onWaTemplate }}" style="width:100%; border:1px solid #dcdad4; border-radius:8px; padding:11px 32px 11px 13px; font-size:13.5px; color:#1b1b1d;"><sc-for list="{{ templateOptions }}" as="t" hint-placeholder-count="4"><option value="{{ t.value }}">{{ t.label }}</option></sc-for></select><span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); pointer-events:none; color:#9a978f; font-size:11px;">▾</span></div>
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:6px;">Message</label>
+            <textarea value="{{ waMessage }}" onChange="{{ onWaMessage }}" rows="4" style="width:100%; border:1px solid #e0ddd6; border-radius:8px; padding:11px 13px; font-size:12.5px; line-height:1.55; color:#1f3327; resize:vertical; background:#f3fbf5;" style-focus="border-color:#1f8a4c; box-shadow:0 0 0 3px rgba(31,138,76,0.1);"></textarea>
+          </div>
+        </div>
+        <div style="padding:16px 26px; border-top:1px solid #ececea; display:flex; justify-content:flex-end; gap:10px; background:#faf9f7;">
+          <button onClick="{{ closeWa }}" style="font-size:13px; color:#5a5853; background:#fff; border:1px solid #dcdad4; border-radius:8px; padding:10px 16px; font-weight:500;" style-hover="background:#f1f0ec;">Cancel</button>
+          <button onClick="{{ sendWa }}" style="font-size:13px; color:#fff; background:#1f8a4c; border:none; border-radius:8px; padding:10px 18px; font-weight:600;" style-hover="background:#1a7842;">Send message</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ ADD USER ============ -->
+  <sc-if value="{{ addUserOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeAddUser }}" style="position:fixed; inset:0; background:rgba(20,28,55,0.45); display:flex; align-items:center; justify-content:center; z-index:40; animation:fadeIn .15s ease;">
+      <div onClick="{{ stop }}" style="width:100%; max-width:420px; background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 30px 70px -24px rgba(10,20,50,0.5);">
+        <div style="padding:22px 26px; border-bottom:1px solid #ececea;"><div style="font-family:'Newsreader',serif; font-size:21px; color:#16224d; font-weight:500;">Add user</div><div style="font-size:12.5px; color:#9a978f; margin-top:3px;">A temporary password is generated on creation.</div></div>
+        <div style="padding:24px 26px; display:flex; flex-direction:column; gap:15px;">
+          <div><label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:6px;">Full name</label><input value="{{ newUserName }}" onChange="{{ onNewUserName }}" style="width:100%; border:1px solid #dcdad4; border-radius:8px; padding:11px 13px; font-size:13.5px;" style-focus="border-color:#1f3c88; box-shadow:0 0 0 3px rgba(31,60,136,0.1);" /></div>
+          <div><label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:6px;">Email (login ID)</label><input value="{{ newUserEmail }}" onChange="{{ onNewUserEmail }}" style="width:100%; border:1px solid #dcdad4; border-radius:8px; padding:11px 13px; font-size:13.5px;" style-focus="border-color:#1f3c88; box-shadow:0 0 0 3px rgba(31,60,136,0.1);" /></div>
+          <div><label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:6px;">Role</label><div style="position:relative;"><select value="{{ newUserRole }}" onChange="{{ onNewUserRole }}" style="width:100%; border:1px solid #dcdad4; border-radius:8px; padding:11px 32px 11px 13px; font-size:13.5px; color:#1b1b1d;"><option value="Admin">Admin</option><option value="Marketing">Marketing</option><option value="Data Entry">Data Entry</option><option value="Tele-caller">Tele-caller</option></select><span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); pointer-events:none; color:#9a978f; font-size:11px;">▾</span></div></div>
+        </div>
+        <div style="padding:16px 26px; border-top:1px solid #ececea; display:flex; justify-content:flex-end; gap:10px; background:#faf9f7;"><button onClick="{{ closeAddUser }}" style="font-size:13px; color:#5a5853; background:#fff; border:1px solid #dcdad4; border-radius:8px; padding:10px 16px; font-weight:500;" style-hover="background:#f1f0ec;">Cancel</button><button onClick="{{ addUser }}" style="font-size:13px; color:#fff; background:#1f3c88; border:none; border-radius:8px; padding:10px 18px; font-weight:600;" style-hover="background:#1a3375;">Create user</button></div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ ADD WATI ============ -->
+  <sc-if value="{{ addWatiOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeAddWati }}" style="position:fixed; inset:0; background:rgba(20,28,55,0.45); display:flex; align-items:center; justify-content:center; z-index:40; animation:fadeIn .15s ease;">
+      <div onClick="{{ stop }}" style="width:100%; max-width:420px; background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 30px 70px -24px rgba(10,20,50,0.5);">
+        <div style="padding:22px 26px; border-bottom:1px solid #ececea; display:flex; align-items:center; gap:10px;"><span style="width:28px; height:28px; border-radius:8px; background:#1f8a4c; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700;">W</span><div style="font-family:'Newsreader',serif; font-size:21px; color:#16224d; font-weight:500;">Add WATI connection</div></div>
+        <div style="padding:24px 26px; display:flex; flex-direction:column; gap:15px;">
+          <div><label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:6px;">Event name</label><input value="{{ newWatiEvent }}" onChange="{{ onNewWatiEvent }}" placeholder="e.g. Autumn Expo 2026" style="width:100%; border:1px solid #dcdad4; border-radius:8px; padding:11px 13px; font-size:13.5px;" style-focus="border-color:#1f8a4c; box-shadow:0 0 0 3px rgba(31,138,76,0.1);" /></div>
+          <div><label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:6px;">Sender number</label><input value="{{ newWatiSender }}" onChange="{{ onNewWatiSender }}" placeholder="+966 50 000 0000" style="width:100%; border:1px solid #dcdad4; border-radius:8px; padding:11px 13px; font-size:13.5px; font-family:'IBM Plex Mono';" style-focus="border-color:#1f8a4c; box-shadow:0 0 0 3px rgba(31,138,76,0.1);" /></div>
+          <div><label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:6px;">API key</label><input value="{{ newWatiApi }}" onChange="{{ onNewWatiApi }}" placeholder="wati_key_••" style="width:100%; border:1px solid #dcdad4; border-radius:8px; padding:11px 13px; font-size:13.5px; font-family:'IBM Plex Mono';" style-focus="border-color:#1f8a4c; box-shadow:0 0 0 3px rgba(31,138,76,0.1);" /></div>
+        </div>
+        <div style="padding:16px 26px; border-top:1px solid #ececea; display:flex; justify-content:flex-end; gap:10px; background:#faf9f7;"><button onClick="{{ closeAddWati }}" style="font-size:13px; color:#5a5853; background:#fff; border:1px solid #dcdad4; border-radius:8px; padding:10px 16px; font-weight:500;" style-hover="background:#f1f0ec;">Cancel</button><button onClick="{{ addWati }}" style="font-size:13px; color:#fff; background:#1f8a4c; border:none; border-radius:8px; padding:10px 18px; font-weight:600;" style-hover="background:#1a7842;">Add connection</button></div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ ADD CALL API ============ -->
+  <sc-if value="{{ addCallApiOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeAddCallApi }}" style="position:fixed; inset:0; background:rgba(20,28,55,0.45); display:flex; align-items:center; justify-content:center; z-index:40; animation:fadeIn .15s ease;">
+      <div onClick="{{ stop }}" style="width:100%; max-width:420px; background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 30px 70px -24px rgba(10,20,50,0.5);">
+        <div style="padding:22px 26px; border-bottom:1px solid #ececea;"><div style="font-family:'Newsreader',serif; font-size:21px; color:#16224d; font-weight:500;">Add call API</div><div style="font-size:12.5px; color:#9a978f; margin-top:3px;">Connect a telephony provider for tele-calling.</div></div>
+        <div style="padding:24px 26px; display:flex; flex-direction:column; gap:15px;">
+          <div><label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:6px;">Provider</label><input value="{{ newCallProvider }}" onChange="{{ onNewCallProvider }}" placeholder="e.g. Twilio Voice, Knowlarity" style="width:100%; border:1px solid #dcdad4; border-radius:8px; padding:11px 13px; font-size:13.5px;" style-focus="border-color:#1f3c88; box-shadow:0 0 0 3px rgba(31,60,136,0.1);" /></div>
+          <div><label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:6px;">Caller ID</label><input value="{{ newCallCallerId }}" onChange="{{ onNewCallCallerId }}" placeholder="+966 11 000 0000" style="width:100%; border:1px solid #dcdad4; border-radius:8px; padding:11px 13px; font-size:13.5px; font-family:'IBM Plex Mono';" style-focus="border-color:#1f3c88; box-shadow:0 0 0 3px rgba(31,60,136,0.1);" /></div>
+          <div><label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:6px;">API key</label><input value="{{ newCallKey }}" onChange="{{ onNewCallKey }}" placeholder="key_••" style="width:100%; border:1px solid #dcdad4; border-radius:8px; padding:11px 13px; font-size:13.5px; font-family:'IBM Plex Mono';" style-focus="border-color:#1f3c88; box-shadow:0 0 0 3px rgba(31,60,136,0.1);" /></div>
+        </div>
+        <div style="padding:16px 26px; border-top:1px solid #ececea; display:flex; justify-content:flex-end; gap:10px; background:#faf9f7;"><button onClick="{{ closeAddCallApi }}" style="font-size:13px; color:#5a5853; background:#fff; border:1px solid #dcdad4; border-radius:8px; padding:10px 16px; font-weight:500;" style-hover="background:#f1f0ec;">Cancel</button><button onClick="{{ addCallApi }}" style="font-size:13px; color:#fff; background:#1f3c88; border:none; border-radius:8px; padding:10px 18px; font-weight:600;" style-hover="background:#1a3375;">Add call API</button></div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ EDIT EVENT ============ -->
+  <sc-if value="{{ editEventOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeEditEvent }}" style="position:fixed; inset:0; background:rgba(20,28,55,0.45); display:flex; align-items:center; justify-content:center; z-index:40; animation:fadeIn .15s ease;">
+      <div onClick="{{ stop }}" style="width:100%; max-width:400px; background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 30px 70px -24px rgba(10,20,50,0.5);">
+        <div style="padding:22px 26px; border-bottom:1px solid #ececea;"><div style="font-family:'Newsreader',serif; font-size:21px; color:#16224d; font-weight:500;">Rename event</div><div style="font-size:12.5px; color:#9a978f; margin-top:3px;">Renames it across all visitor records and connections.</div></div>
+        <div style="padding:24px 26px;"><label style="font-size:12px; font-weight:600; color:#4a4945; display:block; margin-bottom:6px;">Event name</label><input value="{{ editEventName }}" onChange="{{ onEditEventName }}" style="width:100%; border:1px solid #dcdad4; border-radius:8px; padding:11px 13px; font-size:13.5px;" style-focus="border-color:#1f3c88; box-shadow:0 0 0 3px rgba(31,60,136,0.1);" /></div>
+        <div style="padding:16px 26px; border-top:1px solid #ececea; display:flex; justify-content:flex-end; gap:10px; background:#faf9f7;"><button onClick="{{ closeEditEvent }}" style="font-size:13px; color:#5a5853; background:#fff; border:1px solid #dcdad4; border-radius:8px; padding:10px 16px; font-weight:500;" style-hover="background:#f1f0ec;">Cancel</button><button onClick="{{ saveEditEvent }}" style="font-size:13px; color:#fff; background:#1f3c88; border:none; border-radius:8px; padding:10px 18px; font-weight:600;" style-hover="background:#1a3375;">Save</button></div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ TOAST ============ -->
+  <sc-if value="{{ showToast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed; bottom:28px; left:50%; transform:translateX(-50%); z-index:60; background:#16224d; color:#eef0f7; padding:13px 22px; border-radius:10px; font-size:13.5px; font-weight:500; box-shadow:0 16px 40px -14px rgba(10,20,50,0.5); animation:toastIn .25s ease;">{{ toast }}</div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1180,&quot;height&quot;:760},&quot;accentColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#1f3c88&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#1f3c88&quot;,&quot;#1f6a47&quot;,&quot;#5a3ea8&quot;]},&quot;defaultTab&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;dashboard&quot;,&quot;options&quot;:[&quot;dashboard&quot;,&quot;visitors&quot;,&quot;cleanup&quot;,&quot;calls&quot;,&quot;campaigns&quot;,&quot;reports&quot;,&quot;admin&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;compactRows&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const tpl = 'spring_expo_followup';
+    this.state = {
+      loggedIn: false,
+      role: 'Staff',
+      loginAs: 'staff',
+      sessionIp: '10.0.0.1',
+      auditCat: 'all',
+      auditSearch: '',
+      auditLog: [
+        { id: 'au1', time: '20 Jun 08:02:14', actor: 'admin@sunaidiexpo.com', role: 'Admin', action: 'User signed in', target: 'Session', category: 'Authentication', ip: '10.0.21.4', result: 'Success' },
+        { id: 'au2', time: '20 Jun 08:05:41', actor: 'admin@sunaidiexpo.com', role: 'Admin', action: 'Password reset issued', target: 'calls@sunaidiexpo.com', category: 'User Management', ip: '10.0.21.4', result: 'Success' },
+        { id: 'au3', time: '20 Jun 08:11:09', actor: 'cleanup@sunaidiexpo.com', role: 'Data Entry', action: 'Visitor record updated', target: 'Faisal Khan', category: 'Data', ip: '10.0.18.7', result: 'Success' },
+        { id: 'au4', time: '20 Jun 08:19:55', actor: 'marketing@sunaidiexpo.com', role: 'Marketing', action: 'Campaign sent via WATI', target: 'Spring Expo 2026 — 1,180', category: 'Campaign', ip: '10.0.12.2', result: 'Success' },
+        { id: 'au5', time: '20 Jun 08:24:30', actor: 'unknown', role: '—', action: 'Failed sign-in attempt', target: 'ops@sunaidiexpo.com', category: 'Authentication', ip: '41.92.6.183', result: 'Denied' },
+        { id: 'au6', time: '20 Jun 08:40:12', actor: 'admin@sunaidiexpo.com', role: 'Admin', action: 'CSV export generated', target: 'visitors-all.csv', category: 'Export', ip: '10.0.21.4', result: 'Success' },
+      ],
+      email: 'marketing@sunaidiexpo.com',
+      password: 'expo2026',
+      tab: (props && props.defaultTab) || 'dashboard',
+      filterEvent: 'all',
+      filterStatus: 'all',
+      filterConsent: 'all',
+      search: '',
+      cleanupFilter: 'all',
+      cleanupEventFilter: 'all',
+      callFilter: 'all',
+      callEventFilter: 'all',
+      reportEvent: 'all',
+      targetEvent: 'Autumn Expo 2026',
+      callingId: null,
+      activeCall: null,
+      callSeconds: 0,
+      waOpen: false,
+      waVisitorId: null,
+      waTemplate: 'thank_you_visit',
+      waMessage: this.tplMessage('thank_you_visit'),
+      repCat: 'calls',
+      repStatus: 'all',
+      watiConns: [
+        { event: 'Spring Expo 2026', sender: '+966 50 111 2026', api: 'wati_spring_••42', active: true },
+        { event: 'Tech Forum', sender: '+966 50 222 7788', api: 'wati_techforum_••19', active: true },
+        { event: 'Trade Days', sender: '+966 50 333 4455', api: 'wati_tradedays_••07', active: true },
+        { event: 'Design Week', sender: '+966 50 444 9090', api: 'wati_designweek_••63', active: false },
+        { event: 'Startup Meet', sender: '+966 50 555 1212', api: 'wati_startup_••88', active: true },
+      ],
+      users: [
+        { id: 'u1', name: 'Marketing User', email: 'marketing@sunaidiexpo.com', role: 'Marketing', status: 'Active', perms: { edit: true, delete: false, call: false } },
+        { id: 'u2', name: 'Data Cleanup', email: 'cleanup@sunaidiexpo.com', role: 'Data Entry', status: 'Active', perms: { edit: true, delete: true, call: true } },
+        { id: 'u3', name: 'Call Agent', email: 'calls@sunaidiexpo.com', role: 'Tele-caller', status: 'Active', perms: { edit: false, delete: false, call: true } },
+        { id: 'u4', name: 'Administrator', email: 'admin@sunaidiexpo.com', role: 'Admin', status: 'Active', perms: { edit: true, delete: true, call: true } },
+      ],
+      callApis: [
+        { id: 'ca1', provider: 'Twilio Voice', callerId: '+966 11 200 4040', key: 'sk_live_••••8842', connected: true },
+        { id: 'ca2', provider: 'Knowlarity', callerId: '+966 11 200 5050', key: 'kl_live_••••3317', connected: false },
+      ],
+      addCallApiOpen: false,
+      newCallApi: { provider: '', callerId: '', key: '' },
+      autoBackup: true,
+      events: ['Spring Expo 2026', 'Tech Forum', 'Trade Days', 'Design Week', 'Startup Meet'],
+      newEventName: '',
+      editEventOpen: false,
+      editEventOrig: '',
+      editEventName: '',
+      addUserOpen: false,
+      newUser: { name: '', email: '', role: 'Marketing' },
+      addWatiOpen: false,
+      newWati: { event: 'Autumn Expo 2026', sender: '', api: '' },
+      addInviteEvent: 'Autumn Expo 2026',
+      addInviteStatus: 'Invited',
+      ncOpen: false,
+      ncEvents: ['Spring Expo 2026'],
+      ncTemplate: 'spring_expo_followup',
+      ncMessage: this.tplMessage('spring_expo_followup'),
+      ncSelectedIds: [],
+      selectedIds: [],
+      template: tpl,
+      message: this.tplMessage(tpl),
+      editingId: null,
+      editDraft: { name: '', company: '', phone: '', email: '', consent: 'Opted-in', cleaned: false },
+      toast: '',
+      visitors: this.seedVisitors(),
+      callLog: [
+        { id: 'cl1', name: 'Lina Mansour', company: 'Orbit Media', event: 'Spring Expo 2026', time: '09:12', duration: 142, outcome: 'Invited' },
+        { id: 'cl2', name: 'Omar Tariq', company: 'Helix Industries', event: 'Spring Expo 2026', time: '09:31', duration: 64, outcome: 'Not interested' },
+        { id: 'cl3', name: 'Yousef Amin', company: 'Cedar Systems', event: 'Tech Forum', time: '10:04', duration: 208, outcome: 'Invited' },
+        { id: 'cl4', name: 'Nora Fadel', company: 'Atlas Media', event: 'Trade Days', time: '10:22', duration: 47, outcome: 'Pending' },
+        { id: 'cl5', name: 'Dana Khoury', company: 'Vela Studio', event: 'Design Week', time: '11:08', duration: 175, outcome: 'Invited' },
+      ],
+      campaigns: [
+        { id: 'c1', name: 'Thank You for Visiting', event: 'Tech Forum', recipients: 412, sentAt: '2 days ago', status: 'Delivered', wati: '+966 50 222 7788' },
+        { id: 'c2', name: 'Catalogue Request', event: 'Spring Expo 2026', recipients: 1180, sentAt: '5 days ago', status: 'Delivered', wati: '+966 50 111 2026' },
+      ],
+      activity: [
+        { id: 'a1', initials: 'LM', name: 'Lina Mansour', detail: 'Duplicate merged', tag: 'Merged', kind: 'merge' },
+        { id: 'a2', initials: 'RA', name: 'Rami Al-Said', detail: 'Consent set to opted-in', tag: 'Updated', kind: 'update' },
+        { id: 'a3', initials: 'FK', name: 'Faisal Khan', detail: 'Phone number updated', tag: 'Edited', kind: 'edit' },
+        { id: 'a4', initials: 'WA', name: 'Catalogue Request', detail: 'Campaign sent to 1,180 contacts', tag: 'Sent', kind: 'sent' },
+      ],
+    };
+  }
+
+  templates = [
+    { value: 'spring_expo_followup', label: 'Spring Expo — Follow-up' },
+    { value: 'thank_you_visit', label: 'Thank You for Visiting' },
+    { value: 'event_invite', label: 'Event Invitation' },
+    { value: 'catalogue_request', label: 'Catalogue Request' },
+  ];
+
+  watiFor(ev) { return (this.state.watiConns || []).find((w) => w.event === ev) || { sender: '—', api: '—' }; }
+
+  today() { return new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }); }
+
+  nowStamp() {
+    const d = new Date();
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+  logAudit = (action, target, category, result) => {
+    const e = { id: 'au' + Date.now() + Math.floor(Math.random() * 999), time: this.nowStamp(), actor: this.state.email || 'system', role: this.state.role || '—', action, target: target || '—', category: category || 'General', ip: this.state.sessionIp || '10.0.0.1', result: result || 'Success' };
+    this.setState((s) => ({ auditLog: [e, ...s.auditLog] }));
+  };
+
+  tplMessage(t) {
+    const m = {
+      spring_expo_followup: "Hi {name}, thank you for visiting Sunaidi Expo Spring 2026! Here's the catalogue you requested — reply YES to book a follow-up meeting.",
+      thank_you_visit: "Hi {name}, thank you for visiting the Sunaidi Expo stand. It was great to meet you — we'll be in touch soon!",
+      event_invite: "Hi {name}, you're invited to our next Sunaidi Expo event. Reply JOIN to reserve your place.",
+      catalogue_request: "Hi {name}, as requested here is our latest product catalogue. Reply if you'd like a personalised quote.",
+    };
+    return m[t] || m.spring_expo_followup;
+  }
+
+  seedVisitors() {
+    const ev = ['Spring Expo 2026', 'Tech Forum', 'Trade Days', 'Design Week', 'Startup Meet'];
+    const rows = [
+      ['Faisal Khan', 'Reed Technologies', '142', ev[0], 'Category', 'Opted-in'],
+      ['Lina Mansour', 'Orbit Media', '087', ev[0], 'Category', 'Opted-in'],
+      ['Rami Al-Said', 'Vertex Group', '309', ev[0], 'Engaged', 'Opted-in'],
+      ['Sara Habib', 'Nexa Labs', '561', ev[0], 'Category', 'Opted-in'],
+      ['Omar Tariq', 'Helix Industries', '778', ev[0], 'Pending', 'Pending'],
+      ['Huda Nasser', 'Bright Co', '234', ev[1], 'Category', 'Opted-in'],
+      ['Yousef Amin', 'Cedar Systems', '415', ev[1], 'Pre-registered', 'Opted-in'],
+      ['Maha Salem', 'Lumina', '690', ev[1], 'Engaged', 'Opted-out'],
+      ['Khalid Aziz', 'Pioneer Tech', '052', ev[2], 'Category', 'Opted-in'],
+      ['Nora Fadel', 'Atlas Media', '331', ev[2], 'Pre-registered', 'Pending'],
+      ['Tariq Hassan', 'Summit Group', '847', ev[2], 'Category', 'Opted-in'],
+      ['Dana Khoury', 'Vela Studio', '218', ev[3], 'Engaged', 'Opted-in'],
+      ['Sami Rahman', 'Nimbus Co', '903', ev[3], 'Category', 'Opted-in'],
+      ['Leen Othman', 'Forma Design', '176', ev[3], 'Pre-registered', 'Opted-in'],
+      ['Adel Mansoor', 'Quanta Labs', '524', ev[4], 'Category', 'Opted-in'],
+      ['Reem Saleh', 'Spark Ventures', '660', ev[4], 'Engaged', 'Pending'],
+      ['Bilal Noor', 'Onyx Partners', '288', ev[4], 'Category', 'Opted-in'],
+      ['Jana Aziz', 'Meridian', '741', ev[1], 'Pre-registered', 'Opted-in'],
+    ];
+    return rows.map((r, i) => ({
+      id: 'v' + (i + 1),
+      name: r[0], company: r[1],
+      phone: '+9665' + r[2] + '00' + r[2],
+      email: r[0].toLowerCase().replace(/[^a-z]/g, '.') + '@' + r[1].toLowerCase().replace(/[^a-z]/g, '') + '.com',
+      event: r[3], status: r[4], consent: r[5],
+      cleaned: i % 3 !== 0,
+      invites: i === 0 ? [{ id: 'i1', event: 'Autumn Expo 2026', status: 'Invited', date: '12 Jun' }]
+        : i === 2 ? [{ id: 'i2', event: 'Winter Showcase 2027', status: 'Pending', date: '14 Jun' }, { id: 'i3', event: 'Autumn Expo 2026', status: 'Not interested', date: '10 Jun' }]
+        : i === 5 ? [{ id: 'i4', event: 'Autumn Expo 2026', status: 'Invited', date: '13 Jun' }] : [],
+    }));
+  }
+
+  initials(name) {
+    const p = name.trim().split(/\s+/);
+    return ((p[0] || ' ')[0] + (p[1] || ' ')[0]).toUpperCase();
+  }
+
+  maskPhone(p) {
+    // +9665XX XXX NNN  -> mask middle
+    const tail = p.slice(-3);
+    return '+966 5•• ••• ' + tail;
+  }
+
+  flash(msg) {
+    this.setState({ toast: msg });
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ toast: '' }), 3200);
+  }
+
+  componentWillUnmount() { clearTimeout(this._t); clearInterval(this._callTimer); }
+
+  fmtDur(sec) { const m = Math.floor(sec / 60), s = sec % 60; return m + ':' + (s < 10 ? '0' : '') + s; }
+
+  // ---- active call + end call ----
+  startCall = (id) => {
+    const v = this.state.visitors.find((x) => x.id === id);
+    if (!v) return;
+    clearInterval(this._callTimer);
+    this._callStart = Date.now();
+    this.setState({ activeCall: { id: v.id, name: v.name, company: v.company, phone: v.phone, event: v.event }, callSeconds: 0, callingId: null });
+    this._callTimer = setInterval(() => {
+      this.setState({ callSeconds: Math.floor((Date.now() - this._callStart) / 1000) });
+    }, 1000);
+  };
+  endCall = (outcome) => {
+    clearInterval(this._callTimer);
+    const ac = this.state.activeCall; if (!ac) return;
+    const secs = this.state.callSeconds;
+    const log = { id: 'cl' + Date.now(), name: ac.name, company: ac.company, event: ac.event, time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }), duration: secs, outcome };
+    const upd = (s) => {
+      let visitors = s.visitors;
+      if (outcome === 'Invited' || outcome === 'Pending' || outcome === 'Not interested') {
+        const inv = { id: 'i' + Date.now(), event: ac.event, status: outcome, date: this.today() };
+        visitors = s.visitors.map((v) => v.id === ac.id ? { ...v, invites: [inv, ...v.invites] } : v);
+      }
+      const act = { id: 'a' + Date.now(), initials: this.initials(ac.name), name: ac.name, detail: 'Call ended (' + this.fmtDur(secs) + ') — ' + outcome, tag: 'Called', kind: 'invited' };
+      return { callLog: [log, ...s.callLog], visitors, activity: [act, ...s.activity].slice(0, 8), activeCall: null, callSeconds: 0 };
+    };
+    this.setState(upd);
+    this.logAudit('Call completed & logged', ac.name + ' · ' + this.fmtDur(secs) + ' · ' + outcome, 'Call');
+    this.flash('Call logged — ' + this.fmtDur(secs) + ' · ' + outcome);
+  };
+  cancelCall = () => { clearInterval(this._callTimer); this.setState({ activeCall: null, callSeconds: 0 }); };
+
+  // ---- individual WhatsApp ----
+  openWa = (id) => this.setState({ waOpen: true, waVisitorId: id, waTemplate: 'thank_you_visit', waMessage: this.tplMessage('thank_you_visit') });
+  closeWa = () => this.setState({ waOpen: false });
+  onWaTemplate = (e) => { const t = e.target.value; this.setState({ waTemplate: t, waMessage: this.tplMessage(t) }); };
+  onWaMessage = (e) => this.setState({ waMessage: e.target.value });
+  sendWa = () => {
+    const v = this.state.visitors.find((x) => x.id === this.state.waVisitorId); if (!v) return;
+    const conn = this.watiFor(v.event) || {};
+    const camp = { id: 'c' + Date.now(), name: 'Direct message — ' + v.name, event: v.event, recipients: 1, sentAt: 'Just now', status: 'Delivered', wati: conn.sender };
+    const act = { id: 'a' + Date.now(), initials: 'WA', name: v.name, detail: 'WhatsApp message sent', tag: 'Sent', kind: 'invited' };
+    this.setState((s) => ({ campaigns: [camp, ...s.campaigns], activity: [act, ...s.activity].slice(0, 8), waOpen: false }));
+    this.logAudit('Direct WhatsApp sent', v.name + ' · ' + v.event, 'Campaign');
+    this.flash('WhatsApp message sent to ' + v.name);
+  };
+
+  onRepCat = (c) => this.setState({ repCat: c });
+  onRepStatus = (e) => this.setState({ repStatus: e.target.value });
+  downloadPdf = () => { this.flash('Preparing PDF report…'); setTimeout(() => { try { window.print(); } catch (e) {} }, 400); };
+
+  // ---- admin: users ----
+  openAddUser = () => this.setState({ addUserOpen: true, newUser: { name: '', email: '', role: 'Marketing' } });
+  closeAddUser = () => this.setState({ addUserOpen: false });
+  onNewUserName = (e) => this.setState((s) => ({ newUser: { ...s.newUser, name: e.target.value } }));
+  onNewUserEmail = (e) => this.setState((s) => ({ newUser: { ...s.newUser, email: e.target.value } }));
+  onNewUserRole = (e) => this.setState((s) => ({ newUser: { ...s.newUser, role: e.target.value } }));
+  genPassword() { const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let p = ''; for (let i = 0; i < 8; i++) p += c[Math.floor(Math.random() * c.length)]; return 'Sx-' + p; }
+  addUser = () => {
+    const u = this.state.newUser;
+    if (!u.name.trim() || !u.email.trim()) { this.flash('Enter a name and email.'); return; }
+    const pwd = this.genPassword();
+    const user = { id: 'u' + Date.now(), name: u.name, email: u.email, role: u.role, status: 'Active', perms: { edit: true, delete: false, call: false } };
+    this.setState((s) => ({ users: [...s.users, user], addUserOpen: false }));
+    this.logAudit('User account created', user.email + ' (' + user.role + ')', 'User Management');
+    this.flash('User created — temporary password: ' + pwd);
+  };
+  resetPassword = (id) => { const u = this.state.users.find((x) => x.id === id); const pwd = this.genPassword(); this.logAudit('Password reset issued', u ? u.email : 'user', 'User Management'); this.flash('New password for ' + (u ? u.name : 'user') + ': ' + pwd); };
+  toggleUser = (id) => { const u = this.state.users.find((x) => x.id === id); const ns = u && u.status === 'Active' ? 'Suspended' : 'Active'; this.setState((s) => ({ users: s.users.map((x) => x.id === id ? { ...x, status: ns } : x) })); this.logAudit('User ' + (ns === 'Active' ? 'activated' : 'suspended'), u ? u.email : 'user', 'User Management'); };
+  togglePerm = (id, key) => { const u = this.state.users.find((x) => x.id === id); const cur = u && u.perms ? !!u.perms[key] : false; this.setState((s) => ({ users: s.users.map((x) => x.id === id ? { ...x, perms: { ...(x.perms || {}), [key]: !cur } } : x) })); this.logAudit('Permission ' + (!cur ? 'granted' : 'revoked'), (u ? u.email : 'user') + ' · ' + key, 'User Management'); };
+
+  // ---- admin: import ----
+  importFile = (e) => this.importVisitors(e, null);
+  importVisitors = (e, forcedEvent) => {
+    const file = e.target.files && e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = String(reader.result || '');
+      const lines = text.split(/\r?\n/).filter((l) => l.trim());
+      if (lines.length < 2) { this.flash('No rows found in file.'); return; }
+      const start = /name/i.test(lines[0]) ? 1 : 0;
+      const added = [];
+      for (let i = start; i < lines.length; i++) {
+        const parts = lines[i].split(',').map((x) => x.replace(/^"|"$/g, '').trim());
+        if (!parts[0]) continue;
+        added.push({
+          id: 'v' + Date.now() + i, name: parts[0], company: parts[1] || '—',
+          phone: parts[2] || '+966 5•• ••• •••', email: parts[3] || '', event: forcedEvent || parts[4] || 'Imported',
+          status: 'Pre-registered', consent: 'Pending', cleaned: false, invites: [],
+        });
+      }
+      this.setState((s) => ({ visitors: [...added, ...s.visitors] }));
+      this.logAudit('Visitor data imported', added.length + ' records from ' + file.name + (forcedEvent ? ' → ' + forcedEvent : ''), 'Data');
+      this.flash('Imported ' + added.length + ' records' + (forcedEvent ? ' into ' + forcedEvent : ''));
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  // ---- admin: events ----
+  onNewEventName = (e) => this.setState({ newEventName: e.target.value });
+  createEvent = () => {
+    const name = this.state.newEventName.trim();
+    if (!name) { this.flash('Enter an event name.'); return; }
+    if (this.state.events.some((x) => x.toLowerCase() === name.toLowerCase())) { this.flash('That event already exists.'); return; }
+    this.setState((s) => ({ events: [...s.events, name], newEventName: '' }));
+    this.logAudit('Event created', name, 'Data');
+    this.flash('Event created — ' + name);
+  };
+  importIntoEvent = (ev) => (e) => this.importVisitors(e, ev);
+  openEditEvent = (name) => this.setState({ editEventOpen: true, editEventOrig: name, editEventName: name });
+  closeEditEvent = () => this.setState({ editEventOpen: false });
+  onEditEventName = (e) => this.setState({ editEventName: e.target.value });
+  saveEditEvent = () => {
+    const orig = this.state.editEventOrig, name = this.state.editEventName.trim();
+    if (!name) { this.flash('Enter an event name.'); return; }
+    if (name !== orig && this.state.events.some((x) => x.toLowerCase() === name.toLowerCase())) { this.flash('That event already exists.'); return; }
+    this.setState((s) => ({
+      events: s.events.map((x) => x === orig ? name : x),
+      visitors: s.visitors.map((v) => v.event === orig ? { ...v, event: name } : v),
+      watiConns: s.watiConns.map((w) => w.event === orig ? { ...w, event: name } : w),
+      filterEvent: s.filterEvent === orig ? name : s.filterEvent,
+      reportEvent: s.reportEvent === orig ? name : s.reportEvent,
+      ncEvents: s.ncEvents.map((x) => x === orig ? name : x),
+      editEventOpen: false,
+    }));
+    this.logAudit('Event renamed', orig + ' → ' + name, 'Data');
+    this.flash('Event renamed to ' + name);
+  };
+  deleteEvent = (name) => {
+    const n = this.state.visitors.filter((v) => v.event === name).length;
+    this.setState((s) => ({
+      events: s.events.filter((x) => x !== name),
+      visitors: s.visitors.filter((v) => v.event !== name),
+      watiConns: s.watiConns.filter((w) => w.event !== name),
+      filterEvent: s.filterEvent === name ? 'all' : s.filterEvent,
+      reportEvent: s.reportEvent === name ? 'all' : s.reportEvent,
+      ncEvents: s.ncEvents.filter((x) => x !== name),
+    }));
+    this.logAudit('Event deleted', name + ' (' + n + ' records removed)', 'Data', 'Success');
+    this.flash('Deleted ' + name + ' and ' + n + ' record' + (n === 1 ? '' : 's'));
+  };
+
+  // ---- admin: WATI connections ----
+  toggleWati = (event) => { const w = this.state.watiConns.find((x) => x.event === event); const na = !(w && w.active); this.setState((s) => ({ watiConns: s.watiConns.map((x) => x.event === event ? { ...x, active: na } : x) })); this.logAudit('WATI connection ' + (na ? 'enabled' : 'disabled'), event, 'Integration'); };
+  openAddWati = () => this.setState({ addWatiOpen: true, newWati: { event: '', sender: '', api: '' } });
+  closeAddWati = () => this.setState({ addWatiOpen: false });
+  onNewWatiEvent = (e) => this.setState((s) => ({ newWati: { ...s.newWati, event: e.target.value } }));
+  onNewWatiSender = (e) => this.setState((s) => ({ newWati: { ...s.newWati, sender: e.target.value } }));
+  onNewWatiApi = (e) => this.setState((s) => ({ newWati: { ...s.newWati, api: e.target.value } }));
+  addWati = () => {
+    const w = this.state.newWati;
+    if (!w.event.trim() || !w.sender.trim()) { this.flash('Enter an event and sender number.'); return; }
+    this.setState((s) => ({ watiConns: [...s.watiConns, { event: w.event, sender: w.sender, api: w.api || 'wati_key_••', active: true }], addWatiOpen: false }));
+    this.logAudit('WATI connection added', w.event + ' · ' + w.sender, 'Integration');
+    this.flash('WATI connection added for ' + w.event);
+  };
+
+  // ---- admin: call API (multiple, add/remove) + backup ----
+  toggleCallApi = (id) => { const c = this.state.callApis.find((x) => x.id === id); const nc = !(c && c.connected); this.setState((s) => ({ callApis: s.callApis.map((x) => x.id === id ? { ...x, connected: nc } : x) })); this.logAudit('Call API ' + (nc ? 'connected' : 'disconnected'), c ? c.provider : 'provider', 'Integration'); };
+  testCallApi = (id) => { const c = this.state.callApis.find((x) => x.id === id); this.flash(c && c.connected ? c.provider + ' reachable — test call placed.' : (c ? c.provider + ' is disconnected.' : 'No call API.')); };
+  removeCallApi = (id) => { const c = this.state.callApis.find((x) => x.id === id); this.setState((s) => ({ callApis: s.callApis.filter((x) => x.id !== id) })); this.logAudit('Call API removed', c ? c.provider : 'provider', 'Integration'); };
+  openAddCallApi = () => this.setState({ addCallApiOpen: true, newCallApi: { provider: '', callerId: '', key: '' } });
+  closeAddCallApi = () => this.setState({ addCallApiOpen: false });
+  onNewCallProvider = (e) => this.setState((s) => ({ newCallApi: { ...s.newCallApi, provider: e.target.value } }));
+  onNewCallCallerId = (e) => this.setState((s) => ({ newCallApi: { ...s.newCallApi, callerId: e.target.value } }));
+  onNewCallKey = (e) => this.setState((s) => ({ newCallApi: { ...s.newCallApi, key: e.target.value } }));
+  addCallApi = () => {
+    const c = this.state.newCallApi;
+    if (!c.provider.trim() || !c.callerId.trim()) { this.flash('Enter a provider and caller ID.'); return; }
+    this.setState((s) => ({ callApis: [...s.callApis, { id: 'ca' + Date.now(), provider: c.provider, callerId: c.callerId, key: c.key || 'key_••', connected: true }], addCallApiOpen: false }));
+    this.logAudit('Call API added', c.provider + ' · ' + c.callerId, 'Integration');
+    this.flash('Call API added — ' + c.provider);
+  };
+  toggleAutoBackup = () => this.setState((s) => ({ autoBackup: !s.autoBackup }));
+  onAuditCat = (e) => this.setState({ auditCat: e.target.value });
+  onAuditSearch = (e) => this.setState({ auditSearch: e.target.value });
+  exportAudit = () => {
+    const rows = this.auditFiltered();
+    const cols = ['Timestamp', 'Actor', 'Role', 'Action', 'Target', 'Category', 'Source IP', 'Result'];
+    const esc = (x) => '"' + String(x == null ? '' : x).replace(/"/g, '""') + '"';
+    const lines = [cols.join(',')];
+    rows.forEach((e) => lines.push([e.time, e.actor, e.role, e.action, e.target, e.category, e.ip, e.result].map(esc).join(',')));
+    try {
+      const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'audit-log.csv';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    } catch (e) {}
+    this.flash('Audit log exported (' + rows.length + ' events)');
+  };
+  auditFiltered() {
+    const { auditLog, auditCat, auditSearch } = this.state;
+    const q = auditSearch.trim().toLowerCase();
+    return auditLog.filter((e) =>
+      (auditCat === 'all' || e.category === auditCat) &&
+      (!q || e.actor.toLowerCase().includes(q) || e.action.toLowerCase().includes(q) || (e.target || '').toLowerCase().includes(q) || e.ip.includes(q))
+    );
+  }
+
+  openCall = (id) => this.setState({ callingId: id });
+  onEmail = (e) => this.setState({ email: e.target.value });
+  onPassword = (e) => this.setState({ password: e.target.value });
+  setLoginAs = (which) => this.setState({ loginAs: which, email: which === 'admin' ? 'admin@sunaidiexpo.com' : 'marketing@sunaidiexpo.com' });
+  signIn = () => {
+    const em = this.state.email.trim(); if (!em) return;
+    const u = this.state.users.find((x) => x.email.toLowerCase() === em.toLowerCase());
+    const role = u ? u.role : (/admin/i.test(em) ? 'Admin' : 'Staff');
+    const ip = '10.0.' + (Math.floor(Math.random() * 40) + 1) + '.' + (Math.floor(Math.random() * 250) + 1);
+    this.setState({ loggedIn: true, role, tab: 'dashboard', sessionIp: ip }, () => this.logAudit('User signed in', role + ' session', 'Authentication'));
+  };
+  signOut = () => { this.logAudit('User signed out', 'Session', 'Authentication'); this.setState({ loggedIn: false, selectedIds: [], tab: 'dashboard' }); };
+  setTab = (t) => this.setState({ tab: t });
+  goCampaigns = () => this.setState({ tab: 'campaigns' });
+
+  onFilterEvent = (e) => this.setState({ filterEvent: e.target.value });
+  onFilterStatus = (e) => this.setState({ filterStatus: e.target.value });
+  onFilterConsent = (e) => this.setState({ filterConsent: e.target.value });
+  onSearch = (e) => this.setState({ search: e.target.value });
+
+  filtered() {
+    const { visitors, filterEvent, filterStatus, filterConsent, search } = this.state;
+    const q = search.trim().toLowerCase();
+    return visitors.filter((v) =>
+      (filterEvent === 'all' || v.event === filterEvent) &&
+      (filterStatus === 'all' || v.status === filterStatus) &&
+      (filterConsent === 'all' || v.consent === filterConsent) &&
+      (!q || v.name.toLowerCase().includes(q) || v.company.toLowerCase().includes(q) || v.email.toLowerCase().includes(q))
+    );
+  }
+
+  toggleSelect = (id) => this.setState((s) => ({
+    selectedIds: s.selectedIds.includes(id) ? s.selectedIds.filter((x) => x !== id) : [...s.selectedIds, id],
+  }));
+
+  toggleAll = () => {
+    const ids = this.filtered().map((v) => v.id);
+    const allSel = ids.length > 0 && ids.every((id) => this.state.selectedIds.includes(id));
+    this.setState({ selectedIds: allSel ? [] : ids });
+  };
+
+  onTemplate = (e) => { const t = e.target.value; this.setState({ template: t, message: this.tplMessage(t) }); };
+  onMessage = (e) => this.setState({ message: e.target.value });
+
+  sendCampaign = () => {
+    const sel = this.state.visitors.filter((v) => this.state.selectedIds.includes(v.id));
+    const recips = sel.filter((v) => v.consent === 'Opted-in').length;
+    if (recips === 0) { this.flash('Select at least one opted-in visitor.'); return; }
+    const label = (this.templates.find((t) => t.value === this.state.template) || {}).label || 'Campaign';
+    const evs = Array.from(new Set(sel.map((v) => v.event)));
+    const audience = this.state.filterEvent !== 'all' ? this.state.filterEvent : (evs.length === 1 ? evs[0] : evs.length + ' events');
+    const camp = { id: 'c' + Date.now(), name: label, event: audience, recipients: recips, sentAt: 'Just now', status: 'Delivered' };
+    const act = { id: 'a' + Date.now(), initials: 'WA', name: label, detail: 'Campaign sent to ' + recips.toLocaleString() + ' contacts', tag: 'Sent', kind: 'sent' };
+    this.setState((s) => ({ campaigns: [camp, ...s.campaigns], activity: [act, ...s.activity].slice(0, 8), selectedIds: [] }));
+    this.flash('Campaign sent to ' + recips.toLocaleString() + ' contacts via WATI');
+  };
+
+  openEdit = (id) => {
+    const v = this.state.visitors.find((x) => x.id === id);
+    if (v) this.setState({ editingId: id, editDraft: { name: v.name, company: v.company, phone: v.phone, email: v.email, consent: v.consent, cleaned: !!v.cleaned } });
+  };
+  closeEdit = () => this.setState({ editingId: null });
+  stop = (e) => e.stopPropagation();
+  onEditName = (e) => this.setState((s) => ({ editDraft: { ...s.editDraft, name: e.target.value } }));
+  onEditPhone = (e) => this.setState((s) => ({ editDraft: { ...s.editDraft, phone: e.target.value } }));
+  onEditConsent = (e) => this.setState((s) => ({ editDraft: { ...s.editDraft, consent: e.target.value } }));
+  onEditEmail = (e) => this.setState((s) => ({ editDraft: { ...s.editDraft, email: e.target.value } }));
+  onEditCompany = (e) => this.setState((s) => ({ editDraft: { ...s.editDraft, company: e.target.value } }));
+  onEditCleaned = (e) => this.setState((s) => ({ editDraft: { ...s.editDraft, cleaned: e.target.value === 'Yes' } }));
+  saveEdit = () => {
+    const { editingId, editDraft, visitors } = this.state;
+    const next = visitors.map((v) => v.id === editingId ? { ...v, name: editDraft.name, company: editDraft.company, phone: editDraft.phone, email: editDraft.email, consent: editDraft.consent, cleaned: editDraft.cleaned } : v);
+    const act = { id: 'a' + Date.now(), initials: this.initials(editDraft.name), name: editDraft.name, detail: editDraft.cleaned ? 'Record updated & cleaned' : 'Record updated', tag: editDraft.cleaned ? 'Cleaned' : 'Edited', kind: editDraft.cleaned ? 'cleaned' : 'edit' };
+    this.setState((s) => ({ visitors: next, editingId: null, activity: [act, ...s.activity].slice(0, 8) }));
+    this.logAudit('Visitor record updated', editDraft.name, 'Data');
+    this.flash('Record updated for ' + editDraft.name);
+  };
+
+  exportCsv(rows, fname) {
+    const cols = ['Name', 'Company', 'Phone', 'Email', 'Event', 'Status', 'Consent', 'Cleaned', 'Invitations'];
+    const esc = (x) => '"' + String(x == null ? '' : x).replace(/"/g, '""') + '"';
+    const lines = [cols.join(',')];
+    rows.forEach((v) => lines.push([v.name, v.company, v.phone, v.email, v.event, v.status, v.consent, v.cleaned ? 'Yes' : 'No', (v.invites || []).map((iv) => iv.event + ' (' + iv.status + ')').join('; ')].map(esc).join(',')));
+    try {
+      const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = fname; document.body.appendChild(a); a.click();
+      document.body.removeChild(a); URL.revokeObjectURL(url);
+    } catch (e) {}
+    this.logAudit('CSV export generated', fname + ' · ' + rows.length + ' records', 'Export');
+    this.flash('Exported ' + rows.length + ' records to CSV');
+  }
+  exportAll = () => this.exportCsv(this.state.visitors, 'visitors-all.csv');
+  exportFiltered = () => this.exportCsv(this.filtered(), 'visitors-filtered.csv');
+
+  toggleCleaned = (id) => {
+    const v = this.state.visitors.find((x) => x.id === id);
+    const nowClean = !(v && v.cleaned);
+    const next = this.state.visitors.map((x) => x.id === id ? { ...x, cleaned: nowClean } : x);
+    const act = { id: 'a' + Date.now(), initials: this.initials(v ? v.name : 'X'), name: v ? v.name : '', detail: nowClean ? 'Record marked cleaned' : 'Marked not cleaned', tag: nowClean ? 'Cleaned' : 'Pending', kind: 'cleaned' };
+    this.setState((s) => ({ visitors: next, activity: [act, ...s.activity].slice(0, 8) }));
+    this.flash((v ? v.name : 'Record') + (nowClean ? ' marked as cleaned' : ' marked not cleaned'));
+  };
+  openCall = (id) => this.setState({ callingId: id });
+  closeCall = () => this.setState({ callingId: null });
+  onAddInviteEvent = (e) => this.setState({ addInviteEvent: e.target.value });
+  onAddInviteStatus = (e) => this.setState({ addInviteStatus: e.target.value });
+  addInvite = () => {
+    const id = this.state.callingId; if (!id) return;
+    const inv = { id: 'i' + Date.now(), event: this.state.addInviteEvent, status: this.state.addInviteStatus, date: this.today() };
+    this.setState((s) => ({ visitors: s.visitors.map((v) => v.id === id ? { ...v, invites: [inv, ...v.invites] } : v) }));
+    this.flash('Invitation logged: ' + inv.event);
+  };
+  setInviteStatus = (vid, iid, val) => this.setState((s) => ({ visitors: s.visitors.map((v) => v.id === vid ? { ...v, invites: v.invites.map((iv) => iv.id === iid ? { ...iv, status: val } : iv) } : v) }));
+  removeInvite = (vid, iid) => this.setState((s) => ({ visitors: s.visitors.map((v) => v.id === vid ? { ...v, invites: v.invites.filter((iv) => iv.id !== iid) } : v) }));
+
+  get allEvents() { return this.state.events; }
+  optedInIds(events) { const set = new Set(events); return this.state.visitors.filter((v) => set.has(v.event) && v.consent === 'Opted-in').map((v) => v.id); }
+  openNewCampaign = () => this.setState((s) => ({ ncOpen: true, ncSelectedIds: this.optedInIds(s.ncEvents) }));
+  closeNewCampaign = () => this.setState({ ncOpen: false });
+  toggleNcEvent = (ev) => this.setState((s) => {
+    const has = s.ncEvents.includes(ev);
+    const events = has ? s.ncEvents.filter((x) => x !== ev) : [...s.ncEvents, ev];
+    const poolIds = new Set(this.optedInIds(events));
+    const kept = s.ncSelectedIds.filter((id) => poolIds.has(id));
+    const sel = has ? kept : Array.from(new Set([...kept, ...this.optedInIds([ev])]));
+    return { ncEvents: events, ncSelectedIds: sel };
+  });
+  toggleNcSelect = (id) => this.setState((s) => ({ ncSelectedIds: s.ncSelectedIds.includes(id) ? s.ncSelectedIds.filter((x) => x !== id) : [...s.ncSelectedIds, id] }));
+  toggleNcAll = () => { const ids = this.optedInIds(this.state.ncEvents); const all = ids.length > 0 && ids.every((id) => this.state.ncSelectedIds.includes(id)); this.setState({ ncSelectedIds: all ? [] : ids }); };
+  onNcTemplate = (e) => { const t = e.target.value; this.setState({ ncTemplate: t, ncMessage: this.tplMessage(t) }); };
+  onNcMessage = (e) => this.setState({ ncMessage: e.target.value });
+  sendNewCampaign = () => {
+    const sel = this.state.visitors.filter((v) => this.state.ncSelectedIds.includes(v.id));
+    if (sel.length === 0) { this.flash('Select at least one recipient.'); return; }
+    const label = (this.templates.find((t) => t.value === this.state.ncTemplate) || {}).label || 'Campaign';
+    const byEvent = {};
+    sel.forEach((v) => { (byEvent[v.event] = byEvent[v.event] || []).push(v); });
+    const stamp = Date.now();
+    const newCamps = [], acts = [];
+    Object.keys(byEvent).forEach((ev, k) => {
+      const conn = this.watiFor(ev) || {};
+      const n = byEvent[ev].length;
+      newCamps.push({ id: 'c' + stamp + k, name: label, event: ev, recipients: n, sentAt: 'Just now', status: 'Delivered', wati: conn.sender });
+      acts.push({ id: 'a' + stamp + k, initials: 'WA', name: label, detail: 'Sent to ' + n.toLocaleString() + ' contacts (' + ev + ')', tag: 'Sent', kind: 'invited' });
+    });
+    this.setState((s) => ({ campaigns: [...newCamps, ...s.campaigns], activity: [...acts, ...s.activity].slice(0, 8), ncOpen: false }));
+    const evCount = Object.keys(byEvent).length;
+    this.logAudit('Campaign sent via WATI', sel.length.toLocaleString() + ' recipients · ' + evCount + (evCount === 1 ? ' event' : ' events'), 'Campaign');
+    this.flash('Sent ' + sel.length.toLocaleString() + ' messages across ' + evCount + (evCount === 1 ? ' event' : ' events') + ' via WATI');
+  };
+  onCleanupFilter = (e) => this.setState({ cleanupFilter: e.target.value });
+  onCleanupEventFilter = (e) => this.setState({ cleanupEventFilter: e.target.value });
+  onCallFilter = (e) => this.setState({ callFilter: e.target.value });
+  onCallEventFilter = (e) => this.setState({ callEventFilter: e.target.value });
+  onReportEvent = (e) => this.setState({ reportEvent: e.target.value });
+  onTargetEvent = (e) => this.setState({ targetEvent: e.target.value });
+  exportEvent = () => {
+    const ev = this.state.reportEvent;
+    const rows = ev === 'all' ? this.state.visitors : this.state.visitors.filter((v) => v.event === ev);
+    this.exportCsv(rows, 'visitors-' + (ev === 'all' ? 'all' : ev.replace(/\s+/g, '-').toLowerCase()) + '.csv');
+  };
+
+  // ---- styles ----
+  statusStyle(s) {
+    const map = {
+      'Category': ['#1f6a47', '#e6f1ea'],
+      'Engaged': ['#b07a1e', '#f6efe0'],
+      'Pre-registered': ['#1f3c88', '#eef1fa'],
+      'Pending': ['#6c6a66', '#efeeea'],
+    };
+    const c = map[s] || map['Pending'];
+    return 'font-size:10.5px; font-weight:500; color:' + c[0] + '; background:' + c[1] + '; border-radius:5px; padding:3px 9px; white-space:nowrap;';
+  }
+  consentStyle(c) {
+    const map = { 'Opted-in': ['#1f6a47', '#e6f1ea'], 'Pending': ['#b07a1e', '#f6efe0'], 'Opted-out': ['#9a4a3a', '#f5e8e4'] };
+    const x = map[c] || map['Pending'];
+    return 'font-size:10.5px; font-weight:500; color:' + x[0] + '; background:' + x[1] + '; border-radius:5px; padding:3px 9px; white-space:nowrap;';
+  }
+  tagStyle(kind) {
+    const map = { merge: ['#1f6a47', '#e6f1ea', '#cfe8d8'], sent: ['#1f8a4c', '#e7f4ec', '#cfe8d8'], edit: ['#1f3c88', '#eef1fa', '#dde3f5'], update: ['#1f3c88', '#eef1fa', '#dde3f5'], cleaned: ['#1f6a47', '#e6f1ea', '#cfe8d8'], invited: ['#1f8a4c', '#e7f4ec', '#cfe8d8'] };
+    const x = map[kind] || map.edit;
+    return 'flex:none; font-size:10px; color:' + x[0] + '; background:' + x[1] + '; border:1px solid ' + x[2] + '; border-radius:5px; padding:2px 7px;';
+  }
+  iconStyle(kind) {
+    const sent = kind === 'sent' || kind === 'invited' || kind === 'cleaned';
+    return 'width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; ' +
+      (sent ? 'background:#e7f4ec; color:#1f8a4c;' : 'background:#eef1fa; color:#1f3c88;');
+  }
+  checkboxStyle(sel) {
+    return 'width:16px; height:16px; border-radius:4px; border:1.5px solid ' + (sel ? '#1f3c88' : '#c9c7c1') + '; background:' + (sel ? '#1f3c88' : '#fff') + '; display:block; padding:0;' +
+      (sel ? " background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 8.5l3 3 6-6'/%3E%3C/svg%3E\"); background-size:13px; background-position:center; background-repeat:no-repeat;" : '');
+  }
+
+  renderVals() {
+    const s = this.state;
+    const accent = (this.props && this.props.accentColor) || '#1f3c88';
+    const compact = this.props && this.props.compactRows;
+    const pad = compact ? '8px' : '12px';
+
+    const total = s.visitors.length;
+    const optedIn = s.visitors.filter((v) => v.consent === 'Opted-in').length;
+    const checkedIn = s.visitors.filter((v) => v.status === 'Category').length;
+    const eventsSet = Array.from(new Set(s.visitors.map((v) => v.event)));
+
+    // event stats
+    const counts = {};
+    s.visitors.forEach((v) => { counts[v.event] = (counts[v.event] || 0) + 1; });
+    const statsArr = Object.keys(counts).map((k) => ({ name: k, count: counts[k] }));
+    statsArr.sort((a, b) => b.count - a.count);
+    const max = statsArr.length ? statsArr[0].count : 1;
+    const eventStats = statsArr.map((e, i) => ({
+      name: e.name, count: e.count,
+      barStyle: 'width:' + Math.round((e.count / max) * 100) + '%; height:100%; background:' + (i < 2 ? '#1f3c88' : i < 4 ? '#5478c4' : '#9bb0db') + ';',
+    }));
+
+    const activity = s.activity.map((a) => ({ ...a, iconStyle: this.iconStyle(a.kind), tagStyle: this.tagStyle(a.kind) }));
+
+    const fil = this.filtered();
+    const filIds = fil.map((v) => v.id);
+    const allSel = filIds.length > 0 && filIds.every((id) => s.selectedIds.includes(id));
+    const visitorsList = fil.map((v, i) => ({
+      id: v.id, name: v.name, company: v.company, phoneMasked: this.maskPhone(v.phone),
+      event: v.event, status: v.status, consent: v.consent,
+      selected: s.selectedIds.includes(v.id),
+      rowStyle: 'border-bottom:1px solid #f0efec; background:' + (i % 2 ? '#fcfbf9' : '#fff') + ';',
+      statusStyle: this.statusStyle(v.status),
+      consentStyle: this.consentStyle(v.consent),
+      checkboxStyle: this.checkboxStyle(s.selectedIds.includes(v.id)),
+      onToggle: () => this.toggleSelect(v.id),
+      onEdit: () => this.openEdit(v.id),
+    }));
+    // apply compact padding to row cells via rowStyle? cells fixed; adjust by wrapping — keep simple
+    void pad;
+
+    const selectedSel = s.visitors.filter((v) => s.selectedIds.includes(v.id));
+    const recipientsCount = selectedSel.filter((v) => v.consent === 'Opted-in').length;
+
+    const navDef = [
+      { key: 'dashboard', label: 'Dashboard' },
+      { key: 'visitors', label: 'Visitors' },
+      { key: 'cleanup', label: 'Cleanup' },
+      { key: 'calls', label: 'Calls' },
+      { key: 'campaigns', label: 'Campaigns' },
+      { key: 'reports', label: 'Reports' },
+      { key: 'admin', label: 'Admin' },
+    ].filter((n) => n.key !== 'admin' || s.role === 'Admin');
+    const navItems = navDef.map((n) => ({
+      label: n.label,
+      onClick: () => this.setTab(n.key),
+      style: 'background:' + (s.tab === n.key ? 'rgba(255,255,255,0.12)' : 'transparent') + '; border:none; color:' + (s.tab === n.key ? '#fff' : '#aab2d4') + '; font-weight:' + (s.tab === n.key ? '600' : '500') + '; font-size:13px; padding:8px 14px; border-radius:8px;',
+    }));
+
+    const campaignsList = s.campaigns.map((c, i) => ({
+      ...c, statusLabel: c.status,
+      watiLabel: c.wati || this.watiFor(c.event).sender || '—',
+      rowStyle: 'border-top:1px solid #ececea; background:' + (i % 2 ? '#fcfbf9' : '#fff') + ';',
+    }));
+
+    const sendActive = recipientsCount > 0;
+    const sendBtnStyle = 'width:100%; border:none; border-radius:9px; padding:13px; font-size:13.5px; font-weight:700; color:#fff; background:' + (sendActive ? '#1f8a4c' : '#a9c7b5') + '; box-shadow:' + (sendActive ? '0 10px 22px -10px rgba(31,138,76,0.6)' : 'none') + ';';
+
+    const selectAllStyle = this.checkboxStyle(allSel);
+
+    // cleanup
+    const cleanedCount = s.visitors.filter((v) => v.cleaned).length;
+    const cleanupFil = s.visitors.filter((v) => (s.cleanupEventFilter === 'all' || v.event === s.cleanupEventFilter) && (s.cleanupFilter === 'all' || (s.cleanupFilter === 'cleaned' ? v.cleaned : !v.cleaned)));
+    const cleanupList = cleanupFil.map((v, i) => ({
+      id: v.id, name: v.name, company: v.company, phoneMasked: this.maskPhone(v.phone), event: v.event, cleaned: v.cleaned,
+      telHref: 'tel:' + v.phone.replace(/\s+/g, ''),
+      onCall: () => this.startCall(v.id),
+      onWa: () => this.openWa(v.id),
+      cleanedStyle: 'font-size:10.5px; font-weight:500; border-radius:5px; padding:3px 9px; white-space:nowrap; ' + (v.cleaned ? 'color:#1f6a47; background:#e6f1ea;' : 'color:#b07a1e; background:#f6efe0;'),
+      cleanedLabel: v.cleaned ? 'Cleaned' : 'Not cleaned',
+      toggleLabel: v.cleaned ? 'Mark not cleaned' : 'Mark cleaned',
+      toggleStyle: 'font-size:12px; font-weight:600; border-radius:7px; padding:7px 13px; border:1px solid ' + (v.cleaned ? '#dcdad4; background:#fff; color:#7a7873;' : '#1f8a4c; background:#1f8a4c; color:#fff;'),
+      onToggle: () => this.toggleCleaned(v.id),
+      onEdit: () => this.openEdit(v.id),
+      rowStyle: 'border-bottom:1px solid #f0efec; background:' + (i % 2 ? '#fcfbf9' : '#fff') + ';',
+    }));
+
+    // calls / teleprompter
+    const stColor = (st) => st === 'Invited' ? '#1f8a4c' : st === 'Not interested' ? '#b0481f' : st === 'Pending' ? '#b07a1e' : '#c9c7c1';
+    const stBadge = (st) => 'font-size:10.5px; font-weight:500; border-radius:5px; padding:3px 9px; white-space:nowrap; ' + (st === 'Invited' ? 'color:#1f6a47; background:#e6f1ea;' : st === 'Not interested' ? 'color:#9a4a3a; background:#f5e8e4;' : st === 'Pending' ? 'color:#b07a1e; background:#f6efe0;' : 'color:#7a7873; background:#efeeea;');
+    const callFil = s.visitors.filter((v) => {
+      if (s.callEventFilter !== 'all' && v.event !== s.callEventFilter) return false;
+      if (s.callFilter === 'all') return true;
+      if (s.callFilter === 'none') return v.invites.length === 0;
+      return v.invites.some((iv) => iv.status === s.callFilter);
+    });
+    const callsList = callFil.map((v, i) => {
+      const lt = v.invites[0] || null;
+      const ls = lt ? lt.status : 'Not contacted';
+      return {
+        id: v.id, name: v.name, company: v.company, phoneFull: v.phone, event: v.event,
+        telHref: 'tel:' + v.phone.replace(/\s+/g, ''),
+        onCall: () => this.startCall(v.id),
+        onWa: () => this.openWa(v.id),
+        latestLabel: ls, latestStyle: stBadge(ls),
+        dotStyle: 'width:8px; height:8px; border-radius:50%; display:inline-block; background:' + stColor(ls) + ';',
+        inviteCountLabel: v.invites.length === 1 ? '1 event' : v.invites.length + ' events',
+        onOpen: () => this.openCall(v.id),
+        rowStyle: 'border-bottom:1px solid #f0efec; background:' + (i % 2 ? '#fcfbf9' : '#fff') + ';',
+      };
+    });
+    const invitedCount = s.visitors.filter((v) => v.invites.some((iv) => iv.status === 'Invited')).length;
+    const callScript = 'Hello, this is Sunaidi Expo. Thank you for joining us previously — we would love to invite you to ' + s.targetEvent + '. May we reserve a place for you?';
+
+    // call modal (invitation history)
+    const callingVisitor = s.callingId ? s.visitors.find((v) => v.id === s.callingId) : null;
+    const callInvites = callingVisitor ? callingVisitor.invites.map((iv) => ({
+      id: iv.id, event: iv.event, status: iv.status, date: iv.date, statusStyle: stBadge(iv.status),
+      onStatus: (e) => this.setInviteStatus(callingVisitor.id, iv.id, e.target.value),
+      onRemove: () => this.removeInvite(callingVisitor.id, iv.id),
+    })) : [];
+
+    // new campaign (per-event WATI, multiple events) + record selection
+    const ncEventChips = this.allEvents.map((ev) => ({
+      name: ev, selected: s.ncEvents.includes(ev),
+      onToggle: () => this.toggleNcEvent(ev),
+      style: 'font-size:12px; font-weight:500; border-radius:20px; padding:7px 13px; border:1px solid ' + (s.ncEvents.includes(ev) ? '#1f8a4c; background:#1f8a4c; color:#fff;' : '#dcdad4; background:#fff; color:#5a5853;'),
+    }));
+    const ncWatiLines = s.ncEvents.map((ev) => {
+      const c = this.watiFor(ev) || { sender: '—', api: '—' };
+      const n = s.visitors.filter((v) => v.event === ev && v.consent === 'Opted-in' && s.ncSelectedIds.includes(v.id)).length;
+      return { event: ev, line: c.sender + '  ·  ' + c.api, count: n };
+    });
+    const ncPoolVisitors = s.visitors.filter((v) => s.ncEvents.includes(v.event) && v.consent === 'Opted-in');
+    const ncPool = ncPoolVisitors.map((v, i) => ({
+      id: v.id, name: v.name, company: v.company, event: v.event,
+      checkboxStyle: this.checkboxStyle(s.ncSelectedIds.includes(v.id)),
+      onToggle: () => this.toggleNcSelect(v.id),
+      rowStyle: 'display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:7px; background:' + (i % 2 ? '#faf9f7' : '#fff') + ';',
+    }));
+    const ncAllSel = ncPoolVisitors.length > 0 && ncPoolVisitors.every((v) => s.ncSelectedIds.includes(v.id));
+    const ncSelectAllStyle = this.checkboxStyle(ncAllSel);
+    const ncRecipients = s.ncSelectedIds.length;
+
+    // reports
+    const repEvent = s.reportEvent;
+    const inEvent = (v) => repEvent === 'all' || v.event === repEvent;
+    const reportRows = s.visitors.filter(inEvent);
+
+    const repCats = [{ key: 'cleanup', label: 'Cleanup' }, { key: 'calls', label: 'Calls' }, { key: 'campaigns', label: 'Campaigns' }].map((c) => ({
+      label: c.label, onClick: () => this.onRepCat(c.key),
+      style: 'font-size:13px; font-weight:600; border-radius:8px; padding:9px 18px; border:1px solid ' + (s.repCat === c.key ? '#1f3c88; background:#1f3c88; color:#fff;' : '#dcdad4; background:#fff; color:#5a5853;'),
+    }));
+
+    // cleanup report
+    const repCleanedN = reportRows.filter((v) => v.cleaned).length;
+    const repNotCleanedN = reportRows.length - repCleanedN;
+    const repCleanedPct = reportRows.length ? Math.round((repCleanedN / reportRows.length) * 100) : 0;
+    const cleanBarsR = [
+      { label: 'Cleaned', n: repCleanedN, color: '#1f8a4c' },
+      { label: 'Not cleaned', n: repNotCleanedN, color: '#b07a1e' },
+    ].map((b) => { const mx = Math.max(1, reportRows.length); return { label: b.label, n: b.n, barStyle: 'width:' + Math.round((b.n / mx) * 100) + '%; height:100%; background:' + b.color + '; border-radius:5px;' }; });
+
+    // calls report (with time logs)
+    const logScope = s.callLog.filter((l) => repEvent === 'all' || l.event === repEvent);
+    const logFil = logScope.filter((l) => s.repStatus === 'all' || l.outcome === s.repStatus);
+    const callTotals = { Invited: 0, Pending: 0, 'Not interested': 0 };
+    logScope.forEach((l) => { callTotals[l.outcome] = (callTotals[l.outcome] || 0) + 1; });
+    const totalCalls = logScope.length;
+    const totalCallSecs = logScope.reduce((a, l) => a + l.duration, 0);
+    const avgCallLabel = totalCalls ? this.fmtDur(Math.round(totalCallSecs / totalCalls)) : '0:00';
+    const totalCallLabel = this.fmtDur(totalCallSecs);
+    const callLogList = logFil.map((l, i) => ({
+      id: l.id, name: l.name, company: l.company, event: l.event, time: l.time,
+      durationLabel: this.fmtDur(l.duration), outcome: l.outcome, outcomeStyle: stBadge(l.outcome),
+      rowStyle: 'border-bottom:1px solid #f0efec; background:' + (i % 2 ? '#fcfbf9' : '#fff') + ';',
+    }));
+    const callBarMax = Math.max(1, callTotals.Invited, callTotals.Pending, callTotals['Not interested']);
+    const callBarsR = [
+      { label: 'Invited', n: callTotals.Invited, color: '#1f8a4c' },
+      { label: 'Pending', n: callTotals.Pending, color: '#b07a1e' },
+      { label: 'Not interested', n: callTotals['Not interested'], color: '#b0481f' },
+    ].map((b) => ({ label: b.label, n: b.n, barStyle: 'width:' + Math.round((b.n / callBarMax) * 100) + '%; height:100%; background:' + b.color + '; border-radius:5px;' }));
+
+    // campaigns report
+    const repCampaigns = s.campaigns.filter((c) => repEvent === 'all' || c.event === repEvent);
+    const campMsgs = repCampaigns.reduce((a, c) => a + c.recipients, 0);
+    const campByEvent = {};
+    repCampaigns.forEach((c) => { campByEvent[c.event] = (campByEvent[c.event] || 0) + c.recipients; });
+    const campArr = Object.keys(campByEvent).map((k) => ({ name: k, n: campByEvent[k] }));
+    campArr.sort((a, b) => b.n - a.n);
+    const campMax = Math.max(1, ...campArr.map((c) => c.n));
+    const campBarsR = campArr.map((c) => ({ label: c.name, n: c.n.toLocaleString(), barStyle: 'width:' + Math.round((c.n / campMax) * 100) + '%; height:100%; background:#1f3c88; border-radius:5px;' }));
+
+    // active call + individual WhatsApp
+    const ac = s.activeCall;
+    const waVisitor = s.waVisitorId ? s.visitors.find((v) => v.id === s.waVisitorId) : null;
+    const waConn = waVisitor ? (this.watiFor(waVisitor.event) || {}) : {};
+
+    // admin
+    const permPill = (on) => 'font-size:11px; font-weight:600; border-radius:7px; padding:6px 11px; cursor:pointer; border:1px solid ' + (on ? '#cfe8d8; background:#e7f4ec; color:#1f6a47;' : '#e3e1db; background:#f4f3ef; color:#9a978f;');
+    const usersList = s.users.map((u, i) => {
+      const p = u.perms || {};
+      return {
+      id: u.id, name: u.name, email: u.email, role: u.role, status: u.status,
+      initials: this.initials(u.name),
+      statusStyle: 'font-size:10.5px; font-weight:500; border-radius:5px; padding:3px 9px; ' + (u.status === 'Active' ? 'color:#1f6a47; background:#e6f1ea;' : 'color:#9a4a3a; background:#f5e8e4;'),
+      toggleLabel: u.status === 'Active' ? 'Suspend' : 'Activate',
+      editStyle: permPill(!!p.edit), editLabel: (p.edit ? '✓' : '✕') + ' Edit', onEditPerm: () => this.togglePerm(u.id, 'edit'),
+      deleteStyle: permPill(!!p.delete), deleteLabel: (p.delete ? '✓' : '✕') + ' Delete', onDeletePerm: () => this.togglePerm(u.id, 'delete'),
+      callStyle: permPill(!!p.call), callLabel: (p.call ? '✓' : '✕') + ' Call', onCallPerm: () => this.togglePerm(u.id, 'call'),
+      onReset: () => this.resetPassword(u.id),
+      onToggle: () => this.toggleUser(u.id),
+      rowStyle: 'border-top:1px solid #ececea; background:' + (i % 2 ? '#fcfbf9' : '#fff') + ';',
+      };
+    });
+    const watiList = s.watiConns.map((w, i) => ({
+      event: w.event, sender: w.sender, api: w.api, active: w.active,
+      statusStyle: 'font-size:10.5px; font-weight:500; border-radius:5px; padding:3px 9px; ' + (w.active ? 'color:#1f6a47; background:#e6f1ea;' : 'color:#7a7873; background:#efeeea;'),
+      statusLabel: w.active ? 'Active' : 'Disabled',
+      toggleLabel: w.active ? 'Disable' : 'Enable',
+      onToggle: () => this.toggleWati(w.event),
+      rowStyle: 'border-top:1px solid #ececea; background:' + (i % 2 ? '#fcfbf9' : '#fff') + ';',
+    }));
+    const callApiList = s.callApis.map((c, i) => ({
+      id: c.id, provider: c.provider, callerId: c.callerId, key: c.key, connected: c.connected,
+      statusStyle: 'font-size:10.5px; font-weight:600; border-radius:6px; padding:3px 10px; ' + (c.connected ? 'color:#1f6a47; background:#e6f1ea;' : 'color:#9a4a3a; background:#f5e8e4;'),
+      statusLabel: c.connected ? 'Connected' : 'Disconnected',
+      toggleLabel: c.connected ? 'Disconnect' : 'Reconnect',
+      onTest: () => this.testCallApi(c.id),
+      onToggle: () => this.toggleCallApi(c.id),
+      onRemove: () => this.removeCallApi(c.id),
+      rowStyle: 'border-top:1px solid #ececea; background:' + (i % 2 ? '#fcfbf9' : '#fff') + ';',
+    }));
+
+    const auditFil = this.auditFiltered();
+    const auditList = auditFil.map((e, i) => ({
+      id: e.id, time: e.time, actor: e.actor, role: e.role, action: e.action, target: e.target, category: e.category, ip: e.ip, result: e.result,
+      resultStyle: 'font-size:10.5px; font-weight:600; border-radius:5px; padding:3px 9px; ' + (e.result === 'Success' ? 'color:#1f6a47; background:#e6f1ea;' : e.result === 'Denied' ? 'color:#9a4a3a; background:#f5e8e4;' : 'color:#b07a1e; background:#f6efe0;'),
+      catStyle: 'font-size:10px; font-weight:500; color:#1f3c88; background:#eef1fa; border:1px solid #dde3f5; border-radius:5px; padding:2px 8px; white-space:nowrap;',
+      rowStyle: 'border-top:1px solid #ececea; background:' + (i % 2 ? '#fcfbf9' : '#fff') + ';',
+    }));
+
+    const eventCounts = {};
+    s.visitors.forEach((v) => { eventCounts[v.event] = (eventCounts[v.event] || 0) + 1; });
+    const eventsList = s.events.map((ev, i) => ({
+      name: ev, count: (eventCounts[ev] || 0).toLocaleString(),
+      onImport: this.importIntoEvent(ev),
+      onEdit: () => this.openEditEvent(ev),
+      onDelete: () => this.deleteEvent(ev),
+      rowStyle: 'border-top:1px solid #ececea; background:' + (i % 2 ? '#fcfbf9' : '#fff') + ';',
+    }));
+
+    return {
+      eventsList, eventOptions: s.events, newEventName: s.newEventName, onNewEventName: this.onNewEventName, createEvent: this.createEvent,
+      editEventOpen: s.editEventOpen, editEventName: s.editEventName, editEventOrig: s.editEventOrig, onEditEventName: this.onEditEventName, saveEditEvent: this.saveEditEvent, closeEditEvent: this.closeEditEvent,
+      auditList, noAudit: auditFil.length === 0, auditCount: s.auditLog.length,
+      auditCat: s.auditCat, onAuditCat: this.onAuditCat, auditSearch: s.auditSearch, onAuditSearch: this.onAuditSearch, exportAudit: this.exportAudit,
+      isAdmin: s.tab === 'admin', userRole: s.role,
+      usersList, openAddUser: this.openAddUser, resetPasswordHint: '',
+      importFile: this.importFile,
+      watiList, openAddWati: this.openAddWati, watiActiveCount: s.watiConns.filter((w) => w.active).length,
+      callApiList, callApiActiveCount: s.callApis.filter((c) => c.connected).length, openAddCallApi: this.openAddCallApi,
+      addCallApiOpen: s.addCallApiOpen, closeAddCallApi: this.closeAddCallApi, addCallApi: this.addCallApi,
+      newCallProvider: s.newCallApi.provider, newCallCallerId: s.newCallApi.callerId, newCallKey: s.newCallApi.key,
+      onNewCallProvider: this.onNewCallProvider, onNewCallCallerId: this.onNewCallCallerId, onNewCallKey: this.onNewCallKey,
+      autoBackup: s.autoBackup, autoBackupLabel: s.autoBackup ? 'On' : 'Off',
+      autoBackupStyle: 'width:42px; height:24px; border-radius:13px; border:none; position:relative; background:' + (s.autoBackup ? '#1f8a4c' : '#cdcbc5') + ';',
+      autoBackupKnob: 'position:absolute; top:3px; left:' + (s.autoBackup ? '21px' : '3px') + '; width:18px; height:18px; border-radius:50%; background:#fff; transition:left .15s;',
+      toggleAutoBackup: this.toggleAutoBackup,
+      addUserOpen: s.addUserOpen, closeAddUser: this.closeAddUser, addUser: this.addUser,
+      newUserName: s.newUser.name, newUserEmail: s.newUser.email, newUserRole: s.newUser.role,
+      onNewUserName: this.onNewUserName, onNewUserEmail: this.onNewUserEmail, onNewUserRole: this.onNewUserRole,
+      addWatiOpen: s.addWatiOpen, closeAddWati: this.closeAddWati, addWati: this.addWati,
+      newWatiEvent: s.newWati.event, newWatiSender: s.newWati.sender, newWatiApi: s.newWati.api,
+      onNewWatiEvent: this.onNewWatiEvent, onNewWatiSender: this.onNewWatiSender, onNewWatiApi: this.onNewWatiApi,
+      repCat: s.repCat, repCats, isRepCleanup: s.repCat === 'cleanup', isRepCalls: s.repCat === 'calls', isRepCampaigns: s.repCat === 'campaigns',
+      repStatus: s.repStatus, onRepStatus: this.onRepStatus, downloadPdf: this.downloadPdf,
+      reportRowsCount: reportRows.length, repCleanedN, repNotCleanedN, repCleanedPct, cleanBarsR,
+      callLogList, noCallLog: logFil.length === 0, totalCalls, avgCallLabel, totalCallLabel, callBarsR,
+      repCampaignCount: repCampaigns.length, campMsgs: campMsgs.toLocaleString(), campBarsR, noCampBars: campBarsR.length === 0,
+      showActiveCall: !!ac, acName: ac ? ac.name : '', acCompany: ac ? ac.company : '', acEvent: ac ? ac.event : '', avatarInitialsCall: ac ? this.initials(ac.name) : '',
+      acTelHref: ac ? 'tel:' + ac.phone.replace(/\s+/g, '') : '#', callTimer: this.fmtDur(s.callSeconds),
+      endInvited: () => this.endCall('Invited'), endPending: () => this.endCall('Pending'), endNot: () => this.endCall('Not interested'), cancelCall: this.cancelCall,
+      waOpen: s.waOpen, waName: waVisitor ? waVisitor.name : '', waEvent: waVisitor ? waVisitor.event : '', waSender: waConn.sender || '—',
+      waTemplate: s.waTemplate, onWaTemplate: this.onWaTemplate, waMessage: s.waMessage, onWaMessage: this.onWaMessage, sendWa: this.sendWa, closeWa: this.closeWa,
+      isCleanup: s.tab === 'cleanup', isCalls: s.tab === 'calls',
+      cleanupList, cleanedCount, cleanupFilter: s.cleanupFilter, onCleanupFilter: this.onCleanupFilter, noCleanup: cleanupFil.length === 0,
+      cleanupEventFilter: s.cleanupEventFilter, onCleanupEventFilter: this.onCleanupEventFilter,
+      callsList, invitedCount, callFilter: s.callFilter, onCallFilter: this.onCallFilter, noCalls: callFil.length === 0,
+      callEventFilter: s.callEventFilter, onCallEventFilter: this.onCallEventFilter,
+      targetEvent: s.targetEvent, onTargetEvent: this.onTargetEvent, callScript, openCall: this.openCall,
+      showCall: !!callingVisitor, callName: callingVisitor ? callingVisitor.name : '', callPhone: callingVisitor ? callingVisitor.phone : '',
+      callInvites, hasInvites: callInvites.length > 0, noInvites: callInvites.length === 0,
+      addInviteEvent: s.addInviteEvent, addInviteStatus: s.addInviteStatus, onAddInviteEvent: this.onAddInviteEvent, onAddInviteStatus: this.onAddInviteStatus, addInvite: this.addInvite, closeCall: this.closeCall,
+      ncOpen: s.ncOpen, openNewCampaign: this.openNewCampaign, closeNewCampaign: this.closeNewCampaign,
+      ncEventChips, ncWatiLines, hasNcEvents: s.ncEvents.length > 0,
+      ncRecipients, ncPool, ncPoolTotal: ncPool.length, ncSelectedCount: s.ncSelectedIds.length, ncSelectAllStyle, toggleNcAll: this.toggleNcAll, noNcPool: ncPool.length === 0,
+      ncTemplate: s.ncTemplate, onNcTemplate: this.onNcTemplate, ncMessage: s.ncMessage, onNcMessage: this.onNcMessage, sendNewCampaign: this.sendNewCampaign,
+      reportEvent: s.reportEvent, onReportEvent: this.onReportEvent, reportEventCount: reportRows.length, exportEvent: this.exportEvent,
+      showLogin: !s.loggedIn,
+      showApp: s.loggedIn,
+      email: s.email, password: s.password,
+      onEmail: this.onEmail, onPassword: this.onPassword, signIn: this.signIn,
+      setLoginStaff: () => this.setLoginAs('staff'), setLoginAdmin: () => this.setLoginAs('admin'),
+      loginStaffStyle: 'flex:1; font-size:13px; font-weight:600; border:none; border-radius:7px; padding:9px; ' + (s.loginAs === 'staff' ? 'background:#16224d; color:#fff;' : 'background:transparent; color:#7a7873;'),
+      loginAdminStyle: 'flex:1; font-size:13px; font-weight:600; border:none; border-radius:7px; padding:9px; ' + (s.loginAs === 'admin' ? 'background:#16224d; color:#fff;' : 'background:transparent; color:#7a7873;'),
+      roleBadge: s.role,
+      userEmail: s.email, avatarInitials: this.initials(s.email.replace(/[@.].*$/, ' ' + (s.email.split('@')[0].split('.')[1] || ''))) || 'MK',
+      signOut: this.signOut,
+      navItems,
+      isDashboard: s.tab === 'dashboard', isVisitors: s.tab === 'visitors', isCampaigns: s.tab === 'campaigns', isReports: s.tab === 'reports',
+      kpiTotal: total.toLocaleString(), kpiOptedIn: optedIn.toLocaleString(),
+      kpiOptedInPct: total ? Math.round((optedIn / total) * 100) : 0,
+      kpiCheckedIn: checkedIn.toLocaleString(), kpiEvents: eventsSet.length,
+      kpiCampaigns: s.campaigns.length,
+      eventStats, activity,
+      filterEvent: s.filterEvent, filterStatus: s.filterStatus, filterConsent: s.filterConsent, search: s.search,
+      onFilterEvent: this.onFilterEvent, onFilterStatus: this.onFilterStatus, onFilterConsent: this.onFilterConsent, onSearch: this.onSearch,
+      visitorsList, filteredCount: fil.length, noResults: fil.length === 0,
+      selectedCount: s.selectedIds.length, selectAllStyle, toggleAll: this.toggleAll,
+      templateOptions: this.templates, template: s.template, onTemplate: this.onTemplate,
+      message: s.message, onMessage: this.onMessage,
+      recipientsCount, sendCampaign: this.sendCampaign, sendBtnStyle,
+      campaignsList, noCampaigns: s.campaigns.length === 0, hasCampaigns: s.campaigns.length > 0,
+      exportAll: this.exportAll, exportFiltered: this.exportFiltered, goCampaigns: this.goCampaigns,
+      showEdit: s.editingId != null,
+      editName: s.editDraft.name, editCompany: s.editDraft.company, editPhone: s.editDraft.phone, editEmail: s.editDraft.email, editConsent: s.editDraft.consent, editCleaned: s.editDraft.cleaned ? 'Yes' : 'No',
+      onEditName: this.onEditName, onEditCompany: this.onEditCompany, onEditPhone: this.onEditPhone, onEditEmail: this.onEditEmail, onEditConsent: this.onEditConsent, onEditCleaned: this.onEditCleaned,
+      saveEdit: this.saveEdit, closeEdit: this.closeEdit, stop: this.stop,
+      showToast: !!s.toast, toast: s.toast,
+    };
+  }
+}
+</script>
+</body>
+</html>
