@@ -1,0 +1,102 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: #eef0f4;
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  color: #1b1b1d;
+  -webkit-font-smoothing: antialiased;
+}
+#root { min-height: 100vh; }
+::selection { background: #d7def4; }
+input, textarea, select, button { font-family: inherit; }
+input:focus, textarea:focus, select:focus { outline: none; }
+select { -webkit-appearance: none; appearance: none; cursor: pointer; }
+button { cursor: pointer; }
+h1, h2, h3, p { margin: 0; }
+table { border-collapse: collapse; }
+
+@keyframes toastIn { from { opacity:0; transform:translate(-50%,12px); } to { opacity:1; transform:translate(-50%,0); } }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+.fade-in { animation: fadeIn .25s ease; }
+
+.vdm-card {
+  background: #fff;
+  border: 1px solid #e6e4de;
+  border-radius: 12px;
+}
+.vdm-btn-primary {
+  font-size: 13px;
+  color: #fff;
+  background: var(--accent, #1f3c88);
+  border: none;
+  border-radius: 8px;
+  padding: 9px 15px;
+  font-weight: 500;
+}
+.vdm-btn-primary:hover { filter: brightness(0.92); }
+.vdm-btn-secondary {
+  font-size: 13px;
+  color: var(--accent, #1f3c88);
+  background: #fff;
+  border: 1px solid #cdd6ee;
+  border-radius: 8px;
+  padding: 9px 15px;
+  font-weight: 500;
+}
+.vdm-btn-secondary:hover { background: #eef1fa; }
+.vdm-btn-ghost {
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 7px;
+  padding: 7px 11px;
+  border: 1px solid #dcdad4;
+  background: #fff;
+  color: #5a5853;
+}
+.vdm-btn-ghost:hover { background: #f1f0ec; }
+.vdm-input, .vdm-select {
+  border: 1px solid #dcdad4;
+  background: #fff;
+  border-radius: 9px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #1b1b1d;
+}
+.vdm-input:focus, .vdm-select:focus, textarea.vdm-input:focus {
+  border-color: var(--accent, #1f3c88);
+  box-shadow: 0 0 0 3px rgba(31,60,136,0.1);
+}
+.vdm-select-wrap { position: relative; display: inline-block; }
+.vdm-select-wrap select { padding-right: 34px; }
+.vdm-select-wrap .vdm-caret {
+  position: absolute; right: 13px; top: 50%; transform: translateY(-50%);
+  pointer-events: none; color: #9a978f; font-size: 11px;
+}
+.vdm-th {
+  text-align: left;
+  padding: 12px 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7a7873;
+  font-weight: 600;
+}
+.vdm-mono { font-family: 'IBM Plex Mono', monospace; }
+.vdm-serif { font-family: 'Newsreader', serif; }
+
+@media (max-width: 960px) {
+  .vdm-main { padding: 20px 16px 44px !important; }
+  .vdm-kpi4 { grid-template-columns: repeat(2,1fr) !important; }
+  .vdm-kpi3 { grid-template-columns: repeat(2,1fr) !important; }
+  .vdm-split { grid-template-columns: 1fr !important; }
+  .vdm-admin2 { grid-template-columns: 1fr !important; }
+  .vdm-login { flex-direction: column !important; min-height: unset !important; }
+  .vdm-login-brand { display: none !important; }
+  .vdm-nav { overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+  .vdm-hide-sm { display: none !important; }
+}
+@media (max-width: 600px) {
+  .vdm-kpi4, .vdm-kpi3 { grid-template-columns: 1fr !important; }
+  .vdm-topbar { padding: 0 12px !important; height: 52px !important; }
+}
