@@ -414,6 +414,58 @@ export async function setAutoBackup(value: boolean): Promise<void> {
   await supabase.from('app_settings').update({ value }).eq('key', 'auto_backup');
 }
 
+// ---------------------------------------------------------------------------
+// App settings (generic) + MFA requirement flag
+// ---------------------------------------------------------------------------
+export async function getSetting(key: string): Promise<unknown> {
+  const { data } = await supabase.from('app_settings').select('value').eq('key', key).single();
+  return data?.value;
+}
+
+export async function setSetting(key: string, value: unknown): Promise<void> {
+  const { error } = await supabase.from('app_settings').upsert({ key, value });
+  if (error) throw error;
+}
+
+export async function getMfaRequired(): Promise<boolean> {
+  const v = await getSetting('mfa_required');
+  return v === true || v === 'true';
+}
+
+// ---------------------------------------------------------------------------
+// Multi-factor auth (TOTP) — wraps the Supabase Auth MFA API
+// ---------------------------------------------------------------------------
+export async function mfaAAL(): Promise<{ currentLevel: string | null; nextLevel: string | null }> {
+  const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (error) throw error;
+  return { currentLevel: data.currentLevel ?? null, nextLevel: data.nextLevel ?? null };
+}
+
+export async function mfaVerifiedFactorId(): Promise<string | null> {
+  const { data, error } = await supabase.auth.mfa.listFactors();
+  if (error) throw error;
+  const totp = (data.totp ?? []).find((f) => f.status === 'verified') ?? (data.totp ?? [])[0];
+  return totp?.id ?? null;
+}
+
+export async function mfaEnroll(): Promise<{ factorId: string; qr: string; secret: string }> {
+  const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' });
+  if (error) throw error;
+  return { factorId: data.id, qr: data.totp.qr_code, secret: data.totp.secret };
+}
+
+export async function mfaVerify(factorId: string, code: string): Promise<void> {
+  const { data: ch, error: cErr } = await supabase.auth.mfa.challenge({ factorId });
+  if (cErr) throw cErr;
+  const { error: vErr } = await supabase.auth.mfa.verify({ factorId, challengeId: ch.id, code });
+  if (vErr) throw vErr;
+}
+
+export async function mfaUnenroll(factorId: string): Promise<void> {
+  const { error } = await supabase.auth.mfa.unenroll({ factorId });
+  if (error) throw error;
+}
+
 export async function adminCreateUser(u: {
   name: string; email: string; role: string;
   can_edit: boolean; can_delete: boolean; can_call: boolean;

@@ -11,7 +11,7 @@ export default function Visitors(state: AppState) {
     filterStatus, setFilterStatus, filterConsent, setFilterConsent, search, setSearch,
     selectedIds, toggleSelect, toggleAllVisitors,
     template, onTemplate, message, setMessage, sendCampaign,
-    exportFiltered, openEdit,
+    openEdit,
   } = state;
 
   const filtered = useMemo(() => {
@@ -42,9 +42,6 @@ export default function Visitors(state: AppState) {
           </h1>
           <p style={{ fontSize: 13, color: '#7a7873', marginTop: 4 }}>{filtered.length} of {visitors.length} records</p>
         </div>
-        <button type="button" className="vdm-btn-secondary" onClick={() => exportFiltered(filtered)}>
-          Export filtered
-        </button>
       </div>
 
       <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>

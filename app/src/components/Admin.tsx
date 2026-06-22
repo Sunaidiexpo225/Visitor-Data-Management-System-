@@ -22,6 +22,7 @@ export default function Admin(state: AppState) {
     callApis, openAddCallApi, toggleCallApi, testCallApi, removeCallApi,
     openAddWati, toggleWati,
     autoBackup, toggleAutoBackup, exportAll,
+    mfaRequired, toggleMfaRequired,
     auditLog, auditCat, setAuditCat, auditSearch, setAuditSearch, exportAuditCsv,
   } = state;
 
@@ -180,12 +181,23 @@ export default function Admin(state: AppState) {
         </section>
 
         <section>
-          <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>Data backup &amp; export</h2>
-          <div className="vdm-card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
-              <input type="checkbox" checked={autoBackup} onChange={toggleAutoBackup} /> Enable automatic daily backups
+          <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>Security &amp; backup</h2>
+          <div className="vdm-card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13 }}>
+              <input type="checkbox" checked={mfaRequired} onChange={toggleMfaRequired} style={{ marginTop: 2 }} />
+              <span>
+                Require two-factor authentication (2FA)
+                <span style={{ display: 'block', fontSize: 12, color: '#7a7873', marginTop: 2 }}>
+                  Users without 2FA will be prompted to set up an authenticator app at next sign-in.
+                </span>
+              </span>
             </label>
-            <button type="button" className="vdm-btn-secondary" onClick={exportAll} style={{ alignSelf: 'flex-start' }}>Export all (CSV)</button>
+            <div style={{ borderTop: '1px solid #f0efe9', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
+                <input type="checkbox" checked={autoBackup} onChange={toggleAutoBackup} /> Enable automatic daily backups
+              </label>
+              <button type="button" className="vdm-btn-secondary" onClick={exportAll} style={{ alignSelf: 'flex-start' }}>Export all (CSV)</button>
+            </div>
           </div>
         </section>
       </div>

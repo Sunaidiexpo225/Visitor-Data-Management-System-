@@ -54,6 +54,14 @@ export function useAppState() {
   const [password, setPassword] = useState('expo2026');
   const [loading, setLoading] = useState(false);
 
+  // MFA (TOTP) — admin can require it; users with a factor are challenged at login.
+  const [mfaRequired, setMfaRequired] = useState(false);
+  const [mfaStatus, setMfaStatus] = useState<'pending' | 'ok' | 'challenge' | 'enroll'>('pending');
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
+  const [mfaEnrollData, setMfaEnrollData] = useState<{ factorId: string; qr: string; secret: string } | null>(null);
+  const [mfaBusy, setMfaBusy] = useState(false);
+  const [mfaError, setMfaError] = useState<string | null>(null);
+
   const [tab, setTab] = useState<TabKey>('dashboard');
 
   // ---- server-backed collections ----
@@ -219,10 +227,97 @@ export function useAppState() {
       setCanCampaign(profile?.canCampaign ?? true);
       setSessionIp((ip) => ip || fakeIp());
       setLoggedIn(true);
-      await loadAll();
+
+      // Decide whether a second factor is needed before showing the app.
+      try {
+        const [required, aal] = await Promise.all([api.getMfaRequired(), api.mfaAAL()]);
+        setMfaRequired(required);
+        if (aal.currentLevel === 'aal2') {
+          setMfaStatus('ok');
+          await loadAll();
+        } else if (aal.nextLevel === 'aal2') {
+          // A verified factor exists — step up to AAL2.
+          setMfaFactorId(await api.mfaVerifiedFactorId());
+          setMfaStatus('challenge');
+        } else if (required) {
+          setMfaStatus('enroll');
+        } else {
+          setMfaStatus('ok');
+          await loadAll();
+        }
+      } catch {
+        // If the MFA API is unavailable, don't lock anyone out.
+        setMfaStatus('ok');
+        await loadAll();
+      }
     },
     [loadAll],
   );
+
+  function resetMfa() {
+    setMfaStatus('pending');
+    setMfaFactorId(null);
+    setMfaEnrollData(null);
+    setMfaError(null);
+  }
+
+  async function passMfa() {
+    setMfaStatus('ok');
+    setMfaError(null);
+    await loadAll();
+  }
+
+  async function startMfaEnroll() {
+    setMfaBusy(true);
+    setMfaError(null);
+    try {
+      setMfaEnrollData(await api.mfaEnroll());
+    } catch (e) {
+      setMfaError(errMsg(e, 'Could not start 2FA setup. Ensure TOTP is enabled in the project.'));
+    } finally {
+      setMfaBusy(false);
+    }
+  }
+
+  async function submitMfaEnroll(code: string) {
+    if (!mfaEnrollData) return;
+    setMfaBusy(true);
+    setMfaError(null);
+    try {
+      await api.mfaVerify(mfaEnrollData.factorId, code.trim());
+      await passMfa();
+    } catch (e) {
+      setMfaError(errMsg(e, 'Invalid code, try again.'));
+    } finally {
+      setMfaBusy(false);
+    }
+  }
+
+  async function submitMfaChallenge(code: string) {
+    if (!mfaFactorId) return;
+    setMfaBusy(true);
+    setMfaError(null);
+    try {
+      await api.mfaVerify(mfaFactorId, code.trim());
+      await passMfa();
+    } catch (e) {
+      setMfaError(errMsg(e, 'Invalid code, try again.'));
+    } finally {
+      setMfaBusy(false);
+    }
+  }
+
+  async function toggleMfaRequired() {
+    const next = !mfaRequired;
+    setMfaRequired(next);
+    try {
+      await api.setSetting('mfa_required', next);
+      audit(next ? 'MFA requirement enabled' : 'MFA requirement disabled', 'Security', 'User Management');
+    } catch (e) {
+      setMfaRequired(!next);
+      flash(errMsg(e, 'Could not update MFA setting.'));
+    }
+  }
 
   useEffect(() => {
     let active = true;
@@ -234,6 +329,7 @@ export function useAppState() {
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') {
         setLoggedIn(false);
+        resetMfa();
         return;
       }
       if (event === 'SIGNED_IN' && session?.user) {
@@ -294,6 +390,7 @@ export function useAppState() {
     audit('User signed out', 'Session', 'Authentication');
     await supabase.auth.signOut();
     setLoggedIn(false);
+    resetMfa();
     setSelectedIds([]);
     setTab('dashboard');
   }
@@ -1008,6 +1105,9 @@ export function useAppState() {
     // auth
     loggedIn, authReady, loading, role, myPages, canCampaign, loginAs, sessionIp, email, password,
     setEmail, setPassword, pickLoginAs, signIn, signOut,
+    // mfa
+    mfaRequired, mfaStatus, mfaEnrollData, mfaBusy, mfaError,
+    startMfaEnroll, submitMfaEnroll, submitMfaChallenge, toggleMfaRequired,
     // shell
     tab, setTab, goCampaigns,
     // data

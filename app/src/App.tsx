@@ -9,6 +9,7 @@ import Campaigns from './components/Campaigns';
 import Reports from './components/Reports';
 import Admin from './components/Admin';
 import Toast from './components/Toast';
+import MfaGate from './components/MfaGate';
 import EditVisitorModal from './components/modals/EditVisitorModal';
 import InviteHistoryModal from './components/modals/InviteHistoryModal';
 import NewCampaignModal from './components/modals/NewCampaignModal';
@@ -34,6 +35,23 @@ function App() {
     return (
       <>
         <Login {...state} />
+        <Toast message={state.toast} />
+      </>
+    );
+  }
+
+  // Logged in, but a second factor (or enrollment) is still required.
+  if (state.mfaStatus === 'pending') {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7a7873', fontSize: 14 }}>
+        Loading…
+      </div>
+    );
+  }
+  if (state.mfaStatus !== 'ok') {
+    return (
+      <>
+        <MfaGate {...state} />
         <Toast message={state.toast} />
       </>
     );
