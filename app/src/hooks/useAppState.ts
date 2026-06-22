@@ -54,8 +54,8 @@ export function useAppState() {
   const [canCampaign, setCanCampaign] = useState(true);
   const [loginAs, setLoginAs] = useState<'Staff' | 'Admin'>('Staff');
   const [sessionIp, setSessionIp] = useState('');
-  const [email, setEmail] = useState('marketing@sunaidiexpo.com');
-  const [password, setPassword] = useState('expo2026');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   // MFA (TOTP) — admin can require it; users with a factor are challenged at login.
@@ -373,7 +373,6 @@ export function useAppState() {
   // ---------- Auth ----------
   function pickLoginAs(which: 'Staff' | 'Admin') {
     setLoginAs(which);
-    setEmail(which === 'Admin' ? 'admin@sunaidiexpo.com' : 'marketing@sunaidiexpo.com');
   }
 
   async function signIn() {
