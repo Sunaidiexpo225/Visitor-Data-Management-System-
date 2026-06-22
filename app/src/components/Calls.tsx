@@ -16,7 +16,7 @@ function latestStatus(invites: { status: string }[]): string {
 
 export default function Calls(state: AppState) {
   const {
-    visitors, events, subEventsFor,
+    visitors, events, subEventsFor, categoryOptions,
     callFilter, setCallFilter, callEventFilter, setCallEventFilter, callSubEvent, setCallSubEvent,
     targetEvent, setTargetEvent, targetSubEvent, setTargetSubEvent,
     startCall, openCall,
@@ -28,7 +28,10 @@ export default function Calls(state: AppState) {
 
   const countries = useMemo(() => distinctValues(visitors, (v) => v.country), [visitors]);
   const sources = useMemo(() => distinctValues(visitors, (v) => v.source), [visitors]);
-  const categories = useMemo(() => distinctValues(visitors, (v) => v.category), [visitors]);
+  const categories = useMemo(
+    () => Array.from(new Set([...categoryOptions.map((c) => c.name), ...distinctValues(visitors, (v) => v.category)])).sort(),
+    [categoryOptions, visitors],
+  );
 
   const invitedCount = useMemo(() => visitors.filter((v) => v.invites.some((i) => i.status === 'Invited')).length, [visitors]);
 
