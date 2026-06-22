@@ -2,6 +2,10 @@ import { useMemo, useState } from 'react';
 import type { AppState } from '../hooks/useAppState';
 import { maskPhone } from '../lib/format';
 import { distinctValues } from '../lib/filters';
+import Pagination from './Pagination';
+
+const PAGE_SIZE = 50;
+const ellipsis = (max: number): React.CSSProperties => ({ maxWidth: max, overflow: 'hidden', textOverflow: 'ellipsis' });
 
 export default function Cleanup(state: AppState) {
   const {
@@ -36,6 +40,14 @@ export default function Cleanup(state: AppState) {
 
   const kpiTotal = visitors.length;
   const cleanedCount = visitors.filter((v) => v.cleaned).length;
+
+  const [page, setPage] = useState(1);
+  const filterKey = `${cleanupFilter}|${cleanupEventFilter}|${cleanupSubEvent}|${filterCountry}|${filterSource}|${filterCategory}`;
+  const [prevKey, setPrevKey] = useState(filterKey);
+  if (filterKey !== prevKey) { setPrevKey(filterKey); setPage(1); }
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, pageCount);
+  const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   return (
     <div>
@@ -113,11 +125,11 @@ export default function Cleanup(state: AppState) {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((v) => (
+            {paged.map((v) => (
               <tr key={v.id} style={{ borderTop: '1px solid #f0efe9' }}>
                 <td className="vdm-mono" style={{ padding: '6px 10px', fontSize: 12, color: '#7a7873' }}>{v.refId || <span style={{ color: '#c7c4bd' }}>—</span>}</td>
-                <td style={{ padding: '6px 10px', fontSize: 13, fontWeight: 500, whiteSpace: 'nowrap' }}>{v.name}</td>
-                <td style={{ padding: '6px 10px', fontSize: 13, color: '#5a5853' }}>{v.company}</td>
+                <td style={{ padding: '6px 10px', fontSize: 13, fontWeight: 500, ...ellipsis(190) }} title={v.name}>{v.name}</td>
+                <td style={{ padding: '6px 10px', fontSize: 13, color: '#5a5853', ...ellipsis(200) }} title={v.company}>{v.company}</td>
                 <td className="vdm-mono" style={{ padding: '6px 10px', fontSize: 12, whiteSpace: 'nowrap' }}>{maskPhone(v.phone)}</td>
                 <td style={{ padding: '6px 10px', fontSize: 13 }}>{v.country || <span style={{ color: '#c7c4bd' }}>—</span>}</td>
                 <td style={{ padding: '6px 10px', fontSize: 13 }}>{v.source || <span style={{ color: '#c7c4bd' }}>—</span>}</td>
@@ -140,6 +152,7 @@ export default function Cleanup(state: AppState) {
           </tbody>
         </table>
       </div>
+      <Pagination page={safePage} pageCount={pageCount} total={filtered.length} pageSize={PAGE_SIZE} onPage={setPage} />
     </div>
   );
 }

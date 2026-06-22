@@ -102,7 +102,7 @@ export default function Shell({ state, children }: { state: AppState; children: 
         </div>
       </div>
 
-      <main className="vdm-main" style={{ maxWidth: 1180, margin: '0 auto', padding: '32px 24px 60px' }}>{children}</main>
+      <main className="vdm-main" style={{ maxWidth: 1340, margin: '0 auto', padding: '32px 24px 60px' }}>{children}</main>
     </div>
   );
 }
