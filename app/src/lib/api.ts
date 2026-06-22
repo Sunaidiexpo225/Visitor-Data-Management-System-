@@ -185,6 +185,22 @@ export async function fetchVisitors(): Promise<Visitor[]> {
   return ((data ?? []) as unknown as VisitorRow[]).map(mapVisitor);
 }
 
+// Load every visitor in 1000-row chunks so the app holds the full dataset even
+// when the API caps a single request (default 1000 rows).
+export async function fetchAllVisitors(): Promise<Visitor[]> {
+  const chunk = 1000;
+  const all: Visitor[] = [];
+  for (let from = 0; ; from += chunk) {
+    const { data, error } = await supabase
+      .from('visitors').select(VISITOR_SELECT).order('created_at').range(from, from + chunk - 1);
+    if (error) throw error;
+    const mapped = ((data ?? []) as unknown as VisitorRow[]).map(mapVisitor);
+    all.push(...mapped);
+    if (mapped.length < chunk) break;
+  }
+  return all;
+}
+
 export async function fetchCampaigns(): Promise<Campaign[]> {
   const { data, error } = await supabase.from('campaigns').select('*').order('created_at', { ascending: false });
   if (error) throw error;

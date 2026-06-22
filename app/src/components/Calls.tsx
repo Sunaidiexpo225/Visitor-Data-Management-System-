@@ -161,7 +161,6 @@ export default function Calls(state: AppState) {
         <table className="vdm-table-wide" style={{ width: '100%' }}>
           <thead>
             <tr>
-              <th className="vdm-th" style={{ padding: '8px 10px' }}>Id</th>
               <th className="vdm-th" style={{ padding: '8px 10px' }}>Name</th>
               <th className="vdm-th" style={{ padding: '8px 10px' }}>Company</th>
               <th className="vdm-th" style={{ padding: '8px 10px' }}>Phone</th>
@@ -179,15 +178,14 @@ export default function Calls(state: AppState) {
               const latest = latestStatus(v.invites);
               return (
                 <tr key={v.id} style={{ borderTop: '1px solid #f0efe9' }}>
-                  <td className="vdm-mono" style={{ padding: '6px 10px', fontSize: 12, color: '#7a7873' }}>{v.refId || <span style={{ color: '#c7c4bd' }}>—</span>}</td>
                   <td style={{ padding: '6px 10px', fontSize: 13, fontWeight: 500, ...ellipsis(190) }} title={v.name}>{v.name}</td>
                   <td style={{ padding: '6px 10px', fontSize: 13, color: '#5a5853', ...ellipsis(200) }} title={v.company}>{v.company}</td>
                   <td className="vdm-mono" style={{ padding: '6px 10px', fontSize: 12, whiteSpace: 'nowrap' }}>{maskPhone(v.phone)}</td>
                   <td style={{ padding: '6px 10px', fontSize: 13 }}>{v.country || <span style={{ color: '#c7c4bd' }}>—</span>}</td>
                   <td style={{ padding: '6px 10px', fontSize: 13 }}>{v.source || <span style={{ color: '#c7c4bd' }}>—</span>}</td>
-                  <td style={{ padding: '6px 10px', fontSize: 13, whiteSpace: 'nowrap' }}>
-                    {v.event}
-                    {v.subEvent && <span style={{ fontSize: 11, color: '#9a978f' }}> · {v.subEvent}</span>}
+                  <td style={{ padding: '6px 10px', fontSize: 13 }}>
+                    <div>{v.event}</div>
+                    {v.subEvent && <div style={{ fontSize: 11, color: '#9a978f' }}>{v.subEvent}</div>}
                   </td>
                   <td style={{ padding: '6px 10px', fontSize: 13 }}>{v.category || <span style={{ color: '#c7c4bd' }}>—</span>}</td>
                   <td style={{ padding: '6px 10px' }}>

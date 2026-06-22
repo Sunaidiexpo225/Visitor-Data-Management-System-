@@ -183,7 +183,7 @@ export function useAppState() {
 
   // ---- reloaders ----
   const reloadVisitors = useCallback(async () => {
-    const [list, stats] = await Promise.all([api.fetchVisitors(), api.fetchVisitorStats()]);
+    const [list, stats] = await Promise.all([api.fetchAllVisitors(), api.fetchVisitorStats()]);
     setVisitors(list);
     setVisitorStats(stats);
   }, []);
@@ -210,7 +210,7 @@ export function useAppState() {
     setLoading(true);
     try {
       const [ev, subs, vis, tpls, statuses] = await Promise.all([
-        api.fetchEvents(), api.fetchSubEvents(), api.fetchVisitors(), api.fetchTemplates(), api.fetchStatusOptions(),
+        api.fetchEvents(), api.fetchSubEvents(), api.fetchAllVisitors(), api.fetchTemplates(), api.fetchStatusOptions(),
       ]);
       setEvents(ev);
       setSubEvents(subs);

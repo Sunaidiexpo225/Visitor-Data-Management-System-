@@ -19,13 +19,22 @@ export function downloadCsv(rows: string[][], filename: string) {
 }
 
 export function exportVisitorsCsv(visitors: Visitor[], filename: string) {
-  const header = ['Name', 'Company', 'Phone', 'Email', 'Event', 'Status', 'Consent', 'Cleaned', 'Invitations'];
+  const header = [
+    'Id', 'Name', 'Company', 'Phone', 'Email', 'Country', 'Source', 'Registration Date',
+    'Event', 'Sub-event', 'Category', 'Status', 'Consent', 'Cleaned', 'Invitations',
+  ];
   const rows = visitors.map((v) => [
+    v.refId,
     v.name,
     v.company,
     v.phone,
     v.email,
+    v.country,
+    v.source,
+    v.registrationDate,
     v.event,
+    v.subEvent,
+    v.category,
     v.status,
     v.consent,
     v.cleaned ? 'Yes' : 'No',
