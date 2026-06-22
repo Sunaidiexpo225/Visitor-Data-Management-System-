@@ -19,6 +19,49 @@ export function dialDigits(p: string): string {
   return plus + p.replace(/\D/g, '');
 }
 
+// Split one CSV line, honouring double-quoted fields that may contain commas.
+export function splitCsvLine(line: string): string[] {
+  const out: string[] = [];
+  let cur = '';
+  let inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (inQ) {
+      if (c === '"') {
+        if (line[i + 1] === '"') { cur += '"'; i++; }
+        else inQ = false;
+      } else cur += c;
+    } else if (c === '"') {
+      inQ = true;
+    } else if (c === ',') {
+      out.push(cur);
+      cur = '';
+    } else {
+      cur += c;
+    }
+  }
+  out.push(cur);
+  return out.map((s) => s.trim());
+}
+
+// Combine a separate dialing code + local number into one E.164-style value.
+// Handles leading national-trunk zeros and avoids doubling the country code
+// when the local part already includes it.
+export function combinePhone(code: string, phone: string): string {
+  const codeDigits = code.replace(/\D/g, '');
+  const local = phone.replace(/\D/g, '');
+  if (!local) return '';
+  if (!codeDigits) {
+    return (phone.trim().startsWith('+') ? '+' : '') + local;
+  }
+  // Local already looks international (already carries the country code).
+  if (local.startsWith(codeDigits) && local.length > codeDigits.length + 5) {
+    return '+' + local;
+  }
+  // Drop a national trunk prefix (leading zeros) then prepend the code.
+  return '+' + codeDigits + local.replace(/^0+/, '');
+}
+
 export function fmtDur(sec: number): string {
   const m = Math.floor(sec / 60);
   const s = sec % 60;

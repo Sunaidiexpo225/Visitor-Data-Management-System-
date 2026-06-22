@@ -17,7 +17,7 @@ import type {
   Visitor,
   WatiConnection,
 } from '../types';
-import { fakeIp, nowStamp, today } from '../lib/format';
+import { combinePhone, fakeIp, nowStamp, splitCsvLine, today } from '../lib/format';
 import { exportVisitorsCsv, downloadCsv } from '../lib/csv';
 import { supabase } from '../lib/supabase';
 import * as api from '../lib/api';
@@ -855,30 +855,60 @@ export function useAppState() {
   }
 
   // ---------- Admin: import ----------
+  // Header-based CSV parse: columns are matched by their header name (any
+  // order, extra columns ignored). Supports a separate "Phone Code" column.
   function parseCsv(text: string, forcedEvent?: string) {
     const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
     if (lines.length === 0) return [];
-    const startIdx = /name/i.test(lines[0]) ? 1 : 0;
+    const header = splitCsvLine(lines[0]).map((h) => h.toLowerCase());
+    const find = (...names: string[]) => {
+      for (const n of names) { const i = header.indexOf(n); if (i >= 0) return i; }
+      for (const n of names) { const i = header.findIndex((h) => h.includes(n)); if (i >= 0) return i; }
+      return -1;
+    };
+    const col = {
+      name: find('name', 'full name', 'visitor name'),
+      company: find('company', 'organization', 'organisation'),
+      phoneCode: find('phone code', 'dial code', 'dialing code', 'country code', 'code'),
+      phone: find('phone', 'mobile', 'contact number'),
+      email: find('email', 'e-mail'),
+      event: find('event'),
+      sub: find('sub-event', 'sub event', 'subevent'),
+      category: find('category'),
+      cleaned: find('cleanup status', 'cleaned', 'cleanup'),
+      id: find('id', 'reference', 'reg id', 'registration id', 'ref'),
+      country: find('country'),
+      source: find('source'),
+      regDate: find('registration date', 'reg date', 'registered on', 'date'),
+    };
+    if (col.name < 0) return []; // no recognizable header → treat as no rows
+
+    const get = (cols: string[], i: number) => (i >= 0 ? cols[i] ?? '' : '');
     const rows: { name: string; company: string; phone: string; email: string; eventName: string; subEventName?: string; category?: string; cleaned?: boolean; refId?: string; country?: string; source?: string; registrationDate?: string }[] = [];
-    for (let i = startIdx; i < lines.length; i++) {
-      const cols = lines[i].split(',').map((c) => c.trim());
-      const [name = '', company = '', phone = '', emailCol = '', eventCol = '', subCol = '', catCol = '', cleanCol = '', idCol = '', countryCol = '', sourceCol = '', regDateCol = ''] = cols;
+    for (let i = 1; i < lines.length; i++) {
+      const cols = splitCsvLine(lines[i]);
+      const name = get(cols, col.name);
       if (!name) continue;
+      const phone = combinePhone(get(cols, col.phoneCode), get(cols, col.phone));
+      const emailCol = get(cols, col.email);
       rows.push({
-        name, company, phone,
+        name,
+        company: get(cols, col.company),
+        phone,
         email: emailCol || name.toLowerCase().replace(/[^a-z]/g, '.') + '@example.com',
-        eventName: forcedEvent || eventCol || events[0] || '',
-        subEventName: subCol || undefined,
-        category: catCol || undefined,
-        cleaned: /^(cleaned|yes|true|y|1|done)$/i.test(cleanCol),
-        refId: idCol || undefined,
-        country: countryCol || undefined,
-        source: sourceCol || undefined,
-        registrationDate: regDateCol || undefined,
+        eventName: forcedEvent || get(cols, col.event) || events[0] || '',
+        subEventName: get(cols, col.sub) || undefined,
+        category: get(cols, col.category) || undefined,
+        cleaned: /^(cleaned|yes|true|y|1|done)$/i.test(get(cols, col.cleaned)),
+        refId: get(cols, col.id) || undefined,
+        country: get(cols, col.country) || undefined,
+        source: get(cols, col.source) || undefined,
+        registrationDate: get(cols, col.regDate) || undefined,
       });
     }
     return rows;
   }
+
 
   function importFile(file: File, forcedEvent?: string) {
     const reader = new FileReader();
