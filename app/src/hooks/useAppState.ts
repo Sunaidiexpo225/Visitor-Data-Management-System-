@@ -41,6 +41,22 @@ export interface EditDraft {
 
 const ALL_PAGES: PageKey[] = ['dashboard', 'visitors', 'cleanup', 'calls', 'campaigns', 'reports'];
 
+export interface ImportRow {
+  name: string;
+  company: string;
+  phone: string;
+  email: string;
+  eventName: string;
+  subEventName?: string;
+  category?: string;
+  cleaned?: boolean;
+  refId?: string;
+  country?: string;
+  source?: string;
+  registrationDate?: string;
+  warn?: string;
+}
+
 function initialsOf(name: string): string {
   return name.split(' ').map((p) => p[0] ?? '').join('').toUpperCase();
 }
@@ -129,6 +145,7 @@ export function useAppState() {
   const [addUserOpen, setAddUserOpen] = useState(false);
   const [newUser, setNewUser] = useState({ name: '', email: '', role: 'Marketing' });
   const [credModal, setCredModal] = useState<{ title: string; email: string; password: string } | null>(null);
+  const [importPreview, setImportPreview] = useState<{ rows: ImportRow[]; fileName: string; forcedEvent?: string } | null>(null);
 
   const [addWatiOpen, setAddWatiOpen] = useState(false);
   const [newWati, setNewWati] = useState({ event: '', sender: '', api: '' });
@@ -884,13 +901,22 @@ export function useAppState() {
     if (col.name < 0) return []; // no recognizable header → treat as no rows
 
     const get = (cols: string[], i: number) => (i >= 0 ? cols[i] ?? '' : '');
-    const rows: { name: string; company: string; phone: string; email: string; eventName: string; subEventName?: string; category?: string; cleaned?: boolean; refId?: string; country?: string; source?: string; registrationDate?: string }[] = [];
+    const rows: ImportRow[] = [];
     for (let i = 1; i < lines.length; i++) {
       const cols = splitCsvLine(lines[i]);
       const name = get(cols, col.name);
       if (!name) continue;
-      const phone = combinePhone(get(cols, col.phoneCode), get(cols, col.phone));
+      const rawPhone = get(cols, col.phone);
+      const phone = combinePhone(get(cols, col.phoneCode), rawPhone);
       const emailCol = get(cols, col.email);
+      // Flag dubious phone values for the import preview.
+      let warn: string | undefined;
+      if (/\de\+?\d/i.test(rawPhone)) warn = 'Scientific notation — digits likely lost; re-enter from source';
+      else {
+        const d = phone.replace(/\D/g, '');
+        if (!d) warn = 'No phone number';
+        else if (d.length < 9 || d.length > 15) warn = `Unusual length (${d.length} digits)`;
+      }
       rows.push({
         name,
         company: get(cols, col.company),
@@ -904,31 +930,44 @@ export function useAppState() {
         country: get(cols, col.country) || undefined,
         source: get(cols, col.source) || undefined,
         registrationDate: get(cols, col.regDate) || undefined,
+        warn,
       });
     }
     return rows;
   }
 
-
   function importFile(file: File, forcedEvent?: string) {
     const reader = new FileReader();
-    reader.onload = async () => {
+    reader.onload = () => {
       const rows = parseCsv(String(reader.result ?? ''), forcedEvent);
       if (rows.length === 0) {
-        flash('No rows found in file.');
+        flash('No rows found — make sure the file has a header row with a Name column.');
         return;
       }
-      try {
-        const n = await api.importVisitors(rows, statusOptions[0]?.name ?? 'Pre-registered');
-        audit('Visitor data imported', `${n} record(s)`, 'Data');
-        await reloadVisitors();
-        flash(`Imported ${n} record(s).`);
-      } catch (e) {
-        flash(errMsg(e, 'Import failed (check your permissions).'));
-      }
+      setImportPreview({ rows, fileName: file.name, forcedEvent });
     };
     reader.readAsText(file);
   }
+
+  async function confirmImport() {
+    if (!importPreview) return;
+    const { rows } = importPreview;
+    setImportPreview(null);
+    try {
+      const n = await api.importVisitors(rows, statusOptions[0]?.name ?? 'Pre-registered');
+      audit('Visitor data imported', `${n} record(s)`, 'Data');
+      await reloadVisitors();
+      flash(`Imported ${n} record(s).`);
+    } catch (e) {
+      flash(errMsg(e, 'Import failed (check your permissions).'));
+    }
+  }
+
+  function cancelImport() {
+    setImportPreview(null);
+  }
+
+
 
   // ---------- Admin: events + sub-events ----------
   async function createEvent() {
@@ -1183,7 +1222,7 @@ export function useAppState() {
     // admin: templates
     createTemplate, updateTemplate, deleteTemplate,
     // admin: import
-    importFile,
+    importFile, importPreview, confirmImport, cancelImport,
     // admin: events + sub-events
     newEventName, setNewEventName, createEvent, importIntoEvent,
     createSubEvent, renameSubEvent, deleteSubEvent,
