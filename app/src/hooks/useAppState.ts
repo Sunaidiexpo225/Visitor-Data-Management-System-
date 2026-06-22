@@ -17,7 +17,7 @@ import type {
   Visitor,
   WatiConnection,
 } from '../types';
-import { combinePhone, fakeIp, nowStamp, splitCsvLine, today } from '../lib/format';
+import { combinePhone, fakeIp, nowStamp, parseImportDate, splitCsvLine, today } from '../lib/format';
 import { exportVisitorsCsv, downloadCsv } from '../lib/csv';
 import { supabase } from '../lib/supabase';
 import * as api from '../lib/api';
@@ -945,7 +945,7 @@ export function useAppState() {
         refId: get(cols, col.id) || undefined,
         country: get(cols, col.country) || undefined,
         source: get(cols, col.source) || undefined,
-        registrationDate: get(cols, col.regDate) || undefined,
+        registrationDate: parseImportDate(get(cols, col.regDate)) || undefined,
         consent: parseConsent(get(cols, col.consent)),
         warn,
       });

@@ -44,7 +44,21 @@ export function splitCsvLine(line: string): string[] {
   return out.map((s) => s.trim());
 }
 
-// Combine a separate dialing code + local number into one E.164-style value.
+// Parse an import date in DD.MM.YYYY (also tolerates / or - separators, and an
+// already-ISO YYYY-MM-DD) into the ISO YYYY-MM-DD that the date column stores.
+// Returns '' for blank/unrecognised values.
+export function parseImportDate(s: string): string {
+  const t = s.trim();
+  if (!t) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return t;
+  const m = t.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/);
+  if (m) {
+    const dd = m[1].padStart(2, '0');
+    const mm = m[2].padStart(2, '0');
+    return `${m[3]}-${mm}-${dd}`;
+  }
+  return '';
+}
 // Handles leading national-trunk zeros and avoids doubling the country code
 // when the local part already includes it.
 export function combinePhone(code: string, phone: string): string {

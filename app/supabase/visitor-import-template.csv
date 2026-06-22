@@ -1,4 +1,4 @@
 Name,Company,Phone Code,Phone,Email,Event,Sub-event,Category,Consent,Cleanup status,Id,Country,Source,Registration Date
-Ahmed Al-Farsi,Falcon Trading,966,0500000001,ahmed@falcontrading.com,Spring Expo 2026,General,Buyer,Opted-in,Not cleaned,REG-1001,Saudi Arabia,Website,2026-03-12
-Sara Nasser,Bluewave Tech,971,0500000002,sara@bluewave.com,Spring Expo 2026,Day 1,Visitor,Pending,Cleaned,REG-1002,UAE,Walk-in,2026-03-13
-John Carter,Carter & Co,44,07700900003,john@carterco.com,Tech Forum,General,Supplier,Opted-out,Not cleaned,REG-1003,UK,Referral,2026-03-14
+Ahmed Al-Farsi,Falcon Trading,966,0500000001,ahmed@falcontrading.com,Spring Expo 2026,General,Buyer,Opted-in,Not cleaned,REG-1001,Saudi Arabia,Website,12.03.2026
+Sara Nasser,Bluewave Tech,971,0500000002,sara@bluewave.com,Spring Expo 2026,Day 1,Visitor,Pending,Cleaned,REG-1002,UAE,Walk-in,13.03.2026
+John Carter,Carter & Co,44,07700900003,john@carterco.com,Tech Forum,General,Supplier,Opted-out,Not cleaned,REG-1003,UK,Referral,14.03.2026
