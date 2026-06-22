@@ -3,7 +3,7 @@ import type { ConsentStatus } from '../../types';
 import ModalOverlay from './ModalOverlay';
 
 export default function EditVisitorModal(state: AppState) {
-  const { editingId, editDraft, setEditDraft, closeEdit, saveEdit, events, subEventsFor, statusOptions } = state;
+  const { editingId, editDraft, setEditDraft, closeEdit, saveEdit, events, subEventsFor, statusOptions, categoryOptions } = state;
   if (!editingId || !editDraft) return null;
 
   const consents: ConsentStatus[] = ['Opted-in', 'Pending', 'Opted-out'];
@@ -38,6 +38,21 @@ export default function EditVisitorModal(state: AppState) {
               ))}
               {!statusOptions.some((s) => s.name === editDraft.status) && editDraft.status && (
                 <option value={editDraft.status}>{editDraft.status}</option>
+              )}
+            </select>
+            <span className="vdm-caret">▾</span>
+          </div>
+        </label>
+        <label style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12, color: '#5a5853', fontWeight: 500 }}>
+          Category
+          <div className="vdm-select-wrap">
+            <select className="vdm-select" style={{ width: '100%' }} value={editDraft.category} onChange={(e) => setEditDraft({ ...editDraft, category: e.target.value })}>
+              <option value="">— none —</option>
+              {categoryOptions.map((c) => (
+                <option key={c.id} value={c.name}>{c.name}</option>
+              ))}
+              {editDraft.category && !categoryOptions.some((c) => c.name === editDraft.category) && (
+                <option value={editDraft.category}>{editDraft.category}</option>
               )}
             </select>
             <span className="vdm-caret">▾</span>

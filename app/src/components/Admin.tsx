@@ -163,7 +163,7 @@ export default function Admin(state: AppState) {
         <section>
           <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>Import visitor data</h2>
           <div className="vdm-card" style={{ padding: 20 }}>
-            <p style={{ fontSize: 13, color: '#7a7873', marginBottom: 12 }}>Upload a CSV with columns: Name, Company, Phone, Email, Event, Sub-event.</p>
+            <p style={{ fontSize: 13, color: '#7a7873', marginBottom: 12 }}>Upload a CSV with columns: Name, Company, Phone, Email, Event, Sub-event, Category.</p>
             <input
               ref={importInputRef}
               type="file"

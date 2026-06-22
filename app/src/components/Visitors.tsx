@@ -94,31 +94,32 @@ export default function Visitors(state: AppState) {
           <table style={{ width: '100%' }}>
             <thead>
               <tr>
-                <th className="vdm-th"><input type="checkbox" checked={allSelected} onChange={() => toggleAllVisitors(filteredIds)} /></th>
-                <th className="vdm-th">Name / Company</th>
-                <th className="vdm-th">Phone</th>
-                <th className="vdm-th">Event</th>
-                <th className="vdm-th">Status</th>
-                <th className="vdm-th">Consent</th>
-                <th className="vdm-th"></th>
+                <th className="vdm-th" style={{ padding: '8px 10px' }}><input type="checkbox" checked={allSelected} onChange={() => toggleAllVisitors(filteredIds)} /></th>
+                <th className="vdm-th" style={{ padding: '8px 10px' }}>Name</th>
+                <th className="vdm-th" style={{ padding: '8px 10px' }}>Company</th>
+                <th className="vdm-th" style={{ padding: '8px 10px' }}>Phone</th>
+                <th className="vdm-th" style={{ padding: '8px 10px' }}>Event</th>
+                <th className="vdm-th" style={{ padding: '8px 10px' }}>Category</th>
+                <th className="vdm-th" style={{ padding: '8px 10px' }}>Status</th>
+                <th className="vdm-th" style={{ padding: '8px 10px' }}>Consent</th>
+                <th className="vdm-th" style={{ padding: '8px 10px' }}></th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((v) => (
                 <tr key={v.id} style={{ borderTop: '1px solid #f0efe9' }}>
-                  <td style={{ padding: '10px 8px' }}><input type="checkbox" checked={selectedIds.includes(v.id)} onChange={() => toggleSelect(v.id)} /></td>
-                  <td style={{ padding: '10px 8px' }}>
-                    <div style={{ fontSize: 13, fontWeight: 500 }}>{v.name}</div>
-                    <div style={{ fontSize: 12, color: '#7a7873' }}>{v.company}</div>
-                  </td>
-                  <td className="vdm-mono" style={{ padding: '10px 8px', fontSize: 12 }}>{maskPhone(v.phone)}</td>
-                  <td style={{ padding: '10px 8px', fontSize: 13 }}>
+                  <td style={{ padding: '6px 10px' }}><input type="checkbox" checked={selectedIds.includes(v.id)} onChange={() => toggleSelect(v.id)} /></td>
+                  <td style={{ padding: '6px 10px', fontSize: 13, fontWeight: 500, whiteSpace: 'nowrap' }}>{v.name}</td>
+                  <td style={{ padding: '6px 10px', fontSize: 13, color: '#5a5853' }}>{v.company}</td>
+                  <td className="vdm-mono" style={{ padding: '6px 10px', fontSize: 12, whiteSpace: 'nowrap' }}>{maskPhone(v.phone)}</td>
+                  <td style={{ padding: '6px 10px', fontSize: 13, whiteSpace: 'nowrap' }}>
                     {v.event}
-                    {v.subEvent && <div style={{ fontSize: 11, color: '#9a978f' }}>{v.subEvent}</div>}
+                    {v.subEvent && <span style={{ fontSize: 11, color: '#9a978f' }}> · {v.subEvent}</span>}
                   </td>
-                  <td style={{ padding: '10px 8px' }}><span style={{ ...badgeBase, ...statusStyle(v.status) }}>{v.status}</span></td>
-                  <td style={{ padding: '10px 8px' }}><span style={{ ...badgeBase, ...consentStyle(v.consent) }}>{v.consent}</span></td>
-                  <td style={{ padding: '10px 8px' }}>
+                  <td style={{ padding: '6px 10px', fontSize: 13 }}>{v.category || <span style={{ color: '#c7c4bd' }}>—</span>}</td>
+                  <td style={{ padding: '6px 10px' }}><span style={{ ...badgeBase, ...statusStyle(v.status) }}>{v.status}</span></td>
+                  <td style={{ padding: '6px 10px' }}><span style={{ ...badgeBase, ...consentStyle(v.consent) }}>{v.consent}</span></td>
+                  <td style={{ padding: '6px 10px' }}>
                     <button type="button" className="vdm-btn-ghost" onClick={() => openEdit(v.id)}>Edit</button>
                   </td>
                 </tr>

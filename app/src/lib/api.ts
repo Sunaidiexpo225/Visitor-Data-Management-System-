@@ -21,7 +21,7 @@ import type {
 // ---------------------------------------------------------------------------
 
 const VISITOR_SELECT =
-  'id,name,company,phone,email,status,consent,cleaned,sub_event:sub_events(name,event:events(name)),invites(id,event,status,invited_on)';
+  'id,name,company,phone,email,status,category,consent,cleaned,sub_event:sub_events(name,event:events(name)),invites(id,event,status,invited_on)';
 
 type NameRef = { name: string } | { name: string }[] | null;
 type SubEventRef = { name: string; event: NameRef } | { name: string; event: NameRef }[] | null;
@@ -33,6 +33,7 @@ type VisitorRow = {
   phone: string;
   email: string;
   status: Visitor['status'];
+  category: string | null;
   consent: Visitor['consent'];
   cleaned: boolean;
   sub_event: SubEventRef;
@@ -56,6 +57,7 @@ function mapVisitor(r: VisitorRow): Visitor {
     event: ev?.name ?? '',
     subEvent: se?.name ?? '',
     status: r.status,
+    category: r.category ?? '',
     consent: r.consent,
     cleaned: r.cleaned,
     invites: (r.invites ?? []).map((i) => ({ id: i.id, event: i.event, status: i.status, date: i.invited_on })),
@@ -96,6 +98,29 @@ export async function fetchStatusOptions(): Promise<StatusOption[]> {
   const { data, error } = await supabase.from('status_options').select('*').order('sort');
   if (error) throw error;
   return (data ?? []).map((s) => ({ id: s.id, name: s.name, sort: s.sort }));
+}
+
+export async function fetchCategoryOptions(): Promise<StatusOption[]> {
+  const { data, error } = await supabase.from('category_options').select('*').order('sort');
+  if (error) throw error;
+  return (data ?? []).map((s) => ({ id: s.id, name: s.name, sort: s.sort }));
+}
+
+export async function addCategoryOption(name: string, sort: number): Promise<void> {
+  const { error } = await supabase.from('category_options').insert({ name, sort });
+  if (error) throw error;
+}
+
+export async function renameCategoryOption(id: string, from: string, to: string): Promise<void> {
+  const { error } = await supabase.from('category_options').update({ name: to }).eq('id', id);
+  if (error) throw error;
+  // category has no FK (free text), so propagate the rename to visitors manually.
+  await supabase.from('visitors').update({ category: to }).eq('category', from);
+}
+
+export async function removeCategoryOption(id: string): Promise<void> {
+  const { error } = await supabase.from('category_options').delete().eq('id', id);
+  if (error) throw error;
 }
 
 export async function fetchTemplates(): Promise<MessageTemplate[]> {
@@ -216,7 +241,7 @@ export async function updateVisitor(
   id: string,
   patch: {
     name: string; company: string; phone: string; email: string;
-    consent: Visitor['consent']; cleaned: boolean; status: string; subEventId: string | null;
+    consent: Visitor['consent']; cleaned: boolean; status: string; category: string; subEventId: string | null;
   },
 ): Promise<void> {
   const { subEventId, ...rest } = patch;
@@ -239,7 +264,7 @@ export async function subEventId(eventName: string, subName?: string): Promise<s
 }
 
 export async function importVisitors(
-  rows: { name: string; company: string; phone: string; email: string; eventName: string; subEventName?: string }[],
+  rows: { name: string; company: string; phone: string; email: string; eventName: string; subEventName?: string; category?: string }[],
   defaultStatus: string,
 ): Promise<number> {
   const names = Array.from(new Set(rows.map((r) => r.eventName).filter(Boolean)));
@@ -255,7 +280,8 @@ export async function importVisitors(
   };
   const payload = rows.map((r) => ({
     name: r.name, company: r.company, phone: r.phone, email: r.email,
-    sub_event_id: subFor(r.eventName, r.subEventName), status: defaultStatus, consent: 'Pending', cleaned: false,
+    sub_event_id: subFor(r.eventName, r.subEventName), status: defaultStatus,
+    category: r.category ?? '', consent: 'Pending', cleaned: false,
   }));
   const { error } = await supabase.from('visitors').insert(payload);
   if (error) throw error;

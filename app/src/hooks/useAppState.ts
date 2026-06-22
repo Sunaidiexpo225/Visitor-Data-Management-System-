@@ -30,6 +30,7 @@ export interface EditDraft {
   consent: ConsentStatus;
   cleaned: boolean;
   status: string;
+  category: string;
   event: string;
   subEvent: string;
 }
@@ -60,6 +61,7 @@ export function useAppState() {
   const [events, setEvents] = useState<string[]>([]);
   const [subEvents, setSubEvents] = useState<SubEvent[]>([]);
   const [statusOptions, setStatusOptions] = useState<StatusOption[]>([]);
+  const [categoryOptions, setCategoryOptions] = useState<StatusOption[]>([]);
   const [templatesList, setTemplatesList] = useState<MessageTemplate[]>([]);
   const [watiConns, setWatiConns] = useState<WatiConnection[]>([]);
   const [users, setUsers] = useState<AppUser[]>([]);
@@ -87,6 +89,7 @@ export function useAppState() {
   const [callEventFilter, setCallEventFilter] = useState('');
   const [callSubEvent, setCallSubEvent] = useState('');
   const [targetEvent, setTargetEvent] = useState('');
+  const [targetSubEvent, setTargetSubEvent] = useState('');
 
   const [callingId, setCallingId] = useState<string | null>(null);
   const [addInviteEvent, setAddInviteEvent] = useState('');
@@ -144,6 +147,7 @@ export function useAppState() {
   const reloadEvents = useCallback(async () => setEvents(await api.fetchEvents()), []);
   const reloadSubEvents = useCallback(async () => setSubEvents(await api.fetchSubEvents()), []);
   const reloadStatusOptions = useCallback(async () => setStatusOptions(await api.fetchStatusOptions()), []);
+  const reloadCategoryOptions = useCallback(async () => setCategoryOptions(await api.fetchCategoryOptions()), []);
   const reloadTemplates = useCallback(async () => setTemplatesList(await api.fetchTemplates()), []);
   const reloadCampaigns = useCallback(async () => setCampaigns(await api.fetchCampaigns()), []);
   const reloadCallLog = useCallback(async () => setCallLog(await api.fetchCallLog()), []);
@@ -170,6 +174,7 @@ export function useAppState() {
       setVisitors(vis);
       setTemplatesList(tpls);
       setStatusOptions(statuses);
+      reloadCategoryOptions();
       setTargetEvent((t) => t || ev[0] || '');
       setAddInviteEvent((t) => t || ev[0] || '');
       setNewWati((w) => (w.event ? w : { ...w, event: ev[0] ?? '' }));
@@ -187,7 +192,7 @@ export function useAppState() {
     } finally {
       setLoading(false);
     }
-  }, [reloadCampaigns, reloadCallLog, reloadActivity, reloadWati, reloadUsers, reloadAudit, reloadCallApis]);
+  }, [reloadCampaigns, reloadCallLog, reloadActivity, reloadWati, reloadUsers, reloadAudit, reloadCallApis, reloadCategoryOptions]);
 
   // Audit helper (server insert + refresh).
   const audit = useCallback(
@@ -359,7 +364,7 @@ export function useAppState() {
     setEditingId(id);
     setEditDraft({
       name: v.name, company: v.company, phone: v.phone, email: v.email,
-      consent: v.consent, cleaned: v.cleaned, status: v.status, event: v.event, subEvent: v.subEvent,
+      consent: v.consent, cleaned: v.cleaned, status: v.status, category: v.category, event: v.event, subEvent: v.subEvent,
     });
   }
 
@@ -376,7 +381,8 @@ export function useAppState() {
       const subId = await api.subEventId(editDraft.event, editDraft.subEvent);
       await api.updateVisitor(editingId, {
         name: editDraft.name, company: editDraft.company, phone: editDraft.phone, email: editDraft.email,
-        consent: editDraft.consent, cleaned: editDraft.cleaned, status: editDraft.status, subEventId: subId,
+        consent: editDraft.consent, cleaned: editDraft.cleaned, status: editDraft.status,
+        category: editDraft.category, subEventId: subId,
       });
       await api.addActivity({
         initials: initialsOf(editDraft.name),
@@ -422,7 +428,8 @@ export function useAppState() {
         visitorId: call.id, name: call.name, company: call.company, event: call.event,
         time: nowStamp().split(' ').slice(1).join(' '), duration, outcome,
       });
-      await api.addInvite(call.id, targetEvent, outcome, today());
+      const inviteTarget = targetSubEvent ? `${targetEvent} · ${targetSubEvent}` : targetEvent;
+      await api.addInvite(call.id, inviteTarget, outcome, today());
       await api.addActivity({
         initials: initialsOf(call.name),
         name: call.name,
@@ -668,6 +675,47 @@ export function useAppState() {
     }
   }
 
+  // ---------- Admin: category options (fields) ----------
+  async function createCategoryOption(name: string) {
+    const n = name.trim();
+    if (!n) return;
+    if (categoryOptions.some((s) => s.name.toLowerCase() === n.toLowerCase())) {
+      flash('That category already exists.');
+      return;
+    }
+    try {
+      await api.addCategoryOption(n, categoryOptions.length);
+      audit('Category option added', n, 'Data');
+      await reloadCategoryOptions();
+      flash('Category added.');
+    } catch (e) {
+      flash(errMsg(e, 'Could not add category.'));
+    }
+  }
+  async function renameCategoryOption(id: string, to: string) {
+    const n = to.trim();
+    const opt = categoryOptions.find((c) => c.id === id);
+    if (!n || !opt) return;
+    try {
+      await api.renameCategoryOption(id, opt.name, n);
+      audit('Category option renamed', n, 'Data');
+      await Promise.all([reloadCategoryOptions(), reloadVisitors()]);
+      flash('Category renamed.');
+    } catch (e) {
+      flash(errMsg(e, 'Could not rename category.'));
+    }
+  }
+  async function deleteCategoryOption(id: string) {
+    try {
+      await api.removeCategoryOption(id);
+      audit('Category option removed', '', 'Data');
+      await reloadCategoryOptions();
+      flash('Category removed.');
+    } catch (e) {
+      flash(errMsg(e, 'Could not remove category.'));
+    }
+  }
+
   // ---------- Admin: templates ----------
   async function createTemplate(name: string, body: string) {
     if (!name.trim()) {
@@ -709,16 +757,17 @@ export function useAppState() {
     const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
     if (lines.length === 0) return [];
     const startIdx = /name/i.test(lines[0]) ? 1 : 0;
-    const rows: { name: string; company: string; phone: string; email: string; eventName: string; subEventName?: string }[] = [];
+    const rows: { name: string; company: string; phone: string; email: string; eventName: string; subEventName?: string; category?: string }[] = [];
     for (let i = startIdx; i < lines.length; i++) {
       const cols = lines[i].split(',').map((c) => c.trim());
-      const [name = '', company = '', phone = '', emailCol = '', eventCol = '', subCol = ''] = cols;
+      const [name = '', company = '', phone = '', emailCol = '', eventCol = '', subCol = '', catCol = ''] = cols;
       if (!name) continue;
       rows.push({
         name, company, phone,
         email: emailCol || name.toLowerCase().replace(/[^a-z]/g, '.') + '@example.com',
         eventName: forcedEvent || eventCol || events[0] || '',
         subEventName: subCol || undefined,
+        category: catCol || undefined,
       });
     }
     return rows;
@@ -962,7 +1011,7 @@ export function useAppState() {
     // shell
     tab, setTab, goCampaigns,
     // data
-    visitors, setVisitors, events, subEvents, subEventsFor, statusOptions, templatesList,
+    visitors, setVisitors, events, subEvents, subEventsFor, statusOptions, categoryOptions, templatesList,
     watiConns, users, callApis, callLog, campaigns, activity, auditLog,
     // visitors tab
     filterEvent, setFilterEvent, filterSubEvent, setFilterSubEvent, filterStatus, setFilterStatus,
@@ -975,7 +1024,7 @@ export function useAppState() {
     cleanupFilter, setCleanupFilter, cleanupEventFilter, setCleanupEventFilter, cleanupSubEvent, setCleanupSubEvent,
     // calls
     callFilter, setCallFilter, callEventFilter, setCallEventFilter, callSubEvent, setCallSubEvent,
-    targetEvent, setTargetEvent,
+    targetEvent, setTargetEvent, targetSubEvent, setTargetSubEvent,
     startCall, endCall, cancelCall, activeCall, callSeconds,
     callingId, openCall, closeCall, addInviteEvent, setAddInviteEvent, addInviteStatus, setAddInviteStatus,
     addInvite, setInviteStatus, removeInvite,
@@ -988,8 +1037,9 @@ export function useAppState() {
     addUserOpen, newUser, setNewUser, openAddUser, closeAddUser, addUser, resetPassword, toggleUser, togglePerm,
     toggleUserPage, toggleUserCampaign,
     credModal, closeCredModal: () => setCredModal(null),
-    // admin: fields (status options)
+    // admin: fields (status + category options)
     createStatusOption, renameStatusOption, deleteStatusOption,
+    createCategoryOption, renameCategoryOption, deleteCategoryOption,
     // admin: templates
     createTemplate, updateTemplate, deleteTemplate,
     // admin: import

@@ -17,7 +17,7 @@ export default function Calls(state: AppState) {
   const {
     visitors, events, subEventsFor,
     callFilter, setCallFilter, callEventFilter, setCallEventFilter, callSubEvent, setCallSubEvent,
-    targetEvent, setTargetEvent,
+    targetEvent, setTargetEvent, targetSubEvent, setTargetSubEvent,
     startCall, openCall,
   } = state;
 
@@ -52,16 +52,27 @@ export default function Calls(state: AppState) {
         <p style={{ fontSize: 13, color: '#c7cde2', maxWidth: 640 }}>
           "Hi, this is calling from Sunaidi Expo. We met at one of our recent events — I'd love to invite you to our upcoming show. Would you be interested in attending?"
         </p>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#c7cde2', whiteSpace: 'nowrap' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#c7cde2', whiteSpace: 'nowrap', flexWrap: 'wrap' }}>
           Inviting to
           <div className="vdm-select-wrap">
-            <select className="vdm-select" value={targetEvent} onChange={(e) => setTargetEvent(e.target.value)}>
+            <select className="vdm-select" value={targetEvent} onChange={(e) => { setTargetEvent(e.target.value); setTargetSubEvent(''); }}>
               {events.map((ev) => (
                 <option key={ev} value={ev}>{ev}</option>
               ))}
             </select>
             <span className="vdm-caret">▾</span>
           </div>
+          {subEventsFor(targetEvent).length > 0 && (
+            <div className="vdm-select-wrap">
+              <select className="vdm-select" value={targetSubEvent} onChange={(e) => setTargetSubEvent(e.target.value)}>
+                <option value="">Whole event</option>
+                {subEventsFor(targetEvent).map((s) => (
+                  <option key={s.id} value={s.name}>{s.name}</option>
+                ))}
+              </select>
+              <span className="vdm-caret">▾</span>
+            </div>
+          )}
         </label>
       </div>
 

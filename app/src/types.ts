@@ -40,6 +40,7 @@ export interface Visitor {
   event: string;       // top-level event name (derived from sub-event)
   subEvent: string;    // sub-event name
   status: VisitorStatus;
+  category: string;    // admin-managed classification (separate from status)
   consent: ConsentStatus;
   cleaned: boolean;
   invites: Invite[];
