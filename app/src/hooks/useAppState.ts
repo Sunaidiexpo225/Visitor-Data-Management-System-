@@ -23,10 +23,14 @@ import { supabase } from '../lib/supabase';
 import * as api from '../lib/api';
 
 export interface EditDraft {
+  refId: string;
   name: string;
   company: string;
   phone: string;
   email: string;
+  country: string;
+  source: string;
+  registrationDate: string;
   consent: ConsentStatus;
   cleaned: boolean;
   status: string;
@@ -460,7 +464,8 @@ export function useAppState() {
     if (!v) return;
     setEditingId(id);
     setEditDraft({
-      name: v.name, company: v.company, phone: v.phone, email: v.email,
+      refId: v.refId, name: v.name, company: v.company, phone: v.phone, email: v.email,
+      country: v.country, source: v.source, registrationDate: v.registrationDate,
       consent: v.consent, cleaned: v.cleaned, status: v.status, category: v.category, event: v.event, subEvent: v.subEvent,
     });
   }
@@ -477,7 +482,8 @@ export function useAppState() {
     try {
       const subId = await api.subEventId(editDraft.event, editDraft.subEvent);
       await api.updateVisitor(editingId, {
-        name: editDraft.name, company: editDraft.company, phone: editDraft.phone, email: editDraft.email,
+        refId: editDraft.refId, name: editDraft.name, company: editDraft.company, phone: editDraft.phone, email: editDraft.email,
+        country: editDraft.country, source: editDraft.source, registrationDate: editDraft.registrationDate,
         consent: editDraft.consent, cleaned: editDraft.cleaned, status: editDraft.status,
         category: editDraft.category, subEventId: subId,
       });
@@ -854,10 +860,10 @@ export function useAppState() {
     const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
     if (lines.length === 0) return [];
     const startIdx = /name/i.test(lines[0]) ? 1 : 0;
-    const rows: { name: string; company: string; phone: string; email: string; eventName: string; subEventName?: string; category?: string; cleaned?: boolean }[] = [];
+    const rows: { name: string; company: string; phone: string; email: string; eventName: string; subEventName?: string; category?: string; cleaned?: boolean; refId?: string; country?: string; source?: string; registrationDate?: string }[] = [];
     for (let i = startIdx; i < lines.length; i++) {
       const cols = lines[i].split(',').map((c) => c.trim());
-      const [name = '', company = '', phone = '', emailCol = '', eventCol = '', subCol = '', catCol = '', cleanCol = ''] = cols;
+      const [name = '', company = '', phone = '', emailCol = '', eventCol = '', subCol = '', catCol = '', cleanCol = '', idCol = '', countryCol = '', sourceCol = '', regDateCol = ''] = cols;
       if (!name) continue;
       rows.push({
         name, company, phone,
@@ -866,6 +872,10 @@ export function useAppState() {
         subEventName: subCol || undefined,
         category: catCol || undefined,
         cleaned: /^(cleaned|yes|true|y|1|done)$/i.test(cleanCol),
+        refId: idCol || undefined,
+        country: countryCol || undefined,
+        source: sourceCol || undefined,
+        registrationDate: regDateCol || undefined,
       });
     }
     return rows;

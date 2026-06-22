@@ -1,4 +1,4 @@
-Name,Company,Phone,Email,Event,Sub-event,Category,Cleanup status
-Ahmed Al-Farsi,Falcon Trading,+966 50 000 0001,ahmed@falcontrading.com,Spring Expo 2026,General,Buyer,Not cleaned
-Sara Nasser,Bluewave Tech,+966 50 000 0002,sara@bluewave.com,Spring Expo 2026,Day 1,Visitor,Cleaned
-John Carter,Carter & Co,+966 50 000 0003,john@carterco.com,Tech Forum,General,Supplier,Not cleaned
+Name,Company,Phone,Email,Event,Sub-event,Category,Cleanup status,Id,Country,Source,Registration Date
+Ahmed Al-Farsi,Falcon Trading,+966 50 000 0001,ahmed@falcontrading.com,Spring Expo 2026,General,Buyer,Not cleaned,REG-1001,Saudi Arabia,Website,2026-03-12
+Sara Nasser,Bluewave Tech,+966 50 000 0002,sara@bluewave.com,Spring Expo 2026,Day 1,Visitor,Cleaned,REG-1002,UAE,Walk-in,2026-03-13
+John Carter,Carter & Co,+966 50 000 0003,john@carterco.com,Tech Forum,General,Supplier,Not cleaned,REG-1003,UK,Referral,2026-03-14

@@ -14,6 +14,10 @@ export default function EditVisitorModal(state: AppState) {
       <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Edit visitor record</h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12, color: '#5a5853', fontWeight: 500 }}>
+          Id
+          <input className="vdm-input" value={editDraft.refId} onChange={(e) => setEditDraft({ ...editDraft, refId: e.target.value })} placeholder="Registration / external id" />
+        </label>
+        <label style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12, color: '#5a5853', fontWeight: 500 }}>
           Name
           <input className="vdm-input" value={editDraft.name} onChange={(e) => setEditDraft({ ...editDraft, name: e.target.value })} />
         </label>
@@ -28,6 +32,20 @@ export default function EditVisitorModal(state: AppState) {
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12, color: '#5a5853', fontWeight: 500 }}>
           Email
           <input className="vdm-input" value={editDraft.email} onChange={(e) => setEditDraft({ ...editDraft, email: e.target.value })} />
+        </label>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <label style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12, color: '#5a5853', fontWeight: 500 }}>
+            Country
+            <input className="vdm-input" value={editDraft.country} onChange={(e) => setEditDraft({ ...editDraft, country: e.target.value })} />
+          </label>
+          <label style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12, color: '#5a5853', fontWeight: 500 }}>
+            Source
+            <input className="vdm-input" value={editDraft.source} onChange={(e) => setEditDraft({ ...editDraft, source: e.target.value })} />
+          </label>
+        </div>
+        <label style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12, color: '#5a5853', fontWeight: 500 }}>
+          Registration date
+          <input className="vdm-input" type="date" value={editDraft.registrationDate} onChange={(e) => setEditDraft({ ...editDraft, registrationDate: e.target.value })} />
         </label>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12, color: '#5a5853', fontWeight: 500 }}>
           Status

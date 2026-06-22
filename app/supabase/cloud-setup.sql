@@ -1,4 +1,4 @@
--- One-shot setup: migrations 0001–0004 + seed. Run ONCE on a fresh project.
+-- One-shot setup: migrations 0001–0005 + seed. Run ONCE on a fresh project.
 
 -- ============================================================================
 -- Visitor Data Management — core schema
@@ -517,6 +517,16 @@ exception when duplicate_object then null; end $$;
 do $$ begin
   create policy category_admin on category_options for all to authenticated using (is_admin()) with check (is_admin());
 exception when duplicate_object then null; end $$;
+
+-- ============================================================================
+-- 0005 — Extra visitor fields: external Id, Country, Source, Registration date
+-- Safe to run on a DB that already has 0001–0004 applied.
+-- ============================================================================
+
+alter table visitors add column if not exists ref_id            text not null default '';
+alter table visitors add column if not exists country           text not null default '';
+alter table visitors add column if not exists source            text not null default '';
+alter table visitors add column if not exists registration_date date;
 
 -- ============================================================================
 -- Seed data (data tables only — auth users are seeded separately by

@@ -21,17 +21,21 @@ import type {
 // ---------------------------------------------------------------------------
 
 const VISITOR_SELECT =
-  'id,name,company,phone,email,status,category,consent,cleaned,sub_event:sub_events(name,event:events(name)),invites(id,event,status,invited_on)';
+  'id,ref_id,name,company,phone,email,country,source,registration_date,status,category,consent,cleaned,sub_event:sub_events(name,event:events(name)),invites(id,event,status,invited_on)';
 
 type NameRef = { name: string } | { name: string }[] | null;
 type SubEventRef = { name: string; event: NameRef } | { name: string; event: NameRef }[] | null;
 
 type VisitorRow = {
   id: string;
+  ref_id: string | null;
   name: string;
   company: string;
   phone: string;
   email: string;
+  country: string | null;
+  source: string | null;
+  registration_date: string | null;
   status: Visitor['status'];
   category: string | null;
   consent: Visitor['consent'];
@@ -50,10 +54,14 @@ function mapVisitor(r: VisitorRow): Visitor {
   const ev = se ? unwrap(se.event) : null;
   return {
     id: r.id,
+    refId: r.ref_id ?? '',
     name: r.name,
     company: r.company,
     phone: r.phone,
     email: r.email,
+    country: r.country ?? '',
+    source: r.source ?? '',
+    registrationDate: r.registration_date ?? '',
     event: ev?.name ?? '',
     subEvent: se?.name ?? '',
     status: r.status,
@@ -240,14 +248,20 @@ export async function addActivity(a: Omit<ActivityEntry, 'id'>): Promise<void> {
 export async function updateVisitor(
   id: string,
   patch: {
-    name: string; company: string; phone: string; email: string;
+    refId: string; name: string; company: string; phone: string; email: string;
+    country: string; source: string; registrationDate: string;
     consent: Visitor['consent']; cleaned: boolean; status: string; category: string; subEventId: string | null;
   },
 ): Promise<void> {
-  const { subEventId, ...rest } = patch;
+  const { subEventId, refId, registrationDate, ...rest } = patch;
   const { error } = await supabase
     .from('visitors')
-    .update({ ...rest, sub_event_id: subEventId })
+    .update({
+      ...rest,
+      ref_id: refId,
+      registration_date: registrationDate || null,
+      sub_event_id: subEventId,
+    })
     .eq('id', id);
   if (error) throw error;
 }
@@ -264,7 +278,7 @@ export async function subEventId(eventName: string, subName?: string): Promise<s
 }
 
 export async function importVisitors(
-  rows: { name: string; company: string; phone: string; email: string; eventName: string; subEventName?: string; category?: string; cleaned?: boolean }[],
+  rows: { name: string; company: string; phone: string; email: string; eventName: string; subEventName?: string; category?: string; cleaned?: boolean; refId?: string; country?: string; source?: string; registrationDate?: string }[],
   defaultStatus: string,
 ): Promise<number> {
   const names = Array.from(new Set(rows.map((r) => r.eventName).filter(Boolean)));
@@ -279,7 +293,8 @@ export async function importVisitors(
     return chosen?.id ?? matches[0]?.id ?? null;
   };
   const payload = rows.map((r) => ({
-    name: r.name, company: r.company, phone: r.phone, email: r.email,
+    ref_id: r.refId ?? '', name: r.name, company: r.company, phone: r.phone, email: r.email,
+    country: r.country ?? '', source: r.source ?? '', registration_date: r.registrationDate || null,
     sub_event_id: subFor(r.eventName, r.subEventName), status: defaultStatus,
     category: r.category ?? '', consent: 'Pending', cleaned: r.cleaned ?? false,
   }));

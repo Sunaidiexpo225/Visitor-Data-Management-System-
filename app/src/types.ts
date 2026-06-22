@@ -33,10 +33,14 @@ export interface Invite {
 
 export interface Visitor {
   id: string;
+  refId: string;       // external / registration id (shown as "Id")
   name: string;
   company: string;
   phone: string;
   email: string;
+  country: string;
+  source: string;
+  registrationDate: string; // 'YYYY-MM-DD' or ''
   event: string;       // top-level event name (derived from sub-event)
   subEvent: string;    // sub-event name
   status: VisitorStatus;
