@@ -1,6 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { AppState } from '../hooks/useAppState';
 import { maskPhone } from '../lib/format';
+import { distinctValues } from '../lib/filters';
 
 const statusColor: Record<string, string> = {
   'Not contacted': '#9a978f',
@@ -21,12 +22,23 @@ export default function Calls(state: AppState) {
     startCall, openCall,
   } = state;
 
+  const [filterCountry, setFilterCountry] = useState('');
+  const [filterSource, setFilterSource] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
+
+  const countries = useMemo(() => distinctValues(visitors, (v) => v.country), [visitors]);
+  const sources = useMemo(() => distinctValues(visitors, (v) => v.source), [visitors]);
+  const categories = useMemo(() => distinctValues(visitors, (v) => v.category), [visitors]);
+
   const invitedCount = useMemo(() => visitors.filter((v) => v.invites.some((i) => i.status === 'Invited')).length, [visitors]);
 
   const filtered = useMemo(() => {
     return visitors.filter((v) => {
       if (callEventFilter && v.event !== callEventFilter) return false;
       if (callSubEvent && v.subEvent !== callSubEvent) return false;
+      if (filterCountry && v.country !== filterCountry) return false;
+      if (filterSource && v.source !== filterSource) return false;
+      if (filterCategory && v.category !== filterCategory) return false;
       const latest = latestStatus(v.invites);
       if (callFilter === 'none' && latest !== 'Not contacted') return false;
       if (callFilter === 'pending' && !v.invites.some((i) => i.status === 'Pending')) return false;
@@ -34,7 +46,7 @@ export default function Calls(state: AppState) {
       if (callFilter === 'notinterested' && !v.invites.some((i) => i.status === 'Not interested')) return false;
       return true;
     });
-  }, [visitors, callEventFilter, callSubEvent, callFilter]);
+  }, [visitors, callEventFilter, callSubEvent, callFilter, filterCountry, filterSource, filterCategory]);
 
   return (
     <div>
@@ -98,6 +110,27 @@ export default function Calls(state: AppState) {
           </div>
         )}
         <div className="vdm-select-wrap">
+          <select className="vdm-select" value={filterCountry} onChange={(e) => setFilterCountry(e.target.value)}>
+            <option value="">All countries</option>
+            {countries.map((c) => (<option key={c} value={c}>{c}</option>))}
+          </select>
+          <span className="vdm-caret">▾</span>
+        </div>
+        <div className="vdm-select-wrap">
+          <select className="vdm-select" value={filterSource} onChange={(e) => setFilterSource(e.target.value)}>
+            <option value="">All sources</option>
+            {sources.map((s) => (<option key={s} value={s}>{s}</option>))}
+          </select>
+          <span className="vdm-caret">▾</span>
+        </div>
+        <div className="vdm-select-wrap">
+          <select className="vdm-select" value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
+            <option value="">All categories</option>
+            {categories.map((c) => (<option key={c} value={c}>{c}</option>))}
+          </select>
+          <span className="vdm-caret">▾</span>
+        </div>
+        <div className="vdm-select-wrap">
           <select className="vdm-select" value={callFilter} onChange={(e) => setCallFilter(e.target.value)}>
             <option value="">All</option>
             <option value="none">Not contacted</option>
@@ -113,12 +146,17 @@ export default function Calls(state: AppState) {
         <table style={{ width: '100%' }}>
           <thead>
             <tr>
-              <th className="vdm-th">Visitor</th>
-              <th className="vdm-th">Phone</th>
-              <th className="vdm-th">Event</th>
-              <th className="vdm-th">Latest status</th>
-              <th className="vdm-th">Invitations</th>
-              <th className="vdm-th"></th>
+              <th className="vdm-th" style={{ padding: '8px 10px' }}>Id</th>
+              <th className="vdm-th" style={{ padding: '8px 10px' }}>Name</th>
+              <th className="vdm-th" style={{ padding: '8px 10px' }}>Company</th>
+              <th className="vdm-th" style={{ padding: '8px 10px' }}>Phone</th>
+              <th className="vdm-th" style={{ padding: '8px 10px' }}>Country</th>
+              <th className="vdm-th" style={{ padding: '8px 10px' }}>Source</th>
+              <th className="vdm-th" style={{ padding: '8px 10px' }}>Event</th>
+              <th className="vdm-th" style={{ padding: '8px 10px' }}>Category</th>
+              <th className="vdm-th" style={{ padding: '8px 10px' }}>Latest status</th>
+              <th className="vdm-th" style={{ padding: '8px 10px' }}>Invites</th>
+              <th className="vdm-th" style={{ padding: '8px 10px' }}></th>
             </tr>
           </thead>
           <tbody>
@@ -126,20 +164,25 @@ export default function Calls(state: AppState) {
               const latest = latestStatus(v.invites);
               return (
                 <tr key={v.id} style={{ borderTop: '1px solid #f0efe9' }}>
-                  <td style={{ padding: '10px 8px' }}>
-                    <div style={{ fontSize: 13, fontWeight: 500 }}>{v.name}</div>
-                    <div style={{ fontSize: 12, color: '#7a7873' }}>{v.company}</div>
+                  <td className="vdm-mono" style={{ padding: '6px 10px', fontSize: 12, color: '#7a7873' }}>{v.refId || <span style={{ color: '#c7c4bd' }}>—</span>}</td>
+                  <td style={{ padding: '6px 10px', fontSize: 13, fontWeight: 500, whiteSpace: 'nowrap' }}>{v.name}</td>
+                  <td style={{ padding: '6px 10px', fontSize: 13, color: '#5a5853' }}>{v.company}</td>
+                  <td className="vdm-mono" style={{ padding: '6px 10px', fontSize: 12, whiteSpace: 'nowrap' }}>{maskPhone(v.phone)}</td>
+                  <td style={{ padding: '6px 10px', fontSize: 13 }}>{v.country || <span style={{ color: '#c7c4bd' }}>—</span>}</td>
+                  <td style={{ padding: '6px 10px', fontSize: 13 }}>{v.source || <span style={{ color: '#c7c4bd' }}>—</span>}</td>
+                  <td style={{ padding: '6px 10px', fontSize: 13, whiteSpace: 'nowrap' }}>
+                    {v.event}
+                    {v.subEvent && <span style={{ fontSize: 11, color: '#9a978f' }}> · {v.subEvent}</span>}
                   </td>
-                  <td className="vdm-mono" style={{ padding: '10px 8px', fontSize: 12 }}>{maskPhone(v.phone)}</td>
-                  <td style={{ padding: '10px 8px', fontSize: 13 }}>{v.event}</td>
-                  <td style={{ padding: '10px 8px' }}>
+                  <td style={{ padding: '6px 10px', fontSize: 13 }}>{v.category || <span style={{ color: '#c7c4bd' }}>—</span>}</td>
+                  <td style={{ padding: '6px 10px' }}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
                       <span style={{ width: 7, height: 7, borderRadius: '50%', background: statusColor[latest] }} />
                       {latest}
                     </span>
                   </td>
-                  <td style={{ padding: '10px 8px', fontSize: 13 }}>{v.invites.length}</td>
-                  <td style={{ padding: '10px 8px', display: 'flex', gap: 6 }}>
+                  <td style={{ padding: '6px 10px', fontSize: 13 }}>{v.invites.length}</td>
+                  <td style={{ padding: '6px 10px', display: 'flex', gap: 6 }}>
                     <button type="button" className="vdm-btn-ghost" onClick={() => startCall(v.id)}>📞 Call</button>
                     <button type="button" className="vdm-btn-ghost" onClick={() => openCall(v.id)}>Invites</button>
                   </td>
