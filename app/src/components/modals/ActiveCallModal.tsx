@@ -1,5 +1,5 @@
 import type { AppState } from '../../hooks/useAppState';
-import { fmtDur, initials } from '../../lib/format';
+import { dialDigits, fmtDur, initials } from '../../lib/format';
 import type { MouseEvent } from 'react';
 
 export default function ActiveCallModal(state: AppState) {
@@ -43,7 +43,7 @@ export default function ActiveCallModal(state: AppState) {
         <div className="vdm-mono" style={{ fontSize: 32, fontWeight: 600, margin: '24px 0' }}>{fmtDur(callSeconds)}</div>
 
         <a
-          href={`tel:${activeCall.phone}`}
+          href={`tel:${dialDigits(activeCall.phone)}`}
           style={{ display: 'inline-block', fontSize: 13, color: '#fff', background: 'rgba(255,255,255,0.14)', borderRadius: 8, padding: '9px 16px', marginBottom: 20, textDecoration: 'none' }}
         >
           Dial on this device

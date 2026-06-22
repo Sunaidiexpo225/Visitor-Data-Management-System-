@@ -12,6 +12,13 @@ export function maskPhone(p: string): string {
   return '+966 5•• ••• ' + last3;
 }
 
+// Normalise a phone for dialing / call-provider APIs: keep only digits and a
+// single leading '+', stripping spaces, dashes, parentheses, etc. (E.164-ish).
+export function dialDigits(p: string): string {
+  const plus = p.trim().startsWith('+') ? '+' : '';
+  return plus + p.replace(/\D/g, '');
+}
+
 export function fmtDur(sec: number): string {
   const m = Math.floor(sec / 60);
   const s = sec % 60;
