@@ -82,6 +82,36 @@ export async function fetchEvents(): Promise<string[]> {
   return (data ?? []).map((e) => e.name);
 }
 
+// Server-side counts so dashboard KPIs stay correct beyond the API row cap.
+export async function fetchVisitorStats(): Promise<{ total: number; optedIn: number; byEvent: { event: string; count: number }[] }> {
+  const totalQ = await supabase.from('visitors').select('*', { count: 'exact', head: true });
+  const optedQ = await supabase.from('visitors').select('*', { count: 'exact', head: true }).eq('consent', 'Opted-in');
+  const [events, subs] = await Promise.all([fetchEvents(), fetchSubEvents()]);
+  const byEvent: { event: string; count: number }[] = [];
+  for (const ev of events) {
+    const subIds = subs.filter((s) => s.eventName === ev).map((s) => s.id);
+    let count = 0;
+    if (subIds.length) {
+      const r = await supabase.from('visitors').select('*', { count: 'exact', head: true }).in('sub_event_id', subIds);
+      count = r.count ?? 0;
+    }
+    byEvent.push({ event: ev, count });
+  }
+  return { total: totalQ.count ?? 0, optedIn: optedQ.count ?? 0, byEvent };
+}
+
+// Delete every visitor record under an event (keeps the event + sub-events).
+export async function deleteVisitorsByEvent(eventName: string): Promise<number> {
+  const { data: ev } = await supabase.from('events').select('id').eq('name', eventName).single();
+  if (!ev) return 0;
+  const { data: subs } = await supabase.from('sub_events').select('id').eq('event_id', ev.id);
+  const ids = (subs ?? []).map((s) => s.id);
+  if (ids.length === 0) return 0;
+  const { error, count } = await supabase.from('visitors').delete({ count: 'exact' }).in('sub_event_id', ids);
+  if (error) throw error;
+  return count ?? 0;
+}
+
 export async function fetchSubEvents(): Promise<SubEvent[]> {
   const { data, error } = await supabase
     .from('sub_events')
@@ -278,7 +308,7 @@ export async function subEventId(eventName: string, subName?: string): Promise<s
 }
 
 export async function importVisitors(
-  rows: { name: string; company: string; phone: string; email: string; eventName: string; subEventName?: string; category?: string; cleaned?: boolean; refId?: string; country?: string; source?: string; registrationDate?: string }[],
+  rows: { name: string; company: string; phone: string; email: string; eventName: string; subEventName?: string; category?: string; cleaned?: boolean; refId?: string; country?: string; source?: string; registrationDate?: string; consent?: string }[],
   defaultStatus: string,
 ): Promise<number> {
   const names = Array.from(new Set(rows.map((r) => r.eventName).filter(Boolean)));
@@ -296,7 +326,7 @@ export async function importVisitors(
     ref_id: r.refId ?? '', name: r.name, company: r.company, phone: r.phone, email: r.email,
     country: r.country ?? '', source: r.source ?? '', registration_date: r.registrationDate || null,
     sub_event_id: subFor(r.eventName, r.subEventName), status: defaultStatus,
-    category: r.category ?? '', consent: 'Pending', cleaned: r.cleaned ?? false,
+    category: r.category ?? '', consent: r.consent ?? 'Pending', cleaned: r.cleaned ?? false,
   }));
   const { error } = await supabase.from('visitors').insert(payload);
   if (error) throw error;

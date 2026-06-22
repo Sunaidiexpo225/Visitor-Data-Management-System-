@@ -3,8 +3,8 @@ import type { AppState } from '../../hooks/useAppState';
 
 export default function AdminEventsTree(state: AppState) {
   const {
-    events, subEventsFor, visitors,
-    newEventName, setNewEventName, createEvent, importIntoEvent, openEditEvent, deleteEvent,
+    events, subEventsFor, visitors, visitorStats,
+    newEventName, setNewEventName, createEvent, importIntoEvent, openEditEvent, deleteEvent, clearEventRecords,
     createSubEvent, renameSubEvent, deleteSubEvent,
   } = state;
 
@@ -19,7 +19,7 @@ export default function AdminEventsTree(state: AppState) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {events.map((ev) => {
           const subs = subEventsFor(ev);
-          const count = visitors.filter((v) => v.event === ev).length;
+          const count = visitorStats.byEvent.find((b) => b.event === ev)?.count ?? visitors.filter((v) => v.event === ev).length;
           return (
             <div key={ev} className="vdm-card" style={{ padding: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
@@ -35,6 +35,7 @@ export default function AdminEventsTree(state: AppState) {
                   />
                   <button type="button" className="vdm-btn-ghost" onClick={() => importRefs.current[ev]?.click()}>Import</button>
                   <button type="button" className="vdm-btn-ghost" onClick={() => openEditEvent(ev)}>Rename</button>
+                  <button type="button" className="vdm-btn-ghost" onClick={() => clearEventRecords(ev)} style={{ color: '#9a4a3a' }}>Clear records</button>
                   <button type="button" className="vdm-btn-ghost" onClick={() => deleteEvent(ev)}>Delete</button>
                 </div>
               </div>

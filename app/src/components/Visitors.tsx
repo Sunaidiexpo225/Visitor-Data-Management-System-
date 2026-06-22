@@ -7,7 +7,7 @@ import type { ConsentStatus } from '../types';
 
 export default function Visitors(state: AppState) {
   const {
-    visitors, events, subEventsFor, statusOptions, categoryOptions,
+    visitors, visitorStats, events, subEventsFor, statusOptions, categoryOptions,
     filterEvent, setFilterEvent, filterSubEvent, setFilterSubEvent,
     filterStatus, setFilterStatus, filterConsent, setFilterConsent, search, setSearch,
     openEdit,
@@ -48,7 +48,10 @@ export default function Visitors(state: AppState) {
         <h1 className="vdm-serif" style={{ fontSize: 26, fontWeight: 500 }}>
           Visitors
         </h1>
-        <p style={{ fontSize: 13, color: '#7a7873', marginTop: 4 }}>{filtered.length} of {visitors.length} records</p>
+        <p style={{ fontSize: 13, color: '#7a7873', marginTop: 4 }}>
+          {filtered.length} of {visitorStats.total.toLocaleString()} records
+          {visitors.length < visitorStats.total && <span style={{ color: '#b07a1e' }}> · showing first {visitors.length.toLocaleString()} (raise the API row limit to load more)</span>}
+        </p>
       </div>
 
       <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
@@ -107,7 +110,7 @@ export default function Visitors(state: AppState) {
       </div>
 
       <div className="vdm-card" style={{ overflow: 'auto' }}>
-        <table style={{ width: '100%' }}>
+        <table className="vdm-table-wide" style={{ width: '100%' }}>
           <thead>
             <tr>
               <th className="vdm-th" style={{ padding: '8px 10px' }}>Id</th>

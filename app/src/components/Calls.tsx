@@ -146,7 +146,7 @@ export default function Calls(state: AppState) {
       </div>
 
       <div className="vdm-card" style={{ overflow: 'auto' }}>
-        <table style={{ width: '100%' }}>
+        <table className="vdm-table-wide" style={{ width: '100%' }}>
           <thead>
             <tr>
               <th className="vdm-th" style={{ padding: '8px 10px' }}>Id</th>

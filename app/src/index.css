@@ -85,6 +85,11 @@ table { border-collapse: collapse; }
 .vdm-mono { font-family: 'IBM Plex Mono', monospace; }
 .vdm-serif { font-family: 'Newsreader', serif; }
 
+/* Wide data tables: keep cells on one line and scroll horizontally inside the
+   card instead of cramming/wrapping columns. */
+.vdm-table-wide { min-width: 1080px; }
+.vdm-table-wide th, .vdm-table-wide td { white-space: nowrap; }
+
 @media (max-width: 960px) {
   .vdm-main { padding: 20px 16px 44px !important; }
   .vdm-kpi4 { grid-template-columns: repeat(2,1fr) !important; }

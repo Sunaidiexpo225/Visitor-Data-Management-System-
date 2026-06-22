@@ -54,7 +54,16 @@ export interface ImportRow {
   country?: string;
   source?: string;
   registrationDate?: string;
+  consent?: string;
   warn?: string;
+}
+
+function parseConsent(raw: string): string | undefined {
+  const s = raw.trim().toLowerCase();
+  if (!s) return undefined;
+  if (/opt.?ed.?in|opt.?in|^in$|^yes$|^y$|subscribed|consented/.test(s)) return 'Opted-in';
+  if (/opt.?ed.?out|opt.?out|^out$|^no$|unsubscribed/.test(s)) return 'Opted-out';
+  return 'Pending';
 }
 
 function initialsOf(name: string): string {
@@ -86,6 +95,7 @@ export function useAppState() {
 
   // ---- server-backed collections ----
   const [visitors, setVisitors] = useState<Visitor[]>([]);
+  const [visitorStats, setVisitorStats] = useState<{ total: number; optedIn: number; byEvent: { event: string; count: number }[] }>({ total: 0, optedIn: 0, byEvent: [] });
   const [events, setEvents] = useState<string[]>([]);
   const [subEvents, setSubEvents] = useState<SubEvent[]>([]);
   const [statusOptions, setStatusOptions] = useState<StatusOption[]>([]);
@@ -172,7 +182,11 @@ export function useAppState() {
   }
 
   // ---- reloaders ----
-  const reloadVisitors = useCallback(async () => setVisitors(await api.fetchVisitors()), []);
+  const reloadVisitors = useCallback(async () => {
+    const [list, stats] = await Promise.all([api.fetchVisitors(), api.fetchVisitorStats()]);
+    setVisitors(list);
+    setVisitorStats(stats);
+  }, []);
   const reloadEvents = useCallback(async () => setEvents(await api.fetchEvents()), []);
   const reloadSubEvents = useCallback(async () => setSubEvents(await api.fetchSubEvents()), []);
   const reloadStatusOptions = useCallback(async () => setStatusOptions(await api.fetchStatusOptions()), []);
@@ -216,6 +230,7 @@ export function useAppState() {
       await Promise.all([
         reloadCampaigns(), reloadCallLog(), reloadActivity(), reloadWati(),
         reloadUsers(), reloadAudit(), reloadCallApis(),
+        api.fetchVisitorStats().then(setVisitorStats),
         api.fetchAutoBackup().then(setAutoBackup),
       ]);
     } finally {
@@ -893,6 +908,7 @@ export function useAppState() {
       sub: find('sub-event', 'sub event', 'subevent'),
       category: find('category'),
       cleaned: find('cleanup status', 'cleaned', 'cleanup'),
+      consent: find('consent', 'opt-in', 'opt in', 'opted in', 'subscription'),
       id: find('id', 'reference', 'reg id', 'registration id', 'ref'),
       country: find('country'),
       source: find('source'),
@@ -930,6 +946,7 @@ export function useAppState() {
         country: get(cols, col.country) || undefined,
         source: get(cols, col.source) || undefined,
         registrationDate: get(cols, col.regDate) || undefined,
+        consent: parseConsent(get(cols, col.consent)),
         warn,
       });
     }
@@ -1072,6 +1089,18 @@ export function useAppState() {
     }
   }
 
+  async function clearEventRecords(name: string) {
+    if (!window.confirm(`Delete ALL visitor records under "${name}"? This cannot be undone. The event and its sub-events are kept.`)) return;
+    try {
+      const n = await api.deleteVisitorsByEvent(name);
+      audit('Event records cleared', `${name} (${n} record(s) removed)`, 'Data');
+      await reloadVisitors();
+      flash(`Removed ${n} record(s) from ${name}.`);
+    } catch (e) {
+      flash(errMsg(e, 'Could not clear records.'));
+    }
+  }
+
   // ---------- Admin: WATI ----------
   async function toggleWati(ev: string) {
     const conn = watiConns.find((w) => w.event === ev);
@@ -1190,7 +1219,7 @@ export function useAppState() {
     // shell
     tab, setTab, goCampaigns,
     // data
-    visitors, setVisitors, events, subEvents, subEventsFor, statusOptions, categoryOptions, templatesList,
+    visitors, setVisitors, visitorStats, events, subEvents, subEventsFor, statusOptions, categoryOptions, templatesList,
     watiConns, users, callApis, callLog, campaigns, activity, auditLog,
     // visitors tab
     filterEvent, setFilterEvent, filterSubEvent, setFilterSubEvent, filterStatus, setFilterStatus,
@@ -1225,7 +1254,7 @@ export function useAppState() {
     importFile, importPreview, confirmImport, cancelImport,
     // admin: events + sub-events
     newEventName, setNewEventName, createEvent, importIntoEvent,
-    createSubEvent, renameSubEvent, deleteSubEvent,
+    createSubEvent, renameSubEvent, deleteSubEvent, clearEventRecords,
     editEventOpen, editEventName, setEditEventName, openEditEvent, closeEditEvent, saveEditEvent, deleteEvent,
     // admin: wati
     addWatiOpen, newWati, setNewWati, openAddWati, closeAddWati, addWati, toggleWati,

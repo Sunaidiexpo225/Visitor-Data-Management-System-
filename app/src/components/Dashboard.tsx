@@ -3,20 +3,17 @@ import type { AppState } from '../hooks/useAppState';
 import { iconStyle, tagStyle } from '../lib/styles';
 
 export default function Dashboard(state: AppState) {
-  const { visitors, events, campaigns, activity, exportAll } = state;
+  const { visitorStats, campaigns, activity, exportAll } = state;
 
-  const totalRecords = visitors.length;
-  const optedIn = visitors.filter((v) => v.consent === 'Opted-in').length;
+  const totalRecords = visitorStats.total;
+  const optedIn = visitorStats.optedIn;
   const reachablePct = totalRecords ? Math.round((optedIn / totalRecords) * 100) : 0;
   const campaignsSent = campaigns.length;
 
   const eventStats = useMemo(() => {
-    const max = Math.max(1, ...events.map((ev) => visitors.filter((v) => v.event === ev).length));
-    return events.map((ev) => {
-      const count = visitors.filter((v) => v.event === ev).length;
-      return { event: ev, count, pct: Math.round((count / max) * 100) };
-    });
-  }, [events, visitors]);
+    const max = Math.max(1, ...visitorStats.byEvent.map((b) => b.count));
+    return visitorStats.byEvent.map((b) => ({ event: b.event, count: b.count, pct: Math.round((b.count / max) * 100) }));
+  }, [visitorStats]);
 
   return (
     <div>
