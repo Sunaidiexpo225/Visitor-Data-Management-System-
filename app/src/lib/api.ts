@@ -264,7 +264,7 @@ export async function subEventId(eventName: string, subName?: string): Promise<s
 }
 
 export async function importVisitors(
-  rows: { name: string; company: string; phone: string; email: string; eventName: string; subEventName?: string; category?: string }[],
+  rows: { name: string; company: string; phone: string; email: string; eventName: string; subEventName?: string; category?: string; cleaned?: boolean }[],
   defaultStatus: string,
 ): Promise<number> {
   const names = Array.from(new Set(rows.map((r) => r.eventName).filter(Boolean)));
@@ -281,7 +281,7 @@ export async function importVisitors(
   const payload = rows.map((r) => ({
     name: r.name, company: r.company, phone: r.phone, email: r.email,
     sub_event_id: subFor(r.eventName, r.subEventName), status: defaultStatus,
-    category: r.category ?? '', consent: 'Pending', cleaned: false,
+    category: r.category ?? '', consent: 'Pending', cleaned: r.cleaned ?? false,
   }));
   const { error } = await supabase.from('visitors').insert(payload);
   if (error) throw error;

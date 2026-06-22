@@ -854,10 +854,10 @@ export function useAppState() {
     const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
     if (lines.length === 0) return [];
     const startIdx = /name/i.test(lines[0]) ? 1 : 0;
-    const rows: { name: string; company: string; phone: string; email: string; eventName: string; subEventName?: string; category?: string }[] = [];
+    const rows: { name: string; company: string; phone: string; email: string; eventName: string; subEventName?: string; category?: string; cleaned?: boolean }[] = [];
     for (let i = startIdx; i < lines.length; i++) {
       const cols = lines[i].split(',').map((c) => c.trim());
-      const [name = '', company = '', phone = '', emailCol = '', eventCol = '', subCol = '', catCol = ''] = cols;
+      const [name = '', company = '', phone = '', emailCol = '', eventCol = '', subCol = '', catCol = '', cleanCol = ''] = cols;
       if (!name) continue;
       rows.push({
         name, company, phone,
@@ -865,6 +865,7 @@ export function useAppState() {
         eventName: forcedEvent || eventCol || events[0] || '',
         subEventName: subCol || undefined,
         category: catCol || undefined,
+        cleaned: /^(cleaned|yes|true|y|1|done)$/i.test(cleanCol),
       });
     }
     return rows;
