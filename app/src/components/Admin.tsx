@@ -17,8 +17,8 @@ const PAGE_KEYS: { key: PageKey; label: string }[] = [
 
 export default function Admin(state: AppState) {
   const {
-    users, openAddUser, resetPassword, toggleUser, togglePerm, toggleUserPage, toggleUserCampaign,
-    importFile, watiConns,
+    users, openAddUser, resetPassword, toggleUser, togglePerm, toggleUserPage, toggleUserCampaign, toggleUserEvent,
+    allEvents, importFile, watiConns,
     callApis, openAddCallApi, toggleCallApi, testCallApi, removeCallApi,
     openAddWati, toggleWati,
     autoBackup, toggleAutoBackup, exportAll,
@@ -134,6 +134,31 @@ export default function Admin(state: AppState) {
                         WATI
                       </button>
                     </div>
+                    {u.role !== 'Admin' && (
+                      <div style={{ marginTop: 8, maxWidth: 260 }}>
+                        <div style={{ fontSize: 10, color: '#9a978f', marginBottom: 3 }}>
+                          Event access {u.eventScope.length === 0 && <span style={{ color: '#1f6a47' }}>· all events</span>}
+                        </div>
+                        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                          {allEvents.map((ev) => {
+                            const on = u.eventScope.includes(ev);
+                            return (
+                              <button
+                                key={ev}
+                                type="button"
+                                onClick={() => toggleUserEvent(u.id, ev)}
+                                style={{
+                                  fontSize: 10, fontWeight: 600, padding: '3px 7px', borderRadius: 6, border: 'none',
+                                  color: on ? '#16224d' : '#9a978f', background: on ? '#dfe4f3' : '#efeeea',
+                                }}
+                              >
+                                {ev}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </td>
                   <td style={{ padding: '10px 8px' }}>
                     <span

@@ -5,7 +5,7 @@ export default function AdminEventsTree(state: AppState) {
   const {
     events, subEventsFor, visitors, visitorStats,
     newEventName, setNewEventName, createEvent, importIntoEvent, openEditEvent, deleteEvent, clearEventRecords,
-    createSubEvent, renameSubEvent, deleteSubEvent,
+    createSubEvent, renameSubEvent, deleteSubEvent, clearSubEventRecords,
   } = state;
 
   const importRefs = useRef<Record<string, HTMLInputElement | null>>({});
@@ -53,6 +53,7 @@ export default function AdminEventsTree(state: AppState) {
                         onChange={(e) => setSubDrafts({ ...subDrafts, [s.id]: e.target.value })}
                       />
                       <button type="button" className="vdm-btn-ghost" disabled={draft.trim() === s.name} onClick={() => renameSubEvent(s.id, draft)}>Save</button>
+                      <button type="button" className="vdm-btn-ghost" onClick={() => clearSubEventRecords(s.id, s.name)} style={{ color: '#9a4a3a' }}>Clear records</button>
                       <button type="button" className="vdm-btn-ghost" onClick={() => deleteSubEvent(s.id)}>Remove</button>
                     </div>
                   );

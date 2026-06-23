@@ -96,6 +96,7 @@ export interface AppUser {
   perms: UserPerms;
   pages: PageKey[];
   canCampaign: boolean;
+  eventScope: string[];
 }
 
 export interface WatiConnection {

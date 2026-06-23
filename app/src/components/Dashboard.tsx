@@ -3,7 +3,8 @@ import type { AppState } from '../hooks/useAppState';
 import { iconStyle, tagStyle } from '../lib/styles';
 
 export default function Dashboard(state: AppState) {
-  const { visitorStats, campaigns, activity, exportAll } = state;
+  const { visitorStats, campaigns, activity, exportAll, role, myEventScope } = state;
+  const scoped = role !== 'Admin' && myEventScope.length > 0;
 
   const totalRecords = visitorStats.total;
   const optedIn = visitorStats.optedIn;
@@ -11,9 +12,16 @@ export default function Dashboard(state: AppState) {
   const campaignsSent = campaigns.length;
 
   const eventStats = useMemo(() => {
-    const max = Math.max(1, ...visitorStats.byEvent.map((b) => b.count));
-    return visitorStats.byEvent.map((b) => ({ event: b.event, count: b.count, pct: Math.round((b.count / max) * 100) }));
-  }, [visitorStats]);
+    let list = visitorStats.bySubEvent.length ? visitorStats.bySubEvent : visitorStats.byEvent.map((b) => ({ event: b.event, subEvent: '', count: b.count }));
+    if (scoped) list = list.filter((b) => myEventScope.includes(b.event));
+    const max = Math.max(1, ...list.map((b) => b.count));
+    return list.map((b) => ({
+      label: b.subEvent || b.event,
+      sub: b.subEvent ? b.event : '',
+      count: b.count,
+      pct: Math.round((b.count / max) * 100),
+    }));
+  }, [visitorStats, scoped, myEventScope]);
 
   return (
     <div>
@@ -53,14 +61,17 @@ export default function Dashboard(state: AppState) {
 
       <div className="vdm-split" style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: 16 }}>
         <div className="vdm-card" style={{ padding: 20 }}>
-          <h2 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Visitors by event</h2>
+          <h2 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Visitors by sub-event</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {eventStats.map((s) => (
-              <div key={s.event}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
-                  <span>{s.event}</span>
+            {eventStats.map((s, i) => (
+              <div key={`${s.label}-${i}`}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4, gap: 8 }}>
+                  <span>
+                    {s.label}
+                    {s.sub && <span style={{ color: '#9a978f' }}> · {s.sub}</span>}
+                  </span>
                   <span className="vdm-mono" style={{ color: '#7a7873' }}>
-                    {s.count}
+                    {s.count.toLocaleString()}
                   </span>
                 </div>
                 <div style={{ height: 8, background: '#efeeea', borderRadius: 6 }}>

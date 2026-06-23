@@ -83,10 +83,16 @@ export async function fetchEvents(): Promise<string[]> {
 }
 
 // Server-side counts so dashboard KPIs stay correct beyond the API row cap.
-export async function fetchVisitorStats(): Promise<{ total: number; optedIn: number; byEvent: { event: string; count: number }[] }> {
+export async function fetchVisitorStats(): Promise<{
+  total: number;
+  optedIn: number;
+  byEvent: { event: string; count: number }[];
+  bySubEvent: { event: string; subEvent: string; count: number }[];
+}> {
   const totalQ = await supabase.from('visitors').select('*', { count: 'exact', head: true });
   const optedQ = await supabase.from('visitors').select('*', { count: 'exact', head: true }).eq('consent', 'Opted-in');
   const [events, subs] = await Promise.all([fetchEvents(), fetchSubEvents()]);
+
   const byEvent: { event: string; count: number }[] = [];
   for (const ev of events) {
     const subIds = subs.filter((s) => s.eventName === ev).map((s) => s.id);
@@ -97,7 +103,21 @@ export async function fetchVisitorStats(): Promise<{ total: number; optedIn: num
     }
     byEvent.push({ event: ev, count });
   }
-  return { total: totalQ.count ?? 0, optedIn: optedQ.count ?? 0, byEvent };
+
+  const bySubEvent: { event: string; subEvent: string; count: number }[] = [];
+  for (const s of subs) {
+    const r = await supabase.from('visitors').select('*', { count: 'exact', head: true }).eq('sub_event_id', s.id);
+    bySubEvent.push({ event: s.eventName, subEvent: s.name, count: r.count ?? 0 });
+  }
+
+  return { total: totalQ.count ?? 0, optedIn: optedQ.count ?? 0, byEvent, bySubEvent };
+}
+
+// Delete every visitor record under a single sub-event (keeps the sub-event).
+export async function deleteVisitorsBySubEvent(subEventId: string): Promise<number> {
+  const { error, count } = await supabase.from('visitors').delete({ count: 'exact' }).eq('sub_event_id', subEventId);
+  if (error) throw error;
+  return count ?? 0;
 }
 
 // Delete every visitor record under an event (keeps the event + sub-events).
@@ -167,16 +187,21 @@ export async function fetchTemplates(): Promise<MessageTemplate[]> {
   return (data ?? []).map((t) => ({ id: t.id, value: t.name, label: t.name, body: t.body }));
 }
 
-export async function fetchMyProfile(): Promise<{ role: string; pages: PageKey[]; canCampaign: boolean } | null> {
+export async function fetchMyProfile(): Promise<{ role: string; pages: PageKey[]; canCampaign: boolean; eventScope: string[] } | null> {
   const { data: u } = await supabase.auth.getUser();
   if (!u?.user) return null;
   const { data } = await supabase
     .from('profiles')
-    .select('role,pages,can_campaign')
+    .select('role,pages,can_campaign,event_scope')
     .eq('id', u.user.id)
     .single();
   if (!data) return null;
-  return { role: data.role, pages: (data.pages ?? []) as PageKey[], canCampaign: data.can_campaign };
+  return {
+    role: data.role,
+    pages: (data.pages ?? []) as PageKey[],
+    canCampaign: data.can_campaign,
+    eventScope: (data.event_scope ?? []) as string[],
+  };
 }
 
 export async function fetchVisitors(): Promise<Visitor[]> {
@@ -254,6 +279,7 @@ export async function fetchUsers(): Promise<AppUser[]> {
     perms: { edit: p.can_edit, delete: p.can_delete, call: p.can_call },
     pages: (p.pages ?? []) as PageKey[],
     canCampaign: p.can_campaign ?? true,
+    eventScope: (p.event_scope ?? []) as string[],
   }));
 }
 
@@ -553,6 +579,11 @@ export async function setUserPages(id: string, pages: PageKey[]): Promise<void> 
 
 export async function setUserCampaign(id: string, value: boolean): Promise<void> {
   const { error } = await supabase.from('profiles').update({ can_campaign: value }).eq('id', id);
+  if (error) throw error;
+}
+
+export async function setUserEvents(id: string, events: string[]): Promise<void> {
+  const { error } = await supabase.from('profiles').update({ event_scope: events }).eq('id', id);
   if (error) throw error;
 }
 

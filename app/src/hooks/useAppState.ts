@@ -77,6 +77,7 @@ export function useAppState() {
   const [role, setRole] = useState<string>('Staff');
   const [myPages, setMyPages] = useState<PageKey[]>(ALL_PAGES);
   const [canCampaign, setCanCampaign] = useState(true);
+  const [myEventScope, setMyEventScope] = useState<string[]>([]);
   const [loginAs, setLoginAs] = useState<'Staff' | 'Admin'>('Staff');
   const [sessionIp, setSessionIp] = useState('');
   const [email, setEmail] = useState('');
@@ -95,7 +96,7 @@ export function useAppState() {
 
   // ---- server-backed collections ----
   const [visitors, setVisitors] = useState<Visitor[]>([]);
-  const [visitorStats, setVisitorStats] = useState<{ total: number; optedIn: number; byEvent: { event: string; count: number }[] }>({ total: 0, optedIn: 0, byEvent: [] });
+  const [visitorStats, setVisitorStats] = useState<{ total: number; optedIn: number; byEvent: { event: string; count: number }[]; bySubEvent: { event: string; subEvent: string; count: number }[] }>({ total: 0, optedIn: 0, byEvent: [], bySubEvent: [] });
   const [events, setEvents] = useState<string[]>([]);
   const [subEvents, setSubEvents] = useState<SubEvent[]>([]);
   const [statusOptions, setStatusOptions] = useState<StatusOption[]>([]);
@@ -261,6 +262,7 @@ export function useAppState() {
       setRole(profile?.role ?? 'Staff');
       setMyPages(profile?.pages?.length ? profile.pages : ALL_PAGES);
       setCanCampaign(profile?.canCampaign ?? true);
+      setMyEventScope(profile?.eventScope ?? []);
       setSessionIp((ip) => ip || fakeIp());
       setLoggedIn(true);
 
@@ -768,6 +770,18 @@ export function useAppState() {
       flash(errMsg(e, 'Could not update campaign access.'));
     }
   }
+  async function toggleUserEvent(id: string, eventName: string) {
+    const u = users.find((x) => x.id === id);
+    if (!u) return;
+    const next = u.eventScope.includes(eventName) ? u.eventScope.filter((e) => e !== eventName) : [...u.eventScope, eventName];
+    try {
+      await api.setUserEvents(id, next);
+      audit('User event access updated', `${u.email}: ${next.length ? next.join(', ') : 'all events'}`, 'User Management');
+      await reloadUsers();
+    } catch (e) {
+      flash(errMsg(e, 'Could not update event access.'));
+    }
+  }
 
   // ---------- Admin: status options (fields) ----------
   async function createStatusOption(name: string) {
@@ -1089,6 +1103,18 @@ export function useAppState() {
     }
   }
 
+  async function clearSubEventRecords(id: string, label: string) {
+    if (!window.confirm(`Delete ALL visitor records under sub-event "${label}"? This cannot be undone. The sub-event is kept.`)) return;
+    try {
+      const n = await api.deleteVisitorsBySubEvent(id);
+      audit('Sub-event records cleared', `${label} (${n} record(s) removed)`, 'Data');
+      await reloadVisitors();
+      flash(`Removed ${n} record(s) from ${label}.`);
+    } catch (e) {
+      flash(errMsg(e, 'Could not clear records.'));
+    }
+  }
+
   async function clearEventRecords(name: string) {
     if (!window.confirm(`Delete ALL visitor records under "${name}"? This cannot be undone. The event and its sub-events are kept.`)) return;
     try {
@@ -1209,9 +1235,12 @@ export function useAppState() {
     flash('Audit log exported.');
   }
 
+  // Non-admin users limited to specific events only see those in dropdowns.
+  const scopedEvents = role === 'Admin' || myEventScope.length === 0 ? events : events.filter((e) => myEventScope.includes(e));
+
   return {
     // auth
-    loggedIn, authReady, loading, role, myPages, canCampaign, loginAs, sessionIp, email, password,
+    loggedIn, authReady, loading, role, myPages, canCampaign, myEventScope, loginAs, sessionIp, email, password,
     setEmail, setPassword, pickLoginAs, signIn, signOut,
     // mfa
     mfaRequired, mfaStatus, mfaEnrollData, mfaBusy, mfaError,
@@ -1219,7 +1248,7 @@ export function useAppState() {
     // shell
     tab, setTab, goCampaigns,
     // data
-    visitors, setVisitors, visitorStats, events, subEvents, subEventsFor, statusOptions, categoryOptions, templatesList,
+    visitors, setVisitors, visitorStats, events: scopedEvents, allEvents: events, subEvents, subEventsFor, statusOptions, categoryOptions, templatesList,
     watiConns, users, callApis, callLog, campaigns, activity, auditLog,
     // visitors tab
     filterEvent, setFilterEvent, filterSubEvent, setFilterSubEvent, filterStatus, setFilterStatus,
@@ -1243,7 +1272,7 @@ export function useAppState() {
     reportEvent, setReportEvent, reportSubEvent, setReportSubEvent, repCat, setRepCat, repStatus, setRepStatus, downloadPdf,
     // admin: users
     addUserOpen, newUser, setNewUser, openAddUser, closeAddUser, addUser, resetPassword, toggleUser, togglePerm,
-    toggleUserPage, toggleUserCampaign,
+    toggleUserPage, toggleUserCampaign, toggleUserEvent,
     credModal, closeCredModal: () => setCredModal(null),
     // admin: fields (status + category options)
     createStatusOption, renameStatusOption, deleteStatusOption,
@@ -1254,7 +1283,7 @@ export function useAppState() {
     importFile, importPreview, confirmImport, cancelImport,
     // admin: events + sub-events
     newEventName, setNewEventName, createEvent, importIntoEvent,
-    createSubEvent, renameSubEvent, deleteSubEvent, clearEventRecords,
+    createSubEvent, renameSubEvent, deleteSubEvent, clearEventRecords, clearSubEventRecords,
     editEventOpen, editEventName, setEditEventName, openEditEvent, closeEditEvent, saveEditEvent, deleteEvent,
     // admin: wati
     addWatiOpen, newWati, setNewWati, openAddWati, closeAddWati, addWati, toggleWati,
