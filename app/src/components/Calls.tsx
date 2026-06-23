@@ -22,7 +22,7 @@ export default function Calls(state: AppState) {
     visitorStats, visitorOptions, visitorRefreshKey, subEventIdsFor, events, subEventsFor, categoryOptions,
     callFilter, setCallFilter, callEventFilter, setCallEventFilter, callSubEvent, setCallSubEvent,
     targetEvent, setTargetEvent, targetSubEvent, setTargetSubEvent,
-    startCall, openCall,
+    startCall, openCall, openTimeline,
   } = state;
 
   const [filterCountry, setFilterCountry] = useState('');
@@ -178,6 +178,7 @@ export default function Calls(state: AppState) {
                   </td>
                   <td style={{ padding: '6px 10px', fontSize: 13 }}>{v.invites.length}</td>
                   <td style={{ padding: '6px 10px', display: 'flex', gap: 6 }}>
+                    <button type="button" className="vdm-btn-ghost" onClick={() => openTimeline(v)} title="Event history">🕓</button>
                     <button type="button" className="vdm-btn-ghost" onClick={() => startCall(v)}>📞 Call</button>
                     <button type="button" className="vdm-btn-ghost" onClick={() => openCall(v)}>Invites</button>
                   </td>

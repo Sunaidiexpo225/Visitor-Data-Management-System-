@@ -10,7 +10,7 @@ export default function Cleanup(state: AppState) {
   const {
     visitorStats, visitorOptions, visitorRefreshKey, subEventIdsFor, events, subEventsFor, categoryOptions,
     cleanupFilter, setCleanupFilter, cleanupEventFilter, setCleanupEventFilter,
-    cleanupSubEvent, setCleanupSubEvent, startCall, openEdit,
+    cleanupSubEvent, setCleanupSubEvent, startCall, openEdit, openTimeline,
   } = state;
 
   const [filterCountry, setFilterCountry] = useState('');
@@ -130,6 +130,7 @@ export default function Cleanup(state: AppState) {
                   </span>
                 </td>
                 <td style={{ padding: '6px 10px', display: 'flex', gap: 6 }}>
+                  <button type="button" className="vdm-btn-ghost" onClick={() => openTimeline(v)} title="Event history">🕓</button>
                   <button type="button" className="vdm-btn-ghost" onClick={() => startCall(v)}>📞 Call</button>
                   <button type="button" className="vdm-btn-ghost" onClick={() => openEdit(v)}>Edit</button>
                 </td>

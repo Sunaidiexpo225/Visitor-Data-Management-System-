@@ -13,7 +13,7 @@ export default function Visitors(state: AppState) {
     visitorStats, visitorOptions, visitorRefreshKey, subEventIdsFor, events, subEventsFor, statusOptions, categoryOptions,
     filterEvent, setFilterEvent, filterSubEvent, setFilterSubEvent,
     filterStatus, setFilterStatus, filterConsent, setFilterConsent, search, setSearch,
-    openEdit,
+    openEdit, openTimeline,
   } = state;
 
   const [filterCountry, setFilterCountry] = useState('');
@@ -138,7 +138,8 @@ export default function Visitors(state: AppState) {
                 <td style={{ padding: '6px 10px', fontSize: 13 }}>{v.category || <span style={{ color: '#c7c4bd' }}>—</span>}</td>
                 <td style={{ padding: '6px 10px' }}><span style={{ ...badgeBase, ...statusStyle(v.status) }}>{v.status}</span></td>
                 <td style={{ padding: '6px 10px' }}><span style={{ ...badgeBase, ...consentStyle(v.consent) }}>{v.consent}</span></td>
-                <td style={{ padding: '6px 10px' }}>
+                <td style={{ padding: '6px 10px', whiteSpace: 'nowrap' }}>
+                  <button type="button" className="vdm-btn-ghost" onClick={() => openTimeline(v)} title="Event history">🕓 Timeline</button>
                   <button type="button" className="vdm-btn-ghost" onClick={() => openEdit(v)}>Edit</button>
                 </td>
               </tr>

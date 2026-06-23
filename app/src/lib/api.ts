@@ -156,6 +156,33 @@ export async function fetchVisitorsPage(q: VisitorQuery): Promise<{ rows: Visito
   return { rows: ((data ?? []) as unknown as VisitorRow[]).map(mapVisitor), total: count ?? 0 };
 }
 
+// Per-visitor timeline: every event this person (matched by phone, or email
+// when phone is blank) has registered for, in chronological order.
+export interface TimelineVisit {
+  id: string;
+  event: string;
+  subEvent: string;
+  date: string | null;
+  consent: string;
+  status: string;
+  cleaned: boolean;
+  current: boolean;
+}
+export interface VisitorTimeline {
+  person: { name: string; company: string; phone: string; email: string };
+  visits: TimelineVisit[];
+}
+
+export async function fetchVisitorTimeline(id: string): Promise<VisitorTimeline> {
+  const { data, error } = await supabase.rpc('visitor_timeline', { p_id: id });
+  if (error) throw error;
+  const d = (data ?? {}) as Partial<VisitorTimeline>;
+  return {
+    person: d.person ?? { name: '', company: '', phone: '', email: '' },
+    visits: (d.visits ?? []).map((v) => ({ ...v, event: v.event ?? '', subEvent: v.subEvent ?? '' })),
+  };
+}
+
 export async function fetchVisitorById(id: string): Promise<Visitor | null> {
   const { data, error } = await supabase.from('visitors').select(VISITOR_SELECT).eq('id', id).maybeSingle();
   if (error) throw error;

@@ -159,6 +159,10 @@ export function useAppState() {
   const [editDraft, setEditDraft] = useState<EditDraft | null>(null);
   const [editOrigCleaned, setEditOrigCleaned] = useState(false);
 
+  const [timelineOpen, setTimelineOpen] = useState(false);
+  const [timelineLoading, setTimelineLoading] = useState(false);
+  const [timeline, setTimeline] = useState<api.VisitorTimeline | null>(null);
+
   const [addUserOpen, setAddUserOpen] = useState(false);
   const [newUser, setNewUser] = useState({ name: '', email: '', role: 'Marketing' });
   const [credModal, setCredModal] = useState<{ title: string; email: string; password: string } | null>(null);
@@ -539,6 +543,26 @@ export function useAppState() {
   function closeEdit() {
     setEditingId(null);
     setEditDraft(null);
+  }
+
+  // ---------- Visitor timeline (events this person attended) ----------
+  async function openTimeline(v: Visitor) {
+    setTimelineOpen(true);
+    setTimelineLoading(true);
+    setTimeline(null);
+    try {
+      setTimeline(await api.fetchVisitorTimeline(v.id));
+    } catch (e) {
+      setTimelineOpen(false);
+      flash(errMsg(e, 'Could not load timeline (run migration 0009).'));
+    } finally {
+      setTimelineLoading(false);
+    }
+  }
+
+  function closeTimeline() {
+    setTimelineOpen(false);
+    setTimeline(null);
   }
 
   async function saveEdit() {
@@ -1305,6 +1329,8 @@ export function useAppState() {
     exportAll, exportEvent,
     // edit modal
     editingId, editDraft, setEditDraft, openEdit, closeEdit, saveEdit,
+    // visitor timeline
+    timelineOpen, timelineLoading, timeline, openTimeline, closeTimeline,
     // cleanup
     cleanupFilter, setCleanupFilter, cleanupEventFilter, setCleanupEventFilter, cleanupSubEvent, setCleanupSubEvent,
     // calls

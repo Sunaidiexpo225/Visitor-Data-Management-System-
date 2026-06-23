@@ -11,6 +11,7 @@ import Admin from './components/Admin';
 import Toast from './components/Toast';
 import MfaGate from './components/MfaGate';
 import EditVisitorModal from './components/modals/EditVisitorModal';
+import VisitorTimelineModal from './components/modals/VisitorTimelineModal';
 import InviteHistoryModal from './components/modals/InviteHistoryModal';
 import NewCampaignModal from './components/modals/NewCampaignModal';
 import ActiveCallModal from './components/modals/ActiveCallModal';
@@ -79,6 +80,7 @@ function App() {
       </Shell>
 
       <EditVisitorModal {...state} />
+      <VisitorTimelineModal {...state} />
       <InviteHistoryModal {...state} />
       <NewCampaignModal {...state} />
       <ActiveCallModal {...state} />
