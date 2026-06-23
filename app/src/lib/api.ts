@@ -165,6 +165,23 @@ const INVITE_STATUS: Record<string, string> = {
   none: 'Not contacted', pending: 'Pending', invited: 'Invited', notinterested: 'Not interested',
 };
 
+// Build the PostgREST `or(...)` clause for a free-text search. Text matches the
+// given columns (ilike contains). The phone-digit match only runs when the
+// query actually looks like a phone number — otherwise the digits inside an
+// email (e.g. "...619@gmail.com") would spuriously match every phone with 619.
+function buildSearchOr(search: string | undefined, fields: string[]): string | null {
+  const raw = (search ?? '').trim();
+  if (!raw) return null;
+  // Strip PostgREST or() delimiters so user input can't break the filter.
+  const safe = raw.replace(/[,()*%]/g, ' ').trim();
+  const phoneLike = /^[\d\s()+.-]+$/.test(raw); // only digits + phone punctuation
+  const digits = raw.replace(/\D/g, '');
+  const ors: string[] = [];
+  if (safe) ors.push(...fields.map((f) => `${f}.ilike.%${safe}%`));
+  if (phoneLike && digits.length >= 3) ors.push(`phone_digits.ilike.%${digits}%`);
+  return ors.length ? ors.join(',') : null;
+}
+
 export async function fetchVisitorsPage(q: VisitorQuery): Promise<{ rows: Visitor[]; total: number }> {
   if (q.subEventIds && q.subEventIds.length === 0) return { rows: [], total: 0 };
   let query = supabase.from('visitors').select(VISITOR_SELECT, { count: 'exact' });
@@ -177,16 +194,8 @@ export async function fetchVisitorsPage(q: VisitorQuery): Promise<{ rows: Visito
   if (q.cleaned != null) query = query.eq('cleaned', q.cleaned);
   if (q.invite && INVITE_STATUS[q.invite]) query = query.eq('latest_invite_status', INVITE_STATUS[q.invite]);
 
-  const raw = (q.search ?? '').trim();
-  if (raw) {
-    // Strip PostgREST `or()` delimiters so user input can't break the filter.
-    const safe = raw.replace(/[,()*%]/g, ' ').trim();
-    const digits = raw.replace(/\D/g, '');
-    const ors: string[] = [];
-    if (safe) ors.push(`name.ilike.%${safe}%`, `company.ilike.%${safe}%`, `email.ilike.%${safe}%`, `ref_id.ilike.%${safe}%`);
-    if (digits) ors.push(`phone_digits.ilike.%${digits}%`);
-    if (ors.length) query = query.or(ors.join(','));
-  }
+  const or = buildSearchOr(q.search, ['name', 'company', 'email', 'ref_id']);
+  if (or) query = query.or(or);
 
   query = query.order('created_at').range((q.page - 1) * q.pageSize, q.page * q.pageSize - 1);
   const { data, error, count } = await query;
@@ -242,15 +251,8 @@ function mapPerson(r: PersonRow): Person {
 export async function fetchPeoplePage(q: { search?: string; returningOnly?: boolean; page: number; pageSize: number }): Promise<{ rows: Person[]; total: number }> {
   let query = supabase.from('people_overview').select('*', { count: 'exact' });
   if (q.returningOnly) query = query.gt('events', 1);
-  const raw = (q.search ?? '').trim();
-  if (raw) {
-    const safe = raw.replace(/[,()*%]/g, ' ').trim();
-    const digits = raw.replace(/\D/g, '');
-    const ors: string[] = [];
-    if (safe) ors.push(`name.ilike.%${safe}%`, `company.ilike.%${safe}%`, `email.ilike.%${safe}%`);
-    if (digits) ors.push(`phone_digits.ilike.%${digits}%`);
-    if (ors.length) query = query.or(ors.join(','));
-  }
+  const or = buildSearchOr(q.search, ['name', 'company', 'email']);
+  if (or) query = query.or(or);
   query = query.order('last_seen', { ascending: false, nullsFirst: false }).range((q.page - 1) * q.pageSize, q.page * q.pageSize - 1);
   const { data, error, count } = await query;
   if (error) throw error;
