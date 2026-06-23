@@ -159,7 +159,8 @@ export function useAppState() {
   const [importPreview, setImportPreview] = useState<{ rows: ImportRow[]; fileName: string; forcedEvent?: string } | null>(null);
 
   const [addWatiOpen, setAddWatiOpen] = useState(false);
-  const [newWati, setNewWati] = useState({ event: '', sender: '', api: '' });
+  const [editWatiId, setEditWatiId] = useState<string | null>(null);
+  const [newWati, setNewWati] = useState({ event: '', sender: '', endpoint: '', token: '' });
 
   const [addCallApiOpen, setAddCallApiOpen] = useState(false);
   const [newCallApi, setNewCallApi] = useState({ provider: '', callerId: '', key: '' });
@@ -1140,7 +1141,15 @@ export function useAppState() {
     }
   }
   function openAddWati() {
-    setNewWati({ event: events[0] ?? '', sender: '', api: '' });
+    setEditWatiId(null);
+    setNewWati({ event: events[0] ?? '', sender: '', endpoint: '', token: '' });
+    setAddWatiOpen(true);
+  }
+  function openEditWati(id: string) {
+    const conn = watiConns.find((w) => w.id === id);
+    if (!conn) return;
+    setEditWatiId(id);
+    setNewWati({ event: conn.event, sender: conn.sender, endpoint: conn.endpoint, token: '' });
     setAddWatiOpen(true);
   }
   function closeAddWati() {
@@ -1152,13 +1161,18 @@ export function useAppState() {
       return;
     }
     try {
-      await api.addWati(newWati.event, newWati.sender, newWati.api);
-      audit('WATI connection added', newWati.event, 'Integration');
+      if (editWatiId) {
+        await api.updateWati(editWatiId, { sender: newWati.sender, endpoint: newWati.endpoint, token: newWati.token || undefined });
+        audit('WATI connection updated', newWati.event, 'Integration');
+      } else {
+        await api.addWati(newWati.event, newWati.sender, newWati.endpoint, newWati.token);
+        audit('WATI connection added', newWati.event, 'Integration');
+      }
       await reloadWati();
-      flash('WATI connection added.');
+      flash(editWatiId ? 'WATI connection updated.' : 'WATI connection added.');
       setAddWatiOpen(false);
     } catch (e) {
-      flash(errMsg(e, 'Could not add WATI connection.'));
+      flash(errMsg(e, 'Could not save WATI connection.'));
     }
   }
 
@@ -1286,7 +1300,7 @@ export function useAppState() {
     createSubEvent, renameSubEvent, deleteSubEvent, clearEventRecords, clearSubEventRecords,
     editEventOpen, editEventName, setEditEventName, openEditEvent, closeEditEvent, saveEditEvent, deleteEvent,
     // admin: wati
-    addWatiOpen, newWati, setNewWati, openAddWati, closeAddWati, addWati, toggleWati,
+    addWatiOpen, editWatiId, newWati, setNewWati, openAddWati, openEditWati, closeAddWati, addWati, toggleWati,
     // admin: call apis
     addCallApiOpen, newCallApi, setNewCallApi, openAddCallApi, closeAddCallApi, addCallApi, toggleCallApi, testCallApi, removeCallApi,
     // admin: backup/audit

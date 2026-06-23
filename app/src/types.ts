@@ -103,7 +103,8 @@ export interface WatiConnection {
   id?: string;
   event: string;
   sender: string;
-  api: string;
+  api: string;       // masked token hint for display
+  endpoint: string;  // WATI tenant API base URL
   active: boolean;
 }
 

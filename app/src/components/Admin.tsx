@@ -20,7 +20,7 @@ export default function Admin(state: AppState) {
     users, openAddUser, resetPassword, toggleUser, togglePerm, toggleUserPage, toggleUserCampaign, toggleUserEvent,
     allEvents, importFile, watiConns,
     callApis, openAddCallApi, toggleCallApi, testCallApi, removeCallApi,
-    openAddWati, toggleWati,
+    openAddWati, openEditWati, toggleWati,
     autoBackup, toggleAutoBackup, exportAll,
     mfaRequired, toggleMfaRequired,
     auditLog, auditCat, setAuditCat, auditSearch, setAuditSearch, exportAuditCsv,
@@ -283,7 +283,8 @@ export default function Admin(state: AppState) {
               <tr>
                 <th className="vdm-th">Event</th>
                 <th className="vdm-th">Sender</th>
-                <th className="vdm-th">API key</th>
+                <th className="vdm-th">Endpoint</th>
+                <th className="vdm-th">Token</th>
                 <th className="vdm-th">Status</th>
                 <th className="vdm-th"></th>
               </tr>
@@ -293,13 +294,15 @@ export default function Admin(state: AppState) {
                 <tr key={w.event} style={{ borderTop: '1px solid #f0efe9' }}>
                   <td style={{ padding: '10px 8px', fontSize: 13, fontWeight: 500 }}>{w.event}</td>
                   <td className="vdm-mono" style={{ padding: '10px 8px', fontSize: 12 }}>{w.sender}</td>
+                  <td className="vdm-mono" style={{ padding: '10px 8px', fontSize: 11, color: w.endpoint ? '#1b1b1d' : '#c79a3a' }}>{w.endpoint || 'not set'}</td>
                   <td className="vdm-mono" style={{ padding: '10px 8px', fontSize: 12 }}>{w.api}</td>
                   <td style={{ padding: '10px 8px' }}>
                     <span style={{ fontSize: 11, fontWeight: 600, padding: '4px 9px', borderRadius: 20, color: w.active ? '#1f6a47' : '#9a978f', background: w.active ? '#e6f1ea' : '#efeeea' }}>
                       {w.active ? 'Active' : 'Disabled'}
                     </span>
                   </td>
-                  <td style={{ padding: '10px 8px' }}>
+                  <td style={{ padding: '10px 8px', display: 'flex', gap: 6 }}>
+                    <button type="button" className="vdm-btn-ghost" onClick={() => openEditWati(w.id!)}>Edit</button>
                     <button type="button" className="vdm-btn-ghost" onClick={() => toggleWati(w.event)}>{w.active ? 'Disable' : 'Enable'}</button>
                   </td>
                 </tr>

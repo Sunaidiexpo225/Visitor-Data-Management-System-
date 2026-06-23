@@ -260,9 +260,17 @@ export async function fetchAuditLog(): Promise<AuditEntry[]> {
 }
 
 export async function fetchWatiConns(): Promise<WatiConnection[]> {
-  const { data, error } = await supabase.from('wati_connections').select('*').order('created_at');
+  // Never select `token` (revoked from client roles anyway).
+  const { data, error } = await supabase
+    .from('wati_connections')
+    .select('id,event,sender,api,endpoint,active')
+    .order('created_at');
   if (error) throw error;
-  return (data ?? []).map((w) => ({ id: w.id, event: w.event, sender: w.sender, api: w.api, active: w.active }));
+  return (data ?? []).map((w) => ({ id: w.id, event: w.event, sender: w.sender, api: w.api, endpoint: w.endpoint ?? '', active: w.active }));
+}
+
+function maskToken(token: string): string {
+  return token ? '••' + token.slice(-4) : 'wati_key_••';
 }
 
 export async function fetchCallApis(): Promise<CallApi[]> {
@@ -452,8 +460,20 @@ export async function toggleWati(id: string, active: boolean): Promise<void> {
   if (error) throw error;
 }
 
-export async function addWati(event: string, sender: string, api: string): Promise<void> {
-  const { error } = await supabase.from('wati_connections').insert({ event, sender, api: api || 'wati_key_••', active: true });
+export async function addWati(event: string, sender: string, endpoint: string, token: string): Promise<void> {
+  const { error } = await supabase.from('wati_connections').insert({
+    event, sender, endpoint, token, api: maskToken(token), active: true,
+  });
+  if (error) throw error;
+}
+
+export async function updateWati(id: string, patch: { sender: string; endpoint: string; token?: string }): Promise<void> {
+  const update: Record<string, unknown> = { sender: patch.sender, endpoint: patch.endpoint };
+  if (patch.token) {
+    update.token = patch.token;
+    update.api = maskToken(patch.token);
+  }
+  const { error } = await supabase.from('wati_connections').update(update).eq('id', id);
   if (error) throw error;
 }
 

@@ -1,4 +1,4 @@
--- One-shot setup: migrations 0001–0006 + seed. Run ONCE on a fresh project.
+-- One-shot setup: migrations 0001–0007 + seed. Run ONCE on a fresh project.
 
 -- ============================================================================
 -- Visitor Data Management — core schema
@@ -556,6 +556,25 @@ $$;
 -- Scope visitor reads to the user's allowed events.
 drop policy if exists visitors_select on visitors;
 create policy visitors_select on visitors for select to authenticated using (can_see_event(sub_event_id));
+
+-- ============================================================================
+-- 0007 — Real WATI credentials per event
+--   Each event's WATI connection gets its own API endpoint + access token, so
+--   sends use the correct WhatsApp account per event. The token is a secret:
+--   client roles cannot read it (only the service role used by Edge Functions).
+-- Safe to run on a DB that already has 0001–0006 applied.
+-- ============================================================================
+
+alter table wati_connections add column if not exists endpoint text not null default '';
+alter table wati_connections add column if not exists token    text not null default '';
+
+-- Restrict client reads to the non-secret columns. (A column-level REVOKE does
+-- not override a table-level grant, so we revoke the table grant and re-grant
+-- only the safe columns.) The `api` column keeps a masked hint for display; the
+-- service role used by the Edge Function still reads `token` to send.
+revoke select on wati_connections from authenticated;
+grant  select (id, event, sender, api, endpoint, active, created_at) on wati_connections to authenticated;
+revoke select on wati_connections from anon;
 
 -- ============================================================================
 -- Seed data (data tables only — auth users are seeded separately by
