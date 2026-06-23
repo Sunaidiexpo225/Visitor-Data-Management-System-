@@ -94,10 +94,48 @@ export interface VisitorStats {
 
 const EMPTY_STATS: VisitorStats = { total: 0, optedIn: 0, invited: 0, cleaned: 0, byEvent: [], bySubEvent: [] };
 
+// Single round-trip via the visitor_stats() RPC. If that RPC is unreachable
+// (e.g. PostgREST's schema cache hasn't picked it up yet after a migration),
+// fall back to plain count queries so the dashboard still works.
 export async function fetchVisitorStats(): Promise<VisitorStats> {
   const { data, error } = await supabase.rpc('visitor_stats');
+  if (!error && data) return { ...EMPTY_STATS, ...(data as Partial<VisitorStats>) };
+  return fetchVisitorStatsFallback();
+}
+
+async function visitorCount(apply?: (q: ReturnType<typeof statsBaseQuery>) => ReturnType<typeof statsBaseQuery>): Promise<number> {
+  let q = statsBaseQuery();
+  if (apply) q = apply(q);
+  const { count, error } = await q;
   if (error) throw error;
-  return { ...EMPTY_STATS, ...(data as Partial<VisitorStats>) };
+  return count ?? 0;
+}
+function statsBaseQuery() {
+  return supabase.from('visitors').select('*', { count: 'exact', head: true });
+}
+
+async function fetchVisitorStatsFallback(): Promise<VisitorStats> {
+  const [total, optedIn, cleaned, subs] = await Promise.all([
+    visitorCount(),
+    visitorCount((q) => q.eq('consent', 'Opted-in')),
+    visitorCount((q) => q.eq('cleaned', true)),
+    fetchSubEvents(),
+  ]);
+  // latest_invite_status is a 0008 column; if it isn't cached yet, treat as 0.
+  let invited = 0;
+  try { invited = await visitorCount((q) => q.eq('latest_invite_status', 'Invited')); } catch { /* pre-0008 */ }
+
+  // Per-sub-event counts in parallel (only runs in the rare fallback path).
+  const subCounts = await Promise.all(
+    subs.map(async (s) => ({ s, count: await visitorCount((q) => q.eq('sub_event_id', s.id)) })),
+  );
+  const evMap = new Map<string, number>();
+  const bySubEvent = subCounts.map(({ s, count }) => {
+    evMap.set(s.eventName, (evMap.get(s.eventName) ?? 0) + count);
+    return { event: s.eventName, subEvent: s.name, subEventId: s.id, count, cleaned: 0 };
+  });
+  const byEvent = Array.from(evMap, ([event, count]) => ({ event, count }));
+  return { total, optedIn, invited, cleaned, byEvent, bySubEvent };
 }
 
 // Distinct Country / Source / Category values for the filter dropdowns.
