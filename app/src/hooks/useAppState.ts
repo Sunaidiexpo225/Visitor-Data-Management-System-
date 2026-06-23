@@ -185,9 +185,9 @@ export function useAppState() {
 
   // ---- reloaders ----
   const reloadVisitors = useCallback(async () => {
-    const [list, stats] = await Promise.all([api.fetchAllVisitors(), api.fetchVisitorStats()]);
+    const [list, ev, subs] = await Promise.all([api.fetchAllVisitors(), api.fetchEvents(), api.fetchSubEvents()]);
     setVisitors(list);
-    setVisitorStats(stats);
+    setVisitorStats(api.computeVisitorStats(list, ev, subs));
   }, []);
   const reloadEvents = useCallback(async () => setEvents(await api.fetchEvents()), []);
   const reloadSubEvents = useCallback(async () => setSubEvents(await api.fetchSubEvents()), []);
@@ -217,6 +217,7 @@ export function useAppState() {
       setEvents(ev);
       setSubEvents(subs);
       setVisitors(vis);
+      setVisitorStats(api.computeVisitorStats(vis, ev, subs));
       setTemplatesList(tpls);
       setStatusOptions(statuses);
       reloadCategoryOptions();
@@ -232,7 +233,6 @@ export function useAppState() {
       await Promise.all([
         reloadCampaigns(), reloadCallLog(), reloadActivity(), reloadWati(),
         reloadUsers(), reloadAudit(), reloadCallApis(),
-        api.fetchVisitorStats().then(setVisitorStats),
         api.fetchAutoBackup().then(setAutoBackup),
       ]);
     } finally {
@@ -372,7 +372,12 @@ export function useAppState() {
         return;
       }
       if (event === 'SIGNED_IN' && session?.user) {
-        applySession(session.user.email ?? null, session.user.id);
+        const em = session.user.email ?? null;
+        const uid = session.user.id;
+        // Defer out of the auth callback: awaiting other Supabase calls
+        // directly inside onAuthStateChange deadlocks the auth client's
+        // internal lock, which stalls the post-relogin load (no data shown).
+        setTimeout(() => { applySession(em, uid); }, 0);
       }
     });
     return () => {
