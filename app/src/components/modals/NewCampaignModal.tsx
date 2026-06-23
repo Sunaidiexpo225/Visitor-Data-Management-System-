@@ -1,17 +1,45 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { AppState } from '../../hooks/useAppState';
+import * as api from '../../lib/api';
 import ModalOverlay from './ModalOverlay';
+
+type PoolRow = { id: string; name: string; company: string; event: string };
 
 export default function NewCampaignModal(state: AppState) {
   const {
-    ncOpen, closeNewCampaign, events, subEventsFor, watiFor, visitors, templatesList,
-    ncEvents, ncSubEvent, setNcSubEvent, toggleNcEvent, ncSelectedIds, toggleNcSelect, toggleNcAll,
+    ncOpen, closeNewCampaign, events, subEventsFor, subEventIdsForEvents, watiFor, templatesList,
+    ncEvents, ncSubEvent, setNcSubEvent, toggleNcEvent, ncSelectedIds, toggleNcSelect, toggleNcAll, setNcSelectedIds,
     ncTemplate, onNcTemplate, ncMessage, setNcMessage, sendNewCampaign,
   } = state;
-  const pool = useMemo(
-    () => visitors.filter((v) => ncEvents.includes(v.event) && v.consent === 'Opted-in' && (!ncSubEvent || v.subEvent === ncSubEvent)),
-    [visitors, ncEvents, ncSubEvent],
-  );
+
+  const [pool, setPool] = useState<PoolRow[]>([]);
+  const [loadingPool, setLoadingPool] = useState(false);
+
+  // Fetch the opted-in recipient pool for the chosen events/sub-event from the
+  // server (never from an in-browser dataset) and pre-select everyone.
+  useEffect(() => {
+    if (!ncOpen) return;
+    const ids = subEventIdsForEvents(ncEvents, ncSubEvent || undefined);
+    let active = true;
+    const run = async () => {
+      if (ids.length === 0) { setPool([]); setNcSelectedIds([]); return; }
+      setLoadingPool(true);
+      try {
+        const rows = await api.fetchOptedInPool(ids);
+        if (!active) return;
+        setPool(rows);
+        setNcSelectedIds(rows.map((r) => r.id));
+      } catch {
+        if (active) setPool([]);
+      } finally {
+        if (active) setLoadingPool(false);
+      }
+    };
+    run();
+    return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ncOpen, ncEvents, ncSubEvent]);
+
   // Sub-events available across the chosen events (de-duplicated by name).
   const subOptions = useMemo(() => {
     const names = new Set<string>();
@@ -92,7 +120,7 @@ export default function NewCampaignModal(state: AppState) {
           </label>
         </div>
         <div style={{ maxHeight: 200, overflow: 'auto', border: '1px solid #f0efe9', borderRadius: 8 }}>
-          {pool.length === 0 && <div style={{ padding: 12, fontSize: 13, color: '#9a978f' }}>No opted-in contacts for the selected events.</div>}
+          {pool.length === 0 && <div style={{ padding: 12, fontSize: 13, color: '#9a978f' }}>{loadingPool ? 'Loading recipients…' : 'No opted-in contacts for the selected events.'}</div>}
           {pool.map((v) => (
             <label key={v.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', fontSize: 13, borderBottom: '1px solid #f6f5f1' }}>
               <input type="checkbox" checked={ncSelectedIds.includes(v.id)} onChange={() => toggleNcSelect(v.id)} />

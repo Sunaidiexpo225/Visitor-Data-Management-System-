@@ -95,8 +95,12 @@ export function useAppState() {
   const [tab, setTab] = useState<TabKey>('dashboard');
 
   // ---- server-backed collections ----
-  const [visitors, setVisitors] = useState<Visitor[]>([]);
-  const [visitorStats, setVisitorStats] = useState<{ total: number; optedIn: number; byEvent: { event: string; count: number }[]; bySubEvent: { event: string; subEvent: string; count: number }[] }>({ total: 0, optedIn: 0, byEvent: [], bySubEvent: [] });
+  // Visitors are never all loaded into the browser (would break at 100k+); the
+  // list pages fetch one page at a time via useVisitorPage. We keep only
+  // aggregate stats + filter options + a refresh counter here.
+  const [visitorStats, setVisitorStats] = useState<api.VisitorStats>({ total: 0, optedIn: 0, invited: 0, cleaned: 0, byEvent: [], bySubEvent: [] });
+  const [visitorOptions, setVisitorOptions] = useState<{ countries: string[]; sources: string[]; categories: string[] }>({ countries: [], sources: [], categories: [] });
+  const [visitorRefreshKey, setVisitorRefreshKey] = useState(0);
   const [events, setEvents] = useState<string[]>([]);
   const [subEvents, setSubEvents] = useState<SubEvent[]>([]);
   const [statusOptions, setStatusOptions] = useState<StatusOption[]>([]);
@@ -131,6 +135,7 @@ export function useAppState() {
   const [targetSubEvent, setTargetSubEvent] = useState('');
 
   const [callingId, setCallingId] = useState<string | null>(null);
+  const [callingVisitor, setCallingVisitor] = useState<Visitor | null>(null);
   const [addInviteEvent, setAddInviteEvent] = useState('');
   const [addInviteStatus, setAddInviteStatus] = useState<InviteStatus>('Pending');
 
@@ -152,6 +157,7 @@ export function useAppState() {
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<EditDraft | null>(null);
+  const [editOrigCleaned, setEditOrigCleaned] = useState(false);
 
   const [addUserOpen, setAddUserOpen] = useState(false);
   const [newUser, setNewUser] = useState({ name: '', email: '', role: 'Marketing' });
@@ -184,10 +190,14 @@ export function useAppState() {
   }
 
   // ---- reloaders ----
+  // Refresh the visitor-derived data: bump the page key so visible list pages
+  // re-fetch, and reload the aggregate stats + filter options.
   const reloadVisitors = useCallback(async () => {
-    const [list, ev, subs] = await Promise.all([api.fetchAllVisitors(), api.fetchEvents(), api.fetchSubEvents()]);
-    setVisitors(list);
-    setVisitorStats(api.computeVisitorStats(list, ev, subs));
+    setVisitorRefreshKey((k) => k + 1);
+    await Promise.all([
+      api.fetchVisitorStats().then(setVisitorStats).catch(() => {}),
+      api.fetchVisitorOptions().then(setVisitorOptions).catch(() => {}),
+    ]);
   }, []);
   const reloadEvents = useCallback(async () => setEvents(await api.fetchEvents()), []);
   const reloadSubEvents = useCallback(async () => setSubEvents(await api.fetchSubEvents()), []);
@@ -211,15 +221,17 @@ export function useAppState() {
   const loadAll = useCallback(async () => {
     setLoading(true);
     try {
-      const [ev, subs, vis, tpls, statuses] = await Promise.all([
-        api.fetchEvents(), api.fetchSubEvents(), api.fetchAllVisitors(), api.fetchTemplates(), api.fetchStatusOptions(),
+      const [ev, subs, tpls, statuses] = await Promise.all([
+        api.fetchEvents(), api.fetchSubEvents(), api.fetchTemplates(), api.fetchStatusOptions(),
       ]);
       setEvents(ev);
       setSubEvents(subs);
-      setVisitors(vis);
-      setVisitorStats(api.computeVisitorStats(vis, ev, subs));
       setTemplatesList(tpls);
       setStatusOptions(statuses);
+      // Stats/options come from RPCs added in migration 0008 — keep them
+      // non-fatal so the app still loads if the migration hasn't run yet.
+      api.fetchVisitorStats().then(setVisitorStats).catch(() => {});
+      api.fetchVisitorOptions().then(setVisitorOptions).catch(() => {});
       reloadCategoryOptions();
       setTargetEvent((t) => t || ev[0] || '');
       setAddInviteEvent((t) => t || ev[0] || '');
@@ -398,8 +410,14 @@ export function useAppState() {
     return watiConns.find((w) => w.event === ev);
   }
 
-  function optedInIds(evs: string[]): string[] {
-    return visitors.filter((v) => evs.includes(v.event) && v.consent === 'Opted-in').map((v) => v.id);
+  // Resolve event/sub-event names to the sub_event ids the server filters on.
+  // null = no event filter (all); [] = an event with no sub-events (matches none).
+  function subEventIdsFor(eventName: string, subName?: string): string[] | null {
+    if (!eventName) return null;
+    return subEvents.filter((s) => s.eventName === eventName && (!subName || s.name === subName)).map((s) => s.id);
+  }
+  function subEventIdsForEvents(evs: string[], subName?: string): string[] {
+    return subEvents.filter((s) => evs.includes(s.eventName) && (!subName || s.name === subName)).map((s) => s.id);
   }
 
   function tplBody(value: string): string {
@@ -463,7 +481,8 @@ export function useAppState() {
   }
 
   async function sendCampaign() {
-    const recipients = visitors.filter((v) => selectedIds.includes(v.id) && v.consent === 'Opted-in');
+    const selected = await api.fetchVisitorsByIds(selectedIds);
+    const recipients = selected.filter((v) => v.consent === 'Opted-in');
     if (recipients.length === 0) {
       flash('Select at least one opted-in recipient.');
       return;
@@ -479,29 +498,37 @@ export function useAppState() {
     }
   }
 
-  function exportAll() {
-    exportVisitorsCsv(visitors, 'visitors-all.csv');
-    audit('CSV export generated', 'visitors-all.csv', 'Export');
-    flash('Export ready.');
+  async function exportAll() {
+    flash('Preparing export…');
+    try {
+      const rows = await api.fetchAllVisitors();
+      exportVisitorsCsv(rows, 'visitors-all.csv');
+      audit('CSV export generated', 'visitors-all.csv', 'Export');
+      flash(`Exported ${rows.length.toLocaleString()} records.`);
+    } catch (e) {
+      flash(errMsg(e, 'Could not export.'));
+    }
   }
 
-  function exportFiltered(rows: Visitor[]) {
-    exportVisitorsCsv(rows, 'visitors-filtered.csv');
-    audit('CSV export generated', 'visitors-filtered.csv', 'Export');
-    flash('Export ready.');
-  }
-
-  function exportEvent(rows: Visitor[], ev: string) {
-    exportVisitorsCsv(rows, `visitors-${ev.toLowerCase().replace(/\s+/g, '-')}.csv`);
-    audit('CSV export generated', `visitors-${ev}.csv`, 'Export');
-    flash('Export ready.');
+  // Export everything matching an event scope (event name + optional sub-event).
+  async function exportEvent(ev: string, subName?: string) {
+    flash('Preparing export…');
+    try {
+      const ids = ev ? subEventIdsForEvents([ev], subName) : null;
+      const rows = await api.fetchAllVisitors(ids);
+      const label = ev ? ev.toLowerCase().replace(/\s+/g, '-') : 'all';
+      exportVisitorsCsv(rows, `visitors-${label}.csv`);
+      audit('CSV export generated', `visitors-${ev || 'all'}.csv`, 'Export');
+      flash(`Exported ${rows.length.toLocaleString()} records.`);
+    } catch (e) {
+      flash(errMsg(e, 'Could not export.'));
+    }
   }
 
   // ---------- Edit modal ----------
-  function openEdit(id: string) {
-    const v = visitors.find((x) => x.id === id);
-    if (!v) return;
-    setEditingId(id);
+  function openEdit(v: Visitor) {
+    setEditingId(v.id);
+    setEditOrigCleaned(v.cleaned);
     setEditDraft({
       refId: v.refId, name: v.name, company: v.company, phone: v.phone, email: v.email,
       country: v.country, source: v.source, registrationDate: v.registrationDate,
@@ -516,8 +543,7 @@ export function useAppState() {
 
   async function saveEdit() {
     if (!editingId || !editDraft) return;
-    const before = visitors.find((v) => v.id === editingId);
-    const cleanedChanged = before && before.cleaned !== editDraft.cleaned;
+    const cleanedChanged = editOrigCleaned !== editDraft.cleaned;
     try {
       const subId = await api.subEventId(editDraft.event, editDraft.subEvent);
       await api.updateVisitor(editingId, {
@@ -543,9 +569,7 @@ export function useAppState() {
   }
 
   // ---------- Calls ----------
-  function startCall(id: string) {
-    const v = visitors.find((x) => x.id === id);
-    if (!v) return;
+  function startCall(v: Visitor) {
     setActiveCall({ id: v.id, name: v.name, company: v.company, phone: v.phone, event: v.event });
     setCallSeconds(0);
     timerRef.current = setInterval(() => setCallSeconds((s) => s + 1), 1000);
@@ -593,19 +617,29 @@ export function useAppState() {
     setCallSeconds(0);
   }
 
-  function openCall(id: string) {
-    setCallingId(id);
+  function openCall(v: Visitor) {
+    setCallingId(v.id);
+    setCallingVisitor(v);
   }
 
   function closeCall() {
     setCallingId(null);
+    setCallingVisitor(null);
+  }
+
+  // Re-fetch the single visitor being viewed so its invite list stays current
+  // after an invite is added/changed/removed (and refresh aggregate stats).
+  async function refreshCallingVisitor() {
+    if (!callingId) return;
+    const [v] = await Promise.all([api.fetchVisitorById(callingId), reloadVisitors()]);
+    if (v) setCallingVisitor(v);
   }
 
   async function addInvite() {
     if (!callingId) return;
     try {
       await api.addInvite(callingId, addInviteEvent, addInviteStatus, today());
-      await reloadVisitors();
+      await refreshCallingVisitor();
       flash('Invitation added.');
     } catch (e) {
       flash(errMsg(e, 'Could not add invitation.'));
@@ -615,7 +649,7 @@ export function useAppState() {
   async function setInviteStatus(iid: string, val: InviteStatus) {
     try {
       await api.setInviteStatus(iid, val);
-      await reloadVisitors();
+      await refreshCallingVisitor();
     } catch (e) {
       flash(errMsg(e, 'Could not update invitation.'));
     }
@@ -624,7 +658,7 @@ export function useAppState() {
   async function removeInvite(iid: string) {
     try {
       await api.removeInvite(iid);
-      await reloadVisitors();
+      await refreshCallingVisitor();
     } catch (e) {
       flash(errMsg(e, 'Could not remove invitation.'));
     }
@@ -634,7 +668,7 @@ export function useAppState() {
   function openNewCampaign() {
     setNcEvents(filterEvent ? [filterEvent] : []);
     setNcSubEvent('');
-    setNcSelectedIds(optedInIds(filterEvent ? [filterEvent] : []));
+    setNcSelectedIds([]); // the modal fetches the opted-in pool and pre-selects it
     if (templatesList[0]) {
       setNcTemplate(templatesList[0].value);
       setNcMessage(templatesList[0].body);
@@ -648,11 +682,7 @@ export function useAppState() {
 
   function toggleNcEvent(ev: string) {
     setNcSubEvent('');
-    setNcEvents((prev) => {
-      const next = prev.includes(ev) ? prev.filter((e) => e !== ev) : [...prev, ev];
-      setNcSelectedIds(optedInIds(next));
-      return next;
-    });
+    setNcEvents((prev) => (prev.includes(ev) ? prev.filter((e) => e !== ev) : [...prev, ev]));
   }
 
   function toggleNcSelect(id: string) {
@@ -672,16 +702,14 @@ export function useAppState() {
   }
 
   async function sendNewCampaign() {
-    const scopedIds = visitors
-      .filter((v) => ncSelectedIds.includes(v.id) && ncEvents.includes(v.event) && (!ncSubEvent || v.subEvent === ncSubEvent))
-      .map((v) => v.id);
-    if (scopedIds.length === 0) {
+    // ncSelectedIds already holds opted-in, scope-resolved ids from the modal.
+    if (ncSelectedIds.length === 0) {
       flash('Select at least one recipient.');
       return;
     }
     const tplLabel = templatesList.find((t) => t.value === ncTemplate)?.label ?? ncTemplate;
     try {
-      const { total, events: evCount } = await api.sendCampaign(scopedIds, tplLabel, ncMessage);
+      const { total, events: evCount } = await api.sendCampaign(ncSelectedIds, tplLabel, ncMessage);
       await Promise.all([reloadCampaigns(), reloadActivity(), reloadAudit()]);
       flash(`Campaign sent to ${total} contacts across ${evCount} event(s).`);
       setNcOpen(false);
@@ -1096,7 +1124,7 @@ export function useAppState() {
     }
   }
   async function deleteEvent(name: string) {
-    const removedCount = visitors.filter((v) => v.event === name).length;
+    const removedCount = visitorStats.byEvent.find((b) => b.event === name)?.count ?? 0;
     try {
       await api.deleteEvent(name);
       if (filterEvent === name) setFilterEvent('');
@@ -1267,13 +1295,14 @@ export function useAppState() {
     // shell
     tab, setTab, goCampaigns,
     // data
-    visitors, setVisitors, visitorStats, events: scopedEvents, allEvents: events, subEvents, subEventsFor, statusOptions, categoryOptions, templatesList,
+    visitorStats, visitorOptions, visitorRefreshKey, subEventIdsFor, subEventIdsForEvents,
+    events: scopedEvents, allEvents: events, subEvents, subEventsFor, statusOptions, categoryOptions, templatesList,
     watiConns, users, callApis, callLog, campaigns, activity, auditLog,
     // visitors tab
     filterEvent, setFilterEvent, filterSubEvent, setFilterSubEvent, filterStatus, setFilterStatus,
     filterConsent, setFilterConsent, search, setSearch,
     selectedIds, toggleSelect, toggleAllVisitors, template, message, onTemplate, setMessage, sendCampaign,
-    exportAll, exportFiltered, exportEvent,
+    exportAll, exportEvent,
     // edit modal
     editingId, editDraft, setEditDraft, openEdit, closeEdit, saveEdit,
     // cleanup
@@ -1282,10 +1311,10 @@ export function useAppState() {
     callFilter, setCallFilter, callEventFilter, setCallEventFilter, callSubEvent, setCallSubEvent,
     targetEvent, setTargetEvent, targetSubEvent, setTargetSubEvent,
     startCall, endCall, cancelCall, activeCall, callSeconds,
-    callingId, openCall, closeCall, addInviteEvent, setAddInviteEvent, addInviteStatus, setAddInviteStatus,
+    callingId, callingVisitor, openCall, closeCall, addInviteEvent, setAddInviteEvent, addInviteStatus, setAddInviteStatus,
     addInvite, setInviteStatus, removeInvite,
     // campaigns
-    ncOpen, ncEvents, ncSubEvent, setNcSubEvent, ncTemplate, ncMessage, ncSelectedIds, optedInIds, watiFor,
+    ncOpen, ncEvents, ncSubEvent, setNcSubEvent, ncTemplate, ncMessage, ncSelectedIds, setNcSelectedIds, watiFor,
     openNewCampaign, closeNewCampaign, toggleNcEvent, toggleNcSelect, toggleNcAll, onNcTemplate, setNcMessage, sendNewCampaign,
     // reports
     reportEvent, setReportEvent, reportSubEvent, setReportSubEvent, repCat, setRepCat, repStatus, setRepStatus, downloadPdf,

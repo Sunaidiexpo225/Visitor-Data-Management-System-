@@ -6,23 +6,30 @@ const cats: ('Cleanup' | 'Calls' | 'Campaigns')[] = ['Cleanup', 'Calls', 'Campai
 
 export default function Reports(state: AppState) {
   const {
-    visitors, events, subEventsFor, callLog, campaigns,
+    visitorStats, events, subEventsFor, callLog, campaigns,
     reportEvent, setReportEvent, reportSubEvent, setReportSubEvent, repCat, setRepCat, repStatus, setRepStatus,
     downloadPdf, exportEvent,
   } = state;
 
   const isRepCalls = repCat === 'Calls';
 
-  const scopedVisitors = useMemo(
-    () => visitors.filter((v) => (reportEvent ? v.event === reportEvent : true) && (reportSubEvent ? v.subEvent === reportSubEvent : true)),
-    [visitors, reportEvent, reportSubEvent],
-  );
+  // Cleanup KPIs come from server-side aggregates (visitor_stats), scoped to the
+  // selected event / sub-event — never from a full in-browser dataset.
+  const cleanupScope = useMemo(() => {
+    const sub = visitorStats.bySubEvent.filter(
+      (b) => (reportEvent ? b.event === reportEvent : true) && (reportSubEvent ? b.subEvent === reportSubEvent : true),
+    );
+    const total = sub.reduce((s, b) => s + b.count, 0);
+    const cleaned = sub.reduce((s, b) => s + b.cleaned, 0);
+    return { total, cleaned };
+  }, [visitorStats, reportEvent, reportSubEvent]);
+
   const scopedCallLog = useMemo(() => (reportEvent ? callLog.filter((c) => c.event === reportEvent) : callLog), [callLog, reportEvent]);
   const scopedCampaigns = useMemo(() => (reportEvent ? campaigns.filter((c) => c.event === reportEvent) : campaigns), [campaigns, reportEvent]);
 
-  const cleanedCount = scopedVisitors.filter((v) => v.cleaned).length;
-  const notCleanedCount = scopedVisitors.length - cleanedCount;
-  const cleanedPct = scopedVisitors.length ? Math.round((cleanedCount / scopedVisitors.length) * 100) : 0;
+  const cleanedCount = cleanupScope.cleaned;
+  const notCleanedCount = cleanupScope.total - cleanedCount;
+  const cleanedPct = cleanupScope.total ? Math.round((cleanedCount / cleanupScope.total) * 100) : 0;
 
   const callsLogged = scopedCallLog.length;
   const totalTalk = scopedCallLog.reduce((sum, c) => sum + c.duration, 0);
@@ -48,7 +55,7 @@ export default function Reports(state: AppState) {
           <p style={{ fontSize: 13, color: '#7a7873', marginTop: 4 }}>Analytics across cleanup, calls and campaigns.</p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button type="button" className="vdm-btn-secondary" onClick={() => exportEvent(scopedVisitors, reportEvent || 'all')}>
+          <button type="button" className="vdm-btn-secondary" onClick={() => exportEvent(reportEvent, reportSubEvent)}>
             Export CSV
           </button>
           <button type="button" className="vdm-btn-secondary" onClick={downloadPdf}>

@@ -6,12 +6,12 @@ const statuses: InviteStatus[] = ['Invited', 'Pending', 'Not interested'];
 
 export default function InviteHistoryModal(state: AppState) {
   const {
-    callingId, closeCall, visitors, events,
+    callingId, callingVisitor, closeCall, events,
     addInviteEvent, setAddInviteEvent, addInviteStatus, setAddInviteStatus,
     addInvite, setInviteStatus, removeInvite,
   } = state;
   if (!callingId) return null;
-  const visitor = visitors.find((v) => v.id === callingId);
+  const visitor = callingVisitor;
   if (!visitor) return null;
 
   return (

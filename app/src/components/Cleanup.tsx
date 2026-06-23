@@ -1,15 +1,14 @@
 import { useMemo, useState } from 'react';
 import type { AppState } from '../hooks/useAppState';
 import { maskPhone } from '../lib/format';
-import { distinctValues } from '../lib/filters';
+import { useVisitorPage } from '../hooks/useVisitorPage';
 import Pagination from './Pagination';
 
-const PAGE_SIZE = 50;
 const ellipsis = (max: number): React.CSSProperties => ({ maxWidth: max, overflow: 'hidden', textOverflow: 'ellipsis' });
 
 export default function Cleanup(state: AppState) {
   const {
-    visitors, events, subEventsFor, categoryOptions,
+    visitorStats, visitorOptions, visitorRefreshKey, subEventIdsFor, events, subEventsFor, categoryOptions,
     cleanupFilter, setCleanupFilter, cleanupEventFilter, setCleanupEventFilter,
     cleanupSubEvent, setCleanupSubEvent, startCall, openEdit,
   } = state;
@@ -18,36 +17,25 @@ export default function Cleanup(state: AppState) {
   const [filterSource, setFilterSource] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
 
-  const countries = useMemo(() => distinctValues(visitors, (v) => v.country), [visitors]);
-  const sources = useMemo(() => distinctValues(visitors, (v) => v.source), [visitors]);
   const categories = useMemo(
-    () => Array.from(new Set([...categoryOptions.map((c) => c.name), ...distinctValues(visitors, (v) => v.category)])).sort(),
-    [categoryOptions, visitors],
+    () => Array.from(new Set([...categoryOptions.map((c) => c.name), ...visitorOptions.categories])).sort(),
+    [categoryOptions, visitorOptions.categories],
   );
 
-  const filtered = useMemo(() => {
-    return visitors.filter((v) => {
-      if (cleanupEventFilter && v.event !== cleanupEventFilter) return false;
-      if (cleanupSubEvent && v.subEvent !== cleanupSubEvent) return false;
-      if (filterCountry && v.country !== filterCountry) return false;
-      if (filterSource && v.source !== filterSource) return false;
-      if (filterCategory && v.category !== filterCategory) return false;
-      if (cleanupFilter === 'cleaned' && !v.cleaned) return false;
-      if (cleanupFilter === 'not' && v.cleaned) return false;
-      return true;
-    });
-  }, [visitors, cleanupFilter, cleanupEventFilter, cleanupSubEvent, filterCountry, filterSource, filterCategory]);
+  const cleaned = cleanupFilter === 'cleaned' ? true : cleanupFilter === 'not' ? false : null;
+  const { rows, total, page, pageCount, pageSize, loading, setPage } = useVisitorPage(
+    {
+      subEventIds: subEventIdsFor(cleanupEventFilter, cleanupSubEvent),
+      country: filterCountry,
+      source: filterSource,
+      category: filterCategory,
+      cleaned,
+    },
+    visitorRefreshKey,
+  );
 
-  const kpiTotal = visitors.length;
-  const cleanedCount = visitors.filter((v) => v.cleaned).length;
-
-  const [page, setPage] = useState(1);
-  const filterKey = `${cleanupFilter}|${cleanupEventFilter}|${cleanupSubEvent}|${filterCountry}|${filterSource}|${filterCategory}`;
-  const [prevKey, setPrevKey] = useState(filterKey);
-  if (filterKey !== prevKey) { setPrevKey(filterKey); setPage(1); }
-  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const safePage = Math.min(page, pageCount);
-  const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const kpiTotal = visitorStats.total;
+  const cleanedCount = visitorStats.cleaned;
 
   return (
     <div>
@@ -56,7 +44,7 @@ export default function Cleanup(state: AppState) {
           Cleanup
         </h1>
         <p style={{ fontSize: 13, color: '#7a7873', marginTop: 4 }}>
-          {cleanedCount} of {kpiTotal} cleaned
+          {cleanedCount.toLocaleString()} of {kpiTotal.toLocaleString()} cleaned
         </p>
       </div>
 
@@ -80,14 +68,14 @@ export default function Cleanup(state: AppState) {
         <div className="vdm-select-wrap">
           <select className="vdm-select" value={filterCountry} onChange={(e) => setFilterCountry(e.target.value)}>
             <option value="">All countries</option>
-            {countries.map((c) => (<option key={c} value={c}>{c}</option>))}
+            {visitorOptions.countries.map((c) => (<option key={c} value={c}>{c}</option>))}
           </select>
           <span className="vdm-caret">▾</span>
         </div>
         <div className="vdm-select-wrap">
           <select className="vdm-select" value={filterSource} onChange={(e) => setFilterSource(e.target.value)}>
             <option value="">All sources</option>
-            {sources.map((s) => (<option key={s} value={s}>{s}</option>))}
+            {visitorOptions.sources.map((s) => (<option key={s} value={s}>{s}</option>))}
           </select>
           <span className="vdm-caret">▾</span>
         </div>
@@ -124,7 +112,7 @@ export default function Cleanup(state: AppState) {
             </tr>
           </thead>
           <tbody>
-            {paged.map((v) => (
+            {rows.map((v) => (
               <tr key={v.id} style={{ borderTop: '1px solid #f0efe9' }}>
                 <td style={{ padding: '6px 10px', fontSize: 13, fontWeight: 500, ...ellipsis(190) }} title={v.name}>{v.name}</td>
                 <td style={{ padding: '6px 10px', fontSize: 13, color: '#5a5853', ...ellipsis(200) }} title={v.company}>{v.company}</td>
@@ -142,15 +130,18 @@ export default function Cleanup(state: AppState) {
                   </span>
                 </td>
                 <td style={{ padding: '6px 10px', display: 'flex', gap: 6 }}>
-                  <button type="button" className="vdm-btn-ghost" onClick={() => startCall(v.id)}>📞 Call</button>
-                  <button type="button" className="vdm-btn-ghost" onClick={() => openEdit(v.id)}>Edit</button>
+                  <button type="button" className="vdm-btn-ghost" onClick={() => startCall(v)}>📞 Call</button>
+                  <button type="button" className="vdm-btn-ghost" onClick={() => openEdit(v)}>Edit</button>
                 </td>
               </tr>
             ))}
+            {rows.length === 0 && (
+              <tr><td colSpan={9} style={{ padding: 20, fontSize: 13, color: '#9a978f', textAlign: 'center' }}>{loading ? 'Loading…' : 'No matching records.'}</td></tr>
+            )}
           </tbody>
         </table>
       </div>
-      <Pagination page={safePage} pageCount={pageCount} total={filtered.length} pageSize={PAGE_SIZE} onPage={setPage} />
+      <Pagination page={page} pageCount={pageCount} total={total} pageSize={pageSize} onPage={setPage} />
     </div>
   );
 }

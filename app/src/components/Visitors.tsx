@@ -2,16 +2,15 @@ import { useMemo, useState } from 'react';
 import type { AppState } from '../hooks/useAppState';
 import { badgeBase, consentStyle, statusStyle } from '../lib/styles';
 import { maskPhone } from '../lib/format';
-import { distinctValues } from '../lib/filters';
+import { useVisitorPage } from '../hooks/useVisitorPage';
 import Pagination from './Pagination';
 import type { ConsentStatus } from '../types';
 
-const PAGE_SIZE = 50;
 const ellipsis = (max: number): React.CSSProperties => ({ maxWidth: max, overflow: 'hidden', textOverflow: 'ellipsis' });
 
 export default function Visitors(state: AppState) {
   const {
-    visitors, visitorStats, events, subEventsFor, statusOptions, categoryOptions,
+    visitorStats, visitorOptions, visitorRefreshKey, subEventIdsFor, events, subEventsFor, statusOptions, categoryOptions,
     filterEvent, setFilterEvent, filterSubEvent, setFilterSubEvent,
     filterStatus, setFilterStatus, filterConsent, setFilterConsent, search, setSearch,
     openEdit,
@@ -21,47 +20,26 @@ export default function Visitors(state: AppState) {
   const [filterSource, setFilterSource] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
 
-  const countries = useMemo(() => distinctValues(visitors, (v) => v.country), [visitors]);
-  const sources = useMemo(() => distinctValues(visitors, (v) => v.source), [visitors]);
   const categories = useMemo(
-    () => Array.from(new Set([...categoryOptions.map((c) => c.name), ...distinctValues(visitors, (v) => v.category)])).sort(),
-    [categoryOptions, visitors],
+    () => Array.from(new Set([...categoryOptions.map((c) => c.name), ...visitorOptions.categories])).sort(),
+    [categoryOptions, visitorOptions.categories],
   );
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    const qDigits = q.replace(/\D/g, '');
-    return visitors.filter((v) => {
-      if (filterEvent && v.event !== filterEvent) return false;
-      if (filterSubEvent && v.subEvent !== filterSubEvent) return false;
-      if (filterStatus && v.status !== filterStatus) return false;
-      if (filterConsent && v.consent !== filterConsent) return false;
-      if (filterCountry && v.country !== filterCountry) return false;
-      if (filterSource && v.source !== filterSource) return false;
-      if (filterCategory && v.category !== filterCategory) return false;
-      if (q) {
-        const textHit =
-          v.name.toLowerCase().includes(q) ||
-          v.company.toLowerCase().includes(q) ||
-          v.email.toLowerCase().includes(q) ||
-          v.refId.toLowerCase().includes(q);
-        const phoneHit = qDigits.length > 0 && v.phone.replace(/\D/g, '').includes(qDigits);
-        if (!textHit && !phoneHit) return false;
-      }
-      return true;
-    });
-  }, [visitors, filterEvent, filterSubEvent, filterStatus, filterConsent, filterCountry, filterSource, filterCategory, search]);
+  const { rows, total, page, pageCount, pageSize, loading, setPage } = useVisitorPage(
+    {
+      subEventIds: subEventIdsFor(filterEvent, filterSubEvent),
+      status: filterStatus,
+      consent: filterConsent,
+      country: filterCountry,
+      source: filterSource,
+      category: filterCategory,
+      search,
+    },
+    visitorRefreshKey,
+  );
 
   const consents: ConsentStatus[] = ['Opted-in', 'Pending', 'Opted-out'];
   const subOptions = filterEvent ? subEventsFor(filterEvent) : [];
-
-  const [page, setPage] = useState(1);
-  const filterKey = `${filterEvent}|${filterSubEvent}|${filterStatus}|${filterConsent}|${filterCountry}|${filterSource}|${filterCategory}|${search}`;
-  const [prevKey, setPrevKey] = useState(filterKey);
-  if (filterKey !== prevKey) { setPrevKey(filterKey); setPage(1); }
-  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const safePage = Math.min(page, pageCount);
-  const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   return (
     <div>
@@ -70,8 +48,7 @@ export default function Visitors(state: AppState) {
           Visitors
         </h1>
         <p style={{ fontSize: 13, color: '#7a7873', marginTop: 4 }}>
-          {filtered.length} of {visitorStats.total.toLocaleString()} records
-          {visitors.length < visitorStats.total && <span style={{ color: '#b07a1e' }}> · showing first {visitors.length.toLocaleString()} (raise the API row limit to load more)</span>}
+          {total.toLocaleString()} matching · {visitorStats.total.toLocaleString()} total
         </p>
       </div>
 
@@ -96,14 +73,14 @@ export default function Visitors(state: AppState) {
         <div className="vdm-select-wrap">
           <select className="vdm-select" value={filterCountry} onChange={(e) => setFilterCountry(e.target.value)}>
             <option value="">All countries</option>
-            {countries.map((c) => (<option key={c} value={c}>{c}</option>))}
+            {visitorOptions.countries.map((c) => (<option key={c} value={c}>{c}</option>))}
           </select>
           <span className="vdm-caret">▾</span>
         </div>
         <div className="vdm-select-wrap">
           <select className="vdm-select" value={filterSource} onChange={(e) => setFilterSource(e.target.value)}>
             <option value="">All sources</option>
-            {sources.map((s) => (<option key={s} value={s}>{s}</option>))}
+            {visitorOptions.sources.map((s) => (<option key={s} value={s}>{s}</option>))}
           </select>
           <span className="vdm-caret">▾</span>
         </div>
@@ -130,7 +107,7 @@ export default function Visitors(state: AppState) {
         </div>
       </div>
 
-      <div className="vdm-card" style={{ overflow: 'auto' }}>
+      <div className="vdm-card" style={{ overflow: 'auto', position: 'relative' }}>
         <table className="vdm-table-wide" style={{ width: '100%' }}>
           <thead>
             <tr>
@@ -147,7 +124,7 @@ export default function Visitors(state: AppState) {
             </tr>
           </thead>
           <tbody>
-            {paged.map((v) => (
+            {rows.map((v) => (
               <tr key={v.id} style={{ borderTop: '1px solid #f0efe9' }}>
                 <td style={{ padding: '6px 10px', fontSize: 13, fontWeight: 500, ...ellipsis(190) }} title={v.name}>{v.name}</td>
                 <td style={{ padding: '6px 10px', fontSize: 13, color: '#5a5853', ...ellipsis(200) }} title={v.company}>{v.company}</td>
@@ -162,14 +139,17 @@ export default function Visitors(state: AppState) {
                 <td style={{ padding: '6px 10px' }}><span style={{ ...badgeBase, ...statusStyle(v.status) }}>{v.status}</span></td>
                 <td style={{ padding: '6px 10px' }}><span style={{ ...badgeBase, ...consentStyle(v.consent) }}>{v.consent}</span></td>
                 <td style={{ padding: '6px 10px' }}>
-                  <button type="button" className="vdm-btn-ghost" onClick={() => openEdit(v.id)}>Edit</button>
+                  <button type="button" className="vdm-btn-ghost" onClick={() => openEdit(v)}>Edit</button>
                 </td>
               </tr>
             ))}
+            {rows.length === 0 && (
+              <tr><td colSpan={10} style={{ padding: 20, fontSize: 13, color: '#9a978f', textAlign: 'center' }}>{loading ? 'Loading…' : 'No matching records.'}</td></tr>
+            )}
           </tbody>
         </table>
       </div>
-      <Pagination page={safePage} pageCount={pageCount} total={filtered.length} pageSize={PAGE_SIZE} onPage={setPage} />
+      <Pagination page={page} pageCount={pageCount} total={total} pageSize={pageSize} onPage={setPage} />
     </div>
   );
 }

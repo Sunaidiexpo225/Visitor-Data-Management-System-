@@ -1,10 +1,9 @@
 import { useMemo, useState } from 'react';
 import type { AppState } from '../hooks/useAppState';
 import { maskPhone } from '../lib/format';
-import { distinctValues } from '../lib/filters';
+import { useVisitorPage } from '../hooks/useVisitorPage';
 import Pagination from './Pagination';
 
-const PAGE_SIZE = 50;
 const ellipsis = (max: number): React.CSSProperties => ({ maxWidth: max, overflow: 'hidden', textOverflow: 'ellipsis' });
 
 const statusColor: Record<string, string> = {
@@ -20,7 +19,7 @@ function latestStatus(invites: { status: string }[]): string {
 
 export default function Calls(state: AppState) {
   const {
-    visitors, events, subEventsFor, categoryOptions,
+    visitorStats, visitorOptions, visitorRefreshKey, subEventIdsFor, events, subEventsFor, categoryOptions,
     callFilter, setCallFilter, callEventFilter, setCallEventFilter, callSubEvent, setCallSubEvent,
     targetEvent, setTargetEvent, targetSubEvent, setTargetSubEvent,
     startCall, openCall,
@@ -30,38 +29,21 @@ export default function Calls(state: AppState) {
   const [filterSource, setFilterSource] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
 
-  const countries = useMemo(() => distinctValues(visitors, (v) => v.country), [visitors]);
-  const sources = useMemo(() => distinctValues(visitors, (v) => v.source), [visitors]);
   const categories = useMemo(
-    () => Array.from(new Set([...categoryOptions.map((c) => c.name), ...distinctValues(visitors, (v) => v.category)])).sort(),
-    [categoryOptions, visitors],
+    () => Array.from(new Set([...categoryOptions.map((c) => c.name), ...visitorOptions.categories])).sort(),
+    [categoryOptions, visitorOptions.categories],
   );
 
-  const invitedCount = useMemo(() => visitors.filter((v) => v.invites.some((i) => i.status === 'Invited')).length, [visitors]);
-
-  const filtered = useMemo(() => {
-    return visitors.filter((v) => {
-      if (callEventFilter && v.event !== callEventFilter) return false;
-      if (callSubEvent && v.subEvent !== callSubEvent) return false;
-      if (filterCountry && v.country !== filterCountry) return false;
-      if (filterSource && v.source !== filterSource) return false;
-      if (filterCategory && v.category !== filterCategory) return false;
-      const latest = latestStatus(v.invites);
-      if (callFilter === 'none' && latest !== 'Not contacted') return false;
-      if (callFilter === 'pending' && !v.invites.some((i) => i.status === 'Pending')) return false;
-      if (callFilter === 'invited' && !v.invites.some((i) => i.status === 'Invited')) return false;
-      if (callFilter === 'notinterested' && !v.invites.some((i) => i.status === 'Not interested')) return false;
-      return true;
-    });
-  }, [visitors, callEventFilter, callSubEvent, callFilter, filterCountry, filterSource, filterCategory]);
-
-  const [page, setPage] = useState(1);
-  const filterKey = `${callEventFilter}|${callSubEvent}|${callFilter}|${filterCountry}|${filterSource}|${filterCategory}`;
-  const [prevKey, setPrevKey] = useState(filterKey);
-  if (filterKey !== prevKey) { setPrevKey(filterKey); setPage(1); }
-  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const safePage = Math.min(page, pageCount);
-  const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const { rows, total, page, pageCount, pageSize, loading, setPage } = useVisitorPage(
+    {
+      subEventIds: subEventIdsFor(callEventFilter, callSubEvent),
+      country: filterCountry,
+      source: filterSource,
+      category: filterCategory,
+      invite: callFilter,
+    },
+    visitorRefreshKey,
+  );
 
   return (
     <div>
@@ -69,7 +51,7 @@ export default function Calls(state: AppState) {
         <h1 className="vdm-serif" style={{ fontSize: 26, fontWeight: 500 }}>
           Calls
         </h1>
-        <p style={{ fontSize: 13, color: '#7a7873', marginTop: 4 }}>{invitedCount} visitors invited so far</p>
+        <p style={{ fontSize: 13, color: '#7a7873', marginTop: 4 }}>{visitorStats.invited.toLocaleString()} visitors invited so far</p>
       </div>
 
       <div
@@ -127,14 +109,14 @@ export default function Calls(state: AppState) {
         <div className="vdm-select-wrap">
           <select className="vdm-select" value={filterCountry} onChange={(e) => setFilterCountry(e.target.value)}>
             <option value="">All countries</option>
-            {countries.map((c) => (<option key={c} value={c}>{c}</option>))}
+            {visitorOptions.countries.map((c) => (<option key={c} value={c}>{c}</option>))}
           </select>
           <span className="vdm-caret">▾</span>
         </div>
         <div className="vdm-select-wrap">
           <select className="vdm-select" value={filterSource} onChange={(e) => setFilterSource(e.target.value)}>
             <option value="">All sources</option>
-            {sources.map((s) => (<option key={s} value={s}>{s}</option>))}
+            {visitorOptions.sources.map((s) => (<option key={s} value={s}>{s}</option>))}
           </select>
           <span className="vdm-caret">▾</span>
         </div>
@@ -149,8 +131,8 @@ export default function Calls(state: AppState) {
           <select className="vdm-select" value={callFilter} onChange={(e) => setCallFilter(e.target.value)}>
             <option value="">All</option>
             <option value="none">Not contacted</option>
-            <option value="pending">Has pending</option>
-            <option value="invited">Has invited</option>
+            <option value="pending">Pending</option>
+            <option value="invited">Invited</option>
             <option value="notinterested">Not interested</option>
           </select>
           <span className="vdm-caret">▾</span>
@@ -174,7 +156,7 @@ export default function Calls(state: AppState) {
             </tr>
           </thead>
           <tbody>
-            {paged.map((v) => {
+            {rows.map((v) => {
               const latest = latestStatus(v.invites);
               return (
                 <tr key={v.id} style={{ borderTop: '1px solid #f0efe9' }}>
@@ -196,16 +178,19 @@ export default function Calls(state: AppState) {
                   </td>
                   <td style={{ padding: '6px 10px', fontSize: 13 }}>{v.invites.length}</td>
                   <td style={{ padding: '6px 10px', display: 'flex', gap: 6 }}>
-                    <button type="button" className="vdm-btn-ghost" onClick={() => startCall(v.id)}>📞 Call</button>
-                    <button type="button" className="vdm-btn-ghost" onClick={() => openCall(v.id)}>Invites</button>
+                    <button type="button" className="vdm-btn-ghost" onClick={() => startCall(v)}>📞 Call</button>
+                    <button type="button" className="vdm-btn-ghost" onClick={() => openCall(v)}>Invites</button>
                   </td>
                 </tr>
               );
             })}
+            {rows.length === 0 && (
+              <tr><td colSpan={10} style={{ padding: 20, fontSize: 13, color: '#9a978f', textAlign: 'center' }}>{loading ? 'Loading…' : 'No matching records.'}</td></tr>
+            )}
           </tbody>
         </table>
       </div>
-      <Pagination page={safePage} pageCount={pageCount} total={filtered.length} pageSize={PAGE_SIZE} onPage={setPage} />
+      <Pagination page={page} pageCount={pageCount} total={total} pageSize={pageSize} onPage={setPage} />
     </div>
   );
 }

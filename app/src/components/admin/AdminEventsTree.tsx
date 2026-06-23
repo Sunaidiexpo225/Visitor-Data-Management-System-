@@ -3,7 +3,7 @@ import type { AppState } from '../../hooks/useAppState';
 
 export default function AdminEventsTree(state: AppState) {
   const {
-    events, subEventsFor, visitors, visitorStats,
+    events, subEventsFor, visitorStats,
     newEventName, setNewEventName, createEvent, importIntoEvent, openEditEvent, deleteEvent, clearEventRecords,
     createSubEvent, renameSubEvent, deleteSubEvent, clearSubEventRecords,
   } = state;
@@ -19,7 +19,7 @@ export default function AdminEventsTree(state: AppState) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {events.map((ev) => {
           const subs = subEventsFor(ev);
-          const count = visitorStats.byEvent.find((b) => b.event === ev)?.count ?? visitors.filter((v) => v.event === ev).length;
+          const count = visitorStats.byEvent.find((b) => b.event === ev)?.count ?? 0;
           return (
             <div key={ev} className="vdm-card" style={{ padding: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
