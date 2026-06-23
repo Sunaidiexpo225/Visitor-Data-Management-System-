@@ -3,6 +3,7 @@ import Login from './components/Login';
 import Shell from './components/Shell';
 import Dashboard from './components/Dashboard';
 import Visitors from './components/Visitors';
+import People from './components/People';
 import Cleanup from './components/Cleanup';
 import Calls from './components/Calls';
 import Campaigns from './components/Campaigns';
@@ -72,6 +73,7 @@ function App() {
       <Shell state={state}>
         {activeTab === 'dashboard' && <Dashboard {...state} />}
         {activeTab === 'visitors' && <Visitors {...state} />}
+        {activeTab === 'people' && <People {...state} />}
         {activeTab === 'cleanup' && <Cleanup {...state} />}
         {activeTab === 'calls' && <Calls {...state} />}
         {activeTab === 'campaigns' && <Campaigns {...state} />}

@@ -39,7 +39,7 @@ export interface EditDraft {
   subEvent: string;
 }
 
-const ALL_PAGES: PageKey[] = ['dashboard', 'visitors', 'cleanup', 'calls', 'campaigns', 'reports'];
+const ALL_PAGES: PageKey[] = ['dashboard', 'visitors', 'people', 'cleanup', 'calls', 'campaigns', 'reports'];
 
 export interface ImportRow {
   name: string;
@@ -149,6 +149,8 @@ export function useAppState() {
   const [ncTemplate, setNcTemplate] = useState('');
   const [ncMessage, setNcMessage] = useState('');
   const [ncSelectedIds, setNcSelectedIds] = useState<string[]>([]);
+
+  const [peopleSearch, setPeopleSearch] = useState('');
 
   const [reportEvent, setReportEvent] = useState('');
   const [reportSubEvent, setReportSubEvent] = useState('');
@@ -546,18 +548,21 @@ export function useAppState() {
   }
 
   // ---------- Visitor timeline (events this person attended) ----------
-  async function openTimeline(v: Visitor) {
+  async function openTimelineById(id: string) {
     setTimelineOpen(true);
     setTimelineLoading(true);
     setTimeline(null);
     try {
-      setTimeline(await api.fetchVisitorTimeline(v.id));
+      setTimeline(await api.fetchVisitorTimeline(id));
     } catch (e) {
       setTimelineOpen(false);
       flash(errMsg(e, 'Could not load timeline (run migration 0009).'));
     } finally {
       setTimelineLoading(false);
     }
+  }
+  function openTimeline(v: Visitor) {
+    openTimelineById(v.id);
   }
 
   function closeTimeline() {
@@ -1329,8 +1334,9 @@ export function useAppState() {
     exportAll, exportEvent,
     // edit modal
     editingId, editDraft, setEditDraft, openEdit, closeEdit, saveEdit,
-    // visitor timeline
-    timelineOpen, timelineLoading, timeline, openTimeline, closeTimeline,
+    // visitor timeline + people page
+    timelineOpen, timelineLoading, timeline, openTimeline, openTimelineById, closeTimeline,
+    peopleSearch, setPeopleSearch,
     // cleanup
     cleanupFilter, setCleanupFilter, cleanupEventFilter, setCleanupEventFilter, cleanupSubEvent, setCleanupSubEvent,
     // calls

@@ -22,7 +22,7 @@ export interface StatusOption {
   sort: number;
 }
 
-export type PageKey = 'dashboard' | 'visitors' | 'cleanup' | 'calls' | 'campaigns' | 'reports';
+export type PageKey = 'dashboard' | 'visitors' | 'people' | 'cleanup' | 'calls' | 'campaigns' | 'reports';
 
 export interface Invite {
   id: string;
@@ -157,6 +157,7 @@ export interface MessageTemplate {
 export type TabKey =
   | 'dashboard'
   | 'visitors'
+  | 'people'
   | 'cleanup'
   | 'calls'
   | 'campaigns'

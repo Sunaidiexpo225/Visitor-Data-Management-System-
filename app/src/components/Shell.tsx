@@ -6,6 +6,7 @@ import { initials } from '../lib/format';
 const navItems: { key: TabKey; label: string; adminOnly?: boolean }[] = [
   { key: 'dashboard', label: 'Dashboard' },
   { key: 'visitors', label: 'Visitors' },
+  { key: 'people', label: 'People' },
   { key: 'cleanup', label: 'Cleanup' },
   { key: 'calls', label: 'Calls' },
   { key: 'campaigns', label: 'Campaigns' },

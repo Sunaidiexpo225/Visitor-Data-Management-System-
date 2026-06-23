@@ -211,6 +211,51 @@ export interface VisitorTimeline {
   visits: TimelineVisit[];
 }
 
+// One row per person (collapsing multi-event registrations) for the People page.
+export interface Person {
+  personKey: string;
+  name: string;
+  company: string;
+  phone: string;
+  email: string;
+  latestId: string;
+  registrations: number;
+  events: number;
+  firstSeen: string | null;
+  lastSeen: string | null;
+  optedIn: boolean;
+}
+
+type PersonRow = {
+  person_key: string; name: string | null; company: string | null; phone: string | null;
+  email: string | null; latest_id: string; registrations: number; events: number;
+  first_seen: string | null; last_seen: string | null; opted_in: boolean;
+};
+function mapPerson(r: PersonRow): Person {
+  return {
+    personKey: r.person_key, name: r.name ?? '', company: r.company ?? '', phone: r.phone ?? '',
+    email: r.email ?? '', latestId: r.latest_id, registrations: r.registrations, events: r.events,
+    firstSeen: r.first_seen, lastSeen: r.last_seen, optedIn: r.opted_in,
+  };
+}
+
+export async function fetchPeoplePage(q: { search?: string; page: number; pageSize: number }): Promise<{ rows: Person[]; total: number }> {
+  let query = supabase.from('people_overview').select('*', { count: 'exact' });
+  const raw = (q.search ?? '').trim();
+  if (raw) {
+    const safe = raw.replace(/[,()*%]/g, ' ').trim();
+    const digits = raw.replace(/\D/g, '');
+    const ors: string[] = [];
+    if (safe) ors.push(`name.ilike.%${safe}%`, `company.ilike.%${safe}%`, `email.ilike.%${safe}%`);
+    if (digits) ors.push(`phone_digits.ilike.%${digits}%`);
+    if (ors.length) query = query.or(ors.join(','));
+  }
+  query = query.order('last_seen', { ascending: false, nullsFirst: false }).range((q.page - 1) * q.pageSize, q.page * q.pageSize - 1);
+  const { data, error, count } = await query;
+  if (error) throw error;
+  return { rows: ((data ?? []) as PersonRow[]).map(mapPerson), total: count ?? 0 };
+}
+
 export async function fetchVisitorTimeline(id: string): Promise<VisitorTimeline> {
   const { data, error } = await supabase.rpc('visitor_timeline', { p_id: id });
   if (error) throw error;

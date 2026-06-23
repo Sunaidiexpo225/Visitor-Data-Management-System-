@@ -9,6 +9,7 @@ import AdminEventsTree from './admin/AdminEventsTree';
 const PAGE_KEYS: { key: PageKey; label: string }[] = [
   { key: 'dashboard', label: 'Dash' },
   { key: 'visitors', label: 'Visit' },
+  { key: 'people', label: 'People' },
   { key: 'cleanup', label: 'Clean' },
   { key: 'calls', label: 'Calls' },
   { key: 'campaigns', label: 'Camp' },
