@@ -281,22 +281,30 @@ export async function fetchVisitorsByIds(ids: string[]): Promise<Visitor[]> {
 }
 
 // Opted-in recipients for a campaign — id + display fields only (lightweight).
+// Pages through ALL opted-in contacts for the chosen events (not capped).
 export async function fetchOptedInPool(subEventIds: string[]): Promise<{ id: string; name: string; company: string; event: string }[]> {
   if (subEventIds.length === 0) return [];
-  const { data, error } = await supabase
-    .from('visitors')
-    .select('id,name,company,sub_event:sub_events(event:events(name))')
-    .eq('consent', 'Opted-in')
-    .in('sub_event_id', subEventIds)
-    .order('name')
-    .limit(5000);
-  if (error) throw error;
-  return ((data ?? []) as unknown[]).map((r) => {
-    const row = r as { id: string; name: string; company: string; sub_event: SubEventRef };
-    const se = unwrap(row.sub_event);
-    const ev = se ? unwrap((se as { event: NameRef }).event) : null;
-    return { id: row.id, name: row.name, company: row.company, event: ev?.name ?? '' };
-  });
+  const chunk = 1000;
+  const all: { id: string; name: string; company: string; event: string }[] = [];
+  for (let from = 0; ; from += chunk) {
+    const { data, error } = await supabase
+      .from('visitors')
+      .select('id,name,company,sub_event:sub_events(event:events(name))')
+      .eq('consent', 'Opted-in')
+      .in('sub_event_id', subEventIds)
+      .order('name')
+      .range(from, from + chunk - 1);
+    if (error) throw error;
+    const rows = ((data ?? []) as unknown[]).map((r) => {
+      const row = r as { id: string; name: string; company: string; sub_event: SubEventRef };
+      const se = unwrap(row.sub_event);
+      const ev = se ? unwrap((se as { event: NameRef }).event) : null;
+      return { id: row.id, name: row.name, company: row.company, event: ev?.name ?? '' };
+    });
+    all.push(...rows);
+    if (rows.length < chunk) break;
+  }
+  return all;
 }
 
 // Delete every visitor record under a single sub-event (keeps the sub-event).

@@ -48,8 +48,12 @@ export default function NewCampaignModal(state: AppState) {
   }, [ncEvents, subEventsFor]);
   if (!ncOpen) return null;
 
+  const RENDER_CAP = 500; // cap DOM rows; selection still spans the whole pool
+  const selectedSet = new Set(ncSelectedIds);
   const poolIds = pool.map((v) => v.id);
-  const allSelected = poolIds.length > 0 && poolIds.every((id) => ncSelectedIds.includes(id));
+  const selectedCount = poolIds.reduce((n, id) => (selectedSet.has(id) ? n + 1 : n), 0);
+  const allSelected = poolIds.length > 0 && selectedCount === poolIds.length;
+  const shown = pool.slice(0, RENDER_CAP);
 
   return (
     <ModalOverlay onClose={closeNewCampaign} maxWidth={620}>
@@ -101,7 +105,7 @@ export default function NewCampaignModal(state: AppState) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
           {ncEvents.map((ev) => {
             const conn = watiFor(ev);
-            const count = pool.filter((v) => v.event === ev && ncSelectedIds.includes(v.id)).length;
+            const count = pool.reduce((n, v) => (v.event === ev && selectedSet.has(v.id) ? n + 1 : n), 0);
             return (
               <div key={ev} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, border: '1px solid #f0efe9', borderRadius: 8, padding: '8px 10px' }}>
                 <span>{ev} <span className="vdm-mono" style={{ color: '#7a7873' }}>· {conn?.sender ?? 'No WATI line'}</span></span>
@@ -116,18 +120,23 @@ export default function NewCampaignModal(state: AppState) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
           <div style={{ fontSize: 12, fontWeight: 600, color: '#5a5853' }}>Recipients</div>
           <label style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <input type="checkbox" checked={allSelected} onChange={() => toggleNcAll(poolIds)} /> {poolIds.filter((id) => ncSelectedIds.includes(id)).length} of {pool.length} selected
+            <input type="checkbox" checked={allSelected} onChange={() => toggleNcAll(poolIds)} /> {selectedCount.toLocaleString()} of {pool.length.toLocaleString()} selected
           </label>
         </div>
         <div style={{ maxHeight: 200, overflow: 'auto', border: '1px solid #f0efe9', borderRadius: 8 }}>
           {pool.length === 0 && <div style={{ padding: 12, fontSize: 13, color: '#9a978f' }}>{loadingPool ? 'Loading recipients…' : 'No opted-in contacts for the selected events.'}</div>}
-          {pool.map((v) => (
+          {shown.map((v) => (
             <label key={v.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', fontSize: 13, borderBottom: '1px solid #f6f5f1' }}>
-              <input type="checkbox" checked={ncSelectedIds.includes(v.id)} onChange={() => toggleNcSelect(v.id)} />
+              <input type="checkbox" checked={selectedSet.has(v.id)} onChange={() => toggleNcSelect(v.id)} />
               <span style={{ flex: 1 }}>{v.name} <span style={{ color: '#7a7873' }}>· {v.company}</span></span>
               <span style={{ fontSize: 11, color: '#7a7873' }}>{v.event}</span>
             </label>
           ))}
+          {pool.length > RENDER_CAP && (
+            <div style={{ padding: '10px 12px', fontSize: 12, color: '#7a7873', background: '#faf9f6' }}>
+              + {(pool.length - RENDER_CAP).toLocaleString()} more recipients not shown — they're still included in the send. Use "Select all" above to include/exclude everyone.
+            </div>
+          )}
         </div>
       </div>
 
