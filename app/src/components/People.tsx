@@ -21,7 +21,7 @@ export default function People(state: AppState) {
         <h1 className="vdm-serif" style={{ fontSize: 26, fontWeight: 500 }}>People</h1>
         <p style={{ fontSize: 13, color: '#7a7873', marginTop: 4 }}>
           {total.toLocaleString()} {peopleReturningOnly ? 'returning' : 'unique'} {total === 1 ? 'person' : 'people'}
-          {peopleReturningOnly ? ' (more than one record)' : ''} · matched by phone or email. Open the timeline to see each person's full history.
+          {peopleReturningOnly ? ' (attended more than one event)' : ''} · matched by phone or email. Open the timeline to see each person's full history.
         </p>
       </div>
 
@@ -35,7 +35,7 @@ export default function People(state: AppState) {
         />
         <label style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 13, color: '#5a5853', whiteSpace: 'nowrap', cursor: 'pointer' }}>
           <input type="checkbox" checked={peopleReturningOnly} onChange={(e) => setPeopleReturningOnly(e.target.checked)} />
-          Returning only (multiple records)
+          Returning only (attended &gt;1 event)
         </label>
       </div>
 
