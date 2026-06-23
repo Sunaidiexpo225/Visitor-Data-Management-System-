@@ -12,19 +12,20 @@ function year(d: string | null): string {
 }
 
 export default function People(state: AppState) {
-  const { peopleSearch, setPeopleSearch, visitorRefreshKey, openTimelineById } = state;
-  const { rows, total, page, pageCount, pageSize, loading, setPage } = usePeoplePage(peopleSearch, visitorRefreshKey);
+  const { peopleSearch, setPeopleSearch, peopleReturningOnly, setPeopleReturningOnly, visitorRefreshKey, openTimelineById } = state;
+  const { rows, total, page, pageCount, pageSize, loading, setPage } = usePeoplePage(peopleSearch, peopleReturningOnly, visitorRefreshKey);
 
   return (
     <div>
       <div style={{ marginBottom: 20 }}>
         <h1 className="vdm-serif" style={{ fontSize: 26, fontWeight: 500 }}>People</h1>
         <p style={{ fontSize: 13, color: '#7a7873', marginTop: 4 }}>
-          {total.toLocaleString()} unique {total === 1 ? 'person' : 'people'} · matched by phone or email across every event. Open the timeline to see each person's full history.
+          {total.toLocaleString()} {peopleReturningOnly ? 'returning' : 'unique'} {total === 1 ? 'person' : 'people'}
+          {peopleReturningOnly ? ' (more than one record)' : ''} · matched by phone or email. Open the timeline to see each person's full history.
         </p>
       </div>
 
-      <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
         <input
           className="vdm-input"
           placeholder="Search name, company, email, phone…"
@@ -32,6 +33,10 @@ export default function People(state: AppState) {
           onChange={(e) => setPeopleSearch(e.target.value)}
           style={{ flex: '1 1 260px' }}
         />
+        <label style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 13, color: '#5a5853', whiteSpace: 'nowrap', cursor: 'pointer' }}>
+          <input type="checkbox" checked={peopleReturningOnly} onChange={(e) => setPeopleReturningOnly(e.target.checked)} />
+          Returning only (multiple records)
+        </label>
       </div>
 
       <div className="vdm-card" style={{ overflow: 'auto' }}>

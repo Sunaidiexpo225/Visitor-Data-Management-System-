@@ -151,6 +151,7 @@ export function useAppState() {
   const [ncSelectedIds, setNcSelectedIds] = useState<string[]>([]);
 
   const [peopleSearch, setPeopleSearch] = useState('');
+  const [peopleReturningOnly, setPeopleReturningOnly] = useState(true);
 
   const [reportEvent, setReportEvent] = useState('');
   const [reportSubEvent, setReportSubEvent] = useState('');
@@ -1336,7 +1337,7 @@ export function useAppState() {
     editingId, editDraft, setEditDraft, openEdit, closeEdit, saveEdit,
     // visitor timeline + people page
     timelineOpen, timelineLoading, timeline, openTimeline, openTimelineById, closeTimeline,
-    peopleSearch, setPeopleSearch,
+    peopleSearch, setPeopleSearch, peopleReturningOnly, setPeopleReturningOnly,
     // cleanup
     cleanupFilter, setCleanupFilter, cleanupEventFilter, setCleanupEventFilter, cleanupSubEvent, setCleanupSubEvent,
     // calls

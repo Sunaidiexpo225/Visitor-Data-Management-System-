@@ -239,8 +239,9 @@ function mapPerson(r: PersonRow): Person {
   };
 }
 
-export async function fetchPeoplePage(q: { search?: string; page: number; pageSize: number }): Promise<{ rows: Person[]; total: number }> {
+export async function fetchPeoplePage(q: { search?: string; returningOnly?: boolean; page: number; pageSize: number }): Promise<{ rows: Person[]; total: number }> {
   let query = supabase.from('people_overview').select('*', { count: 'exact' });
+  if (q.returningOnly) query = query.gt('registrations', 1);
   const raw = (q.search ?? '').trim();
   if (raw) {
     const safe = raw.replace(/[,()*%]/g, ' ').trim();
