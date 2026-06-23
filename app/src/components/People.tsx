@@ -13,7 +13,7 @@ function year(d: string | null): string {
 
 export default function People(state: AppState) {
   const { peopleSearch, setPeopleSearch, peopleReturningOnly, setPeopleReturningOnly, visitorRefreshKey, openTimelineById } = state;
-  const { rows, total, page, pageCount, pageSize, loading, setPage } = usePeoplePage(peopleSearch, peopleReturningOnly, visitorRefreshKey);
+  const { rows, total, page, pageCount, pageSize, loading, error, setPage } = usePeoplePage(peopleSearch, peopleReturningOnly, visitorRefreshKey);
 
   return (
     <div>
@@ -81,7 +81,7 @@ export default function People(state: AppState) {
               </tr>
             ))}
             {rows.length === 0 && (
-              <tr><td colSpan={10} style={{ padding: 20, fontSize: 13, color: '#9a978f', textAlign: 'center' }}>{loading ? 'Loading…' : 'No people found.'}</td></tr>
+              <tr><td colSpan={10} style={{ padding: 20, fontSize: 13, color: error ? '#9a4a3a' : '#9a978f', textAlign: 'center' }}>{loading ? 'Loading…' : error ? `Could not load: ${error}` : 'No people found.'}</td></tr>
             )}
           </tbody>
         </table>

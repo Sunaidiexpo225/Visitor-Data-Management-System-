@@ -23,7 +23,7 @@ export default function Cleanup(state: AppState) {
   );
 
   const cleaned = cleanupFilter === 'cleaned' ? true : cleanupFilter === 'not' ? false : null;
-  const { rows, total, page, pageCount, pageSize, loading, setPage } = useVisitorPage(
+  const { rows, total, page, pageCount, pageSize, loading, error, setPage } = useVisitorPage(
     {
       subEventIds: subEventIdsFor(cleanupEventFilter, cleanupSubEvent),
       country: filterCountry,
@@ -137,7 +137,7 @@ export default function Cleanup(state: AppState) {
               </tr>
             ))}
             {rows.length === 0 && (
-              <tr><td colSpan={9} style={{ padding: 20, fontSize: 13, color: '#9a978f', textAlign: 'center' }}>{loading ? 'Loading…' : 'No matching records.'}</td></tr>
+              <tr><td colSpan={9} style={{ padding: 20, fontSize: 13, color: error ? '#9a4a3a' : '#9a978f', textAlign: 'center' }}>{loading ? 'Loading…' : error ? `Could not load: ${error}` : 'No matching records.'}</td></tr>
             )}
           </tbody>
         </table>

@@ -23,6 +23,7 @@ export interface VisitorPage {
   pageCount: number;
   pageSize: number;
   loading: boolean;
+  error: string | null;
   setPage: (p: number) => void;
 }
 
@@ -35,6 +36,7 @@ export function useVisitorPage(filters: VisitorPageFilters, refreshKey: number):
   const [rows, setRows] = useState<Visitor[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Debounce the free-text search so each keystroke isn't a query.
   const [debounced, setDebounced] = useState(filters.search ?? '');
@@ -85,10 +87,12 @@ export function useVisitorPage(filters: VisitorPageFilters, refreshKey: number):
         if (id !== reqId.current) return; // ignore stale responses
         setRows(res.rows);
         setTotal(res.total);
-      } catch {
+        setError(null);
+      } catch (e) {
         if (id !== reqId.current) return;
         setRows([]);
         setTotal(0);
+        setError(e instanceof Error ? e.message : String(e));
       } finally {
         if (id === reqId.current) setLoading(false);
       }
@@ -99,5 +103,5 @@ export function useVisitorPage(filters: VisitorPageFilters, refreshKey: number):
   }, [key, page, refreshKey]);
 
   const pageCount = Math.max(1, Math.ceil(total / VISITOR_PAGE_SIZE));
-  return { rows, total, page: Math.min(page, pageCount), pageCount, pageSize: VISITOR_PAGE_SIZE, loading, setPage };
+  return { rows, total, page: Math.min(page, pageCount), pageCount, pageSize: VISITOR_PAGE_SIZE, loading, error, setPage };
 }

@@ -202,8 +202,8 @@ export function useAppState() {
   const reloadVisitors = useCallback(async () => {
     setVisitorRefreshKey((k) => k + 1);
     await Promise.all([
-      api.fetchVisitorStats().then(setVisitorStats).catch(() => {}),
-      api.fetchVisitorOptions().then(setVisitorOptions).catch(() => {}),
+      api.fetchVisitorStats().then(setVisitorStats).catch((e) => flash(`Stats failed: ${errMsg(e, 'unknown error')}`)),
+      api.fetchVisitorOptions().then(setVisitorOptions).catch((e) => flash(`Filter options failed: ${errMsg(e, 'unknown error')}`)),
     ]);
   }, []);
   const reloadEvents = useCallback(async () => setEvents(await api.fetchEvents()), []);
@@ -236,9 +236,10 @@ export function useAppState() {
       setTemplatesList(tpls);
       setStatusOptions(statuses);
       // Stats/options come from RPCs added in migration 0008 — keep them
-      // non-fatal so the app still loads if the migration hasn't run yet.
-      api.fetchVisitorStats().then(setVisitorStats).catch(() => {});
-      api.fetchVisitorOptions().then(setVisitorOptions).catch(() => {});
+      // non-fatal so the app still loads if the migration hasn't run yet, but
+      // surface the reason so an empty dashboard / empty filters isn't silent.
+      api.fetchVisitorStats().then(setVisitorStats).catch((e) => flash(`Stats failed: ${errMsg(e, 'unknown error')}`));
+      api.fetchVisitorOptions().then(setVisitorOptions).catch((e) => flash(`Filter options failed: ${errMsg(e, 'unknown error')}`));
       reloadCategoryOptions();
       setTargetEvent((t) => t || ev[0] || '');
       setAddInviteEvent((t) => t || ev[0] || '');

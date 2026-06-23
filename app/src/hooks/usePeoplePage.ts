@@ -11,6 +11,7 @@ export interface PeoplePage {
   pageCount: number;
   pageSize: number;
   loading: boolean;
+  error: string | null;
   setPage: (p: number) => void;
 }
 
@@ -22,6 +23,7 @@ export function usePeoplePage(search: string, returningOnly: boolean, refreshKey
   const [rows, setRows] = useState<Person[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [debounced, setDebounced] = useState(search);
   useEffect(() => {
@@ -47,10 +49,12 @@ export function usePeoplePage(search: string, returningOnly: boolean, refreshKey
         if (id !== reqId.current) return;
         setRows(res.rows);
         setTotal(res.total);
-      } catch {
+        setError(null);
+      } catch (e) {
         if (id !== reqId.current) return;
         setRows([]);
         setTotal(0);
+        setError(e instanceof Error ? e.message : String(e));
       } finally {
         if (id === reqId.current) setLoading(false);
       }
@@ -59,5 +63,5 @@ export function usePeoplePage(search: string, returningOnly: boolean, refreshKey
   }, [debounced, returningOnly, page, refreshKey]);
 
   const pageCount = Math.max(1, Math.ceil(total / PEOPLE_PAGE_SIZE));
-  return { rows, total, page: Math.min(page, pageCount), pageCount, pageSize: PEOPLE_PAGE_SIZE, loading, setPage };
+  return { rows, total, page: Math.min(page, pageCount), pageCount, pageSize: PEOPLE_PAGE_SIZE, loading, error, setPage };
 }

@@ -25,7 +25,7 @@ export default function Visitors(state: AppState) {
     [categoryOptions, visitorOptions.categories],
   );
 
-  const { rows, total, page, pageCount, pageSize, loading, setPage } = useVisitorPage(
+  const { rows, total, page, pageCount, pageSize, loading, error, setPage } = useVisitorPage(
     {
       subEventIds: subEventIdsFor(filterEvent, filterSubEvent),
       status: filterStatus,
@@ -145,7 +145,7 @@ export default function Visitors(state: AppState) {
               </tr>
             ))}
             {rows.length === 0 && (
-              <tr><td colSpan={10} style={{ padding: 20, fontSize: 13, color: '#9a978f', textAlign: 'center' }}>{loading ? 'Loading…' : 'No matching records.'}</td></tr>
+              <tr><td colSpan={10} style={{ padding: 20, fontSize: 13, color: error ? '#9a4a3a' : '#9a978f', textAlign: 'center' }}>{loading ? 'Loading…' : error ? `Could not load: ${error}` : 'No matching records.'}</td></tr>
             )}
           </tbody>
         </table>
