@@ -80,7 +80,8 @@ Deno.serve(async (req) => {
             broadcast_name: `${template}-${Date.now()}`,
             receivers: list.map((r) => ({
               whatsappNumber: r.phone.replace(/\D/g, ''),
-              customParams: [{ name: '1', value: r.name }],
+              // Template uses a named variable: Hello {{name}}, …
+              customParams: [{ name: 'name', value: r.name }],
             })),
           }),
         });
